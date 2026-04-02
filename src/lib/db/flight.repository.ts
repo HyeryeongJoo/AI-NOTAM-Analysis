@@ -8,6 +8,7 @@
 
 import { getStore } from './store';
 import type { Flight } from '@/types/flight';
+import type { ImportanceLevel } from '@/types/notam';
 
 /** 운항편 목록 필터 파라미터 */
 interface FlightQueryParams {
@@ -19,6 +20,42 @@ interface FlightQueryParams {
   order?: string;
   page: number;
   pageSize: number;
+}
+
+/** 중요도 우선순위 (높을수록 심각) */
+const IMPORTANCE_RANK: Record<ImportanceLevel, number> = {
+  critical: 4,
+  high: 3,
+  medium: 2,
+  low: 1,
+  routine: 0,
+};
+
+/**
+ * flightImpacts 데이터로부터 notamImpactCount와 notamMaxSeverity를 계산한다.
+ *
+ * @param flight - 운항편
+ * @returns 영향 카운트와 최대 중요도가 계산된 운항편
+ */
+function enrichWithImpactData(flight: Flight): Flight {
+  const store = getStore();
+  const impacts = store.flightImpacts.filter((fi) => fi.flightId === flight.id);
+  const notamImpactCount = impacts.length;
+
+  if (notamImpactCount === 0) {
+    return { ...flight, notamImpactCount: 0, notamMaxSeverity: 'routine' };
+  }
+
+  const notamIds = [...new Set(impacts.map((fi) => fi.notamId))];
+  let maxSeverity: ImportanceLevel = 'routine';
+  for (const nid of notamIds) {
+    const notam = store.notams.get(nid);
+    if (notam && IMPORTANCE_RANK[notam.importanceLevel] > IMPORTANCE_RANK[maxSeverity]) {
+      maxSeverity = notam.importanceLevel;
+    }
+  }
+
+  return { ...flight, notamImpactCount, notamMaxSeverity: maxSeverity };
 }
 
 /** 타입 안전한 정렬 필드 접근자 */
@@ -37,10 +74,12 @@ const SORTABLE_FIELDS: Record<string, (item: Flight) => string | number> = {
  */
 export function findAll(params: FlightQueryParams): { items: Flight[]; total: number } {
   const store = getStore();
-  let items = Array.from(store.flights.values());
+  let items = Array.from(store.flights.values()).map(enrichWithImpactData);
 
   if (params.airport) {
-    items = items.filter((f) => f.departureAirport === params.airport || f.arrivalAirport === params.airport);
+    items = items.filter(
+      (f) => f.departureAirport === params.airport || f.arrivalAirport === params.airport,
+    );
   }
   if (params.route) {
     items = items.filter((f) => f.routeId === params.route);
@@ -83,5 +122,6 @@ export function findAll(params: FlightQueryParams): { items: Flight[]; total: nu
  * @returns 운항편 또는 undefined
  */
 export function findById(id: string): Flight | undefined {
-  return getStore().flights.get(id);
+  const flight = getStore().flights.get(id);
+  return flight ? enrichWithImpactData(flight) : undefined;
 }

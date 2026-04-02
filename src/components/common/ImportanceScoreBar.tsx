@@ -42,7 +42,8 @@ export default function ImportanceScoreBar({ score, showLabel = true }: Importan
     <ProgressBar
       value={percentage}
       status={getStatus(score)}
-      additionalInfo={showLabel ? `${percentage}%` : undefined}
+      label="중요도 점수"
+      additionalInfo={showLabel ? `${percentage}점 / 100점` : undefined}
     />
   );
 }

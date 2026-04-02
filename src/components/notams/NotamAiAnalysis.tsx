@@ -8,10 +8,13 @@
 
 'use client';
 
+import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import Container from '@cloudscape-design/components/container';
 import ExpandableSection from '@cloudscape-design/components/expandable-section';
 import Header from '@cloudscape-design/components/header';
+import Link from '@cloudscape-design/components/link';
+import Popover from '@cloudscape-design/components/popover';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import ImportanceBadge from '@/components/common/ImportanceBadge';
@@ -39,6 +42,46 @@ export default function NotamAiAnalysis({ notam, onReanalyze, isAnalyzing }: Not
       header={
         <Header
           variant="h2"
+          info={
+            <Popover
+              header="AI 중요도 분석 안내"
+              content={
+                <SpaceBetween size="xs">
+                  <Box variant="p">
+                    Amazon Bedrock Claude가 NOTAM 원문을 분석하여 중요도 점수(0~100점)와 등급을
+                    산출합니다.
+                  </Box>
+                  <Box variant="p">
+                    <strong>평가 기준:</strong>
+                  </Box>
+                  <Box variant="small">
+                    • <strong>Q-Code 분류</strong> — NOTAM 유형별 기본 위험도
+                    <br />• <strong>시설 영향</strong> — 활주로, 항행장비, 레이더 등 핵심 시설 관련
+                    여부
+                    <br />• <strong>공간 범위</strong> — 반경, 고도, 항로 인접도
+                    <br />• <strong>시간 범위</strong> — 유효 기간, 운항 시간대 중첩 여부
+                    <br />• <strong>운항 제한</strong> — 비행 금지, 우회, 대체 절차 필요 여부
+                  </Box>
+                  <Box variant="p">
+                    <strong>등급 기준:</strong>
+                  </Box>
+                  <Box variant="small">
+                    • <strong>80점 이상</strong> — Critical (긴급)
+                    <br />• <strong>60~79점</strong> — High (높음)
+                    <br />• <strong>40~59점</strong> — Medium (보통)
+                    <br />• <strong>40점 미만</strong> — Low / Routine
+                  </Box>
+                  <Box variant="p">
+                    「재분석」 버튼으로 최신 컨텍스트를 반영한 재평가를 요청할 수 있습니다.
+                  </Box>
+                </SpaceBetween>
+              }
+              triggerType="custom"
+              size="large"
+            >
+              <Link variant="info">정보</Link>
+            </Popover>
+          }
           actions={
             <Button onClick={onReanalyze} loading={isAnalyzing} variant="normal">
               재분석
