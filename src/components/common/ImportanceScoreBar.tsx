@@ -16,19 +16,10 @@ interface ImportanceScoreBarProps {
 }
 
 /**
- * 점수에 따른 ProgressBar 상태를 반환한다
- *
- * @param score - 0.0~1.0 점수
- * @returns ProgressBar status 값
- */
-function getStatus(score: number): 'error' | 'in-progress' | 'success' {
-  if (score >= 0.8) return 'error';
-  if (score >= 0.6) return 'in-progress';
-  return 'success';
-}
-
-/**
  * 중요도 점수 바를 렌더링한다
+ *
+ * status를 항상 in-progress로 설정하여 바 형태를 유지한다.
+ * 중요도 등급은 별도 ImportanceBadge 컴포넌트가 표시한다.
  *
  * @param props - 점수와 라벨 표시 여부
  * @param props.score - 0.0~1.0 점수
@@ -41,8 +32,8 @@ export default function ImportanceScoreBar({ score, showLabel = true }: Importan
   return (
     <ProgressBar
       value={percentage}
-      status={getStatus(score)}
-      label="중요도 점수"
+      status="in-progress"
+      label={showLabel ? '중요도 점수' : undefined}
       additionalInfo={showLabel ? `${percentage}점 / 100점` : undefined}
     />
   );

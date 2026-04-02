@@ -63,10 +63,30 @@ export default function NotamTable({
   const { items, collectionProps, propertyFilterProps, paginationProps } = useCollection(notams, {
     propertyFiltering: {
       filteringProperties: [
-        { key: 'importanceLevel', operators: ['=', '!='], propertyLabel: '중요도', groupValuesLabel: '중요도 값' },
-        { key: 'status', operators: ['=', '!='], propertyLabel: '상태', groupValuesLabel: '상태 값' },
-        { key: 'locationIndicator', operators: ['=', ':'], propertyLabel: '공항', groupValuesLabel: '공항 코드' },
-        { key: 'qCode', operators: ['=', ':'], propertyLabel: 'Q-Code', groupValuesLabel: 'Q-Code 값' },
+        {
+          key: 'importanceLevel',
+          operators: ['=', '!='],
+          propertyLabel: '중요도',
+          groupValuesLabel: '중요도 값',
+        },
+        {
+          key: 'status',
+          operators: ['=', '!='],
+          propertyLabel: '상태',
+          groupValuesLabel: '상태 값',
+        },
+        {
+          key: 'locationIndicator',
+          operators: ['=', ':'],
+          propertyLabel: '공항',
+          groupValuesLabel: '공항 코드',
+        },
+        {
+          key: 'qCode',
+          operators: ['=', ':'],
+          propertyLabel: 'Q-Code',
+          groupValuesLabel: 'Q-Code 값',
+        },
         { key: 'fir', operators: ['='], propertyLabel: 'FIR', groupValuesLabel: 'FIR 값' },
         { key: 'type', operators: ['='], propertyLabel: '유형', groupValuesLabel: 'NOTAM 유형' },
       ],
@@ -105,7 +125,11 @@ export default function NotamTable({
       variant="full-page"
       onSelectionChange={({ detail }) => onSelectionChange(detail.selectedItems[0] ?? null)}
       header={
-        <Header variant="awsui-h1-sticky" counter={`(${totalCount})`} description={statsDescription}>
+        <Header
+          variant="awsui-h1-sticky"
+          counter={`(${totalCount})`}
+          description={statsDescription}
+        >
           NOTAM 목록
         </Header>
       }
@@ -162,7 +186,8 @@ export default function NotamTable({
         {
           id: 'body',
           header: '내용',
-          cell: (item) => (item.body.length > 100 ? `${item.body.substring(0, 100)}...` : item.body),
+          cell: (item) =>
+            item.body.length > 100 ? `${item.body.substring(0, 100)}...` : item.body,
           width: 300,
         },
         {
@@ -181,7 +206,9 @@ export default function NotamTable({
         {
           id: 'effectiveTo',
           header: '종료일시',
-          cell: (item) => <NotamExpiryIndicator effectiveTo={item.effectiveTo} status={item.status} />,
+          cell: (item) => (
+            <NotamExpiryIndicator effectiveTo={item.effectiveTo} status={item.status} />
+          ),
           sortingField: 'effectiveTo',
           width: 140,
         },
@@ -189,7 +216,10 @@ export default function NotamTable({
           id: 'status',
           header: '상태',
           cell: (item) => {
-            const statusMap: Record<string, 'success' | 'info' | 'stopped' | 'error' | 'pending' | 'warning'> = {
+            const statusMap: Record<
+              string,
+              'success' | 'info' | 'stopped' | 'error' | 'pending' | 'warning'
+            > = {
               new: 'pending',
               active: 'success',
               analyzed: 'info',
@@ -198,15 +228,13 @@ export default function NotamTable({
               cancelled: 'error',
               replaced: 'warning',
             };
-            return <StatusIndicator type={statusMap[item.status] ?? 'pending'}>{item.status}</StatusIndicator>;
+            return (
+              <StatusIndicator type={statusMap[item.status] ?? 'pending'}>
+                {item.status}
+              </StatusIndicator>
+            );
           },
           width: 100,
-        },
-        {
-          id: 'fir',
-          header: 'FIR',
-          cell: (item) => item.fir,
-          width: 70,
         },
       ]}
       empty={
