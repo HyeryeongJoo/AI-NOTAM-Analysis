@@ -7,8 +7,8 @@
 
 'use client';
 
-import { useEffect } from 'react';
 import L from 'leaflet';
+import { useEffect } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -80,6 +80,14 @@ function MapResizeHandler() {
   return null;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.center
+ * @param root0.zoom
+ * @param root0.height
+ * @param root0.children
+ */
 export default function LeafletMapInner({ center, zoom, height, children }: LeafletMapInnerProps) {
   return (
     <div style={{ height, width: '100%', position: 'relative' }}>

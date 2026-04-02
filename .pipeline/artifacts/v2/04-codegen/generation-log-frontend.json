@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "created": "2026-04-01T16:00:00Z",
+    "version": 2,
+    "generator": "frontend",
+    "description": "v2 frontend delta: TIFRS decision recording UI (FR-020). 8 new files, 2 modified files."
+  },
+  "files_created": [
+    {
+      "path": "src/hooks/useDecisions.ts",
+      "spec": "frontend-spec.json",
+      "lines": 52,
+      "status": "created"
+    },
+    {
+      "path": "src/hooks/useNotamDecision.ts",
+      "spec": "frontend-spec.json",
+      "lines": 46,
+      "status": "created"
+    },
+    {
+      "path": "src/hooks/useRecordDecision.ts",
+      "spec": "frontend-spec.json",
+      "lines": 42,
+      "status": "created"
+    },
+    {
+      "path": "src/components/common/DecisionTypeBadge.tsx",
+      "spec": "frontend-spec.json",
+      "lines": 47,
+      "status": "created"
+    },
+    {
+      "path": "src/components/decisions/DecisionTable.tsx",
+      "spec": "frontend-spec.json",
+      "lines": 163,
+      "status": "created"
+    },
+    {
+      "path": "src/components/decisions/DecisionSplitPanelDetail.tsx",
+      "spec": "frontend-spec.json",
+      "lines": 110,
+      "status": "created"
+    },
+    {
+      "path": "src/components/notams/NotamDecisionSection.tsx",
+      "spec": "frontend-spec.json",
+      "lines": 290,
+      "status": "created"
+    },
+    {
+      "path": "src/app/decisions/page.tsx",
+      "spec": "frontend-spec.json",
+      "lines": 47,
+      "status": "created"
+    }
+  ],
+  "files_modified": [
+    {
+      "path": "src/components/layout/AppShell.tsx",
+      "changes": "Added /decisions to ROUTE_LABELS, sideNavItems, and tableRoutes",
+      "status": "modified"
+    },
+    {
+      "path": "src/app/notams/[id]/page.tsx",
+      "changes": "Added NotamDecisionSection below impact section",
+      "status": "modified"
+    }
+  ],
+  "build_result": { "success": true, "attempts": 1, "errors": [], "warnings": [] },
+  "lint_result": { "success": true, "errors": [], "warnings": [] }
+}

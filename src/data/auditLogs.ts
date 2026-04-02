@@ -1,7 +1,7 @@
 /**
  * 감사 로그 시드 데이터
  *
- * 운항관리사 행위 기록 15건. 다양한 액션 유형.
+ * 운항관리사 행위 기록 18건. 다양한 액션 유형 (v2: record-decision 3건 추가).
  *
  * @requirements FR-017
  */
@@ -20,7 +20,7 @@ function relHours(hoursOffset: number): string {
   return d.toISOString();
 }
 
-/** 시드 감사 로그 데이터 (15건) */
+/** 시드 감사 로그 데이터 (18건) */
 export const SEED_AUDIT_LOGS: AuditLog[] = [
   {
     id: 'audit-001',
@@ -156,5 +156,33 @@ export const SEED_AUDIT_LOGS: AuditLog[] = [
     targetId: 'notam-023',
     details: 'NOTAM A1260/26 미사일 사격 훈련 조회',
     timestamp: relHours(-1),
+  },
+  // v2: TIFRS 의사결정 기록
+  {
+    id: 'audit-016',
+    userId: 'dispatcher-001',
+    action: 'record-decision',
+    targetType: 'decision',
+    targetId: 'decision-001',
+    details: 'NOTAM A1234/26 TIFRS 의사결정: monitor (활주로 33L 폐쇄 — 복수 활주로 대체 가능)',
+    timestamp: relHours(-6),
+  },
+  {
+    id: 'audit-017',
+    userId: 'dispatcher-001',
+    action: 'record-decision',
+    targetType: 'decision',
+    targetId: 'decision-002',
+    details: 'NOTAM A1237/26 TIFRS 의사결정: route-change (위험구역으로 Y711 항로 우회 필요)',
+    timestamp: relHours(-5),
+  },
+  {
+    id: 'audit-018',
+    userId: 'dispatcher-002',
+    action: 'record-decision',
+    targetType: 'decision',
+    targetId: 'decision-003',
+    details: 'NOTAM J4501/26 TIFRS 의사결정: monitor (ILS 점검 — 대체 활주로 ILS 정상)',
+    timestamp: relHours(-4),
   },
 ];

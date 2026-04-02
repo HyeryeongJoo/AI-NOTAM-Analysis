@@ -26,6 +26,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/routes': '항로 목록',
   '/ref-book': 'REF BOOK',
   '/briefings': '브리핑 문서',
+  '/decisions': '의사결정 기록',
   '/audit-log': '감사 로그',
 };
 
@@ -81,7 +82,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {
         type: 'section' as const,
         text: '관리',
-        items: [{ type: 'link' as const, text: '감사 로그', href: '/audit-log' }],
+        items: [
+          { type: 'link' as const, text: '의사결정 기록', href: '/decisions' },
+          { type: 'link' as const, text: '감사 로그', href: '/audit-log' },
+        ],
       },
     ],
     [],
@@ -115,7 +119,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   /** 현재 라우트에 맞는 contentType */
   const contentType = useMemo(() => {
     if (pathname === '/') return 'dashboard' as const;
-    const tableRoutes = ['/notams', '/flights', '/routes', '/ref-book', '/briefings', '/audit-log'];
+    const tableRoutes = [
+      '/notams',
+      '/flights',
+      '/routes',
+      '/ref-book',
+      '/briefings',
+      '/decisions',
+      '/audit-log',
+    ];
     if (tableRoutes.includes(pathname)) return 'table' as const;
     return 'default' as const;
   }, [pathname]);
@@ -173,9 +185,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             onFollow={handleNavFollow}
           />
         }
-        breadcrumbs={
-          <BreadcrumbGroup items={breadcrumbItems} onFollow={handleBreadcrumbFollow} />
-        }
+        breadcrumbs={<BreadcrumbGroup items={breadcrumbItems} onFollow={handleBreadcrumbFollow} />}
         notifications={<Flashbar items={notifications} />}
         content={children}
         contentType={contentType}

@@ -14,7 +14,8 @@ export type AuditAction =
   | 'reject'
   | 'register-ref-book'
   | 'generate-briefing'
-  | 'acknowledge-alert';
+  | 'acknowledge-alert'
+  | 'record-decision';
 
 /** 감사 로그 엔티티 -- 운항관리사 행위 기록 */
 export interface AuditLog {

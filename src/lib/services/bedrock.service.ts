@@ -5,17 +5,23 @@
  * NOTAM 중요도 분석, 한국어 요약, 영향 분석, 브리핑 생성, 대체 항로 제안.
  * XML 태그 기반 구조화 프롬프트로 도메인 최적화.
  *
- * @requirements FR-001, FR-003, FR-007, FR-008, FR-009, FR-014, FR-015
+ * @requirements FR-001, FR-003, FR-007, FR-008, FR-009, FR-014, FR-015, FR-020
  */
 
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
-import { parseCrewPackageResult, parseImportanceResult, parseRouteAlternativesResult } from '@/lib/ai/parsers';
+import {
+  parseCrewPackageResult,
+  parseImportanceResult,
+  parseRouteAlternativesResult,
+  parseTifrsDecisionResult,
+} from '@/lib/ai/parsers';
 import {
   IMPACT_ANALYSIS_SYSTEM_PROMPT,
   KOREAN_SUMMARY_SYSTEM_PROMPT,
   NOTAM_IMPORTANCE_SYSTEM_PROMPT,
   ROUTE_ALTERNATIVES_SYSTEM_PROMPT,
   SHIFT_HANDOVER_SYSTEM_PROMPT,
+  TIFRS_DECISION_SYSTEM_PROMPT,
   getBriefingSystemPrompt,
 } from '@/lib/ai/prompts/system';
 import {
@@ -26,8 +32,14 @@ import {
   buildKoreanSummaryMessage,
   buildRouteAlternativesMessage,
   buildShiftHandoverMessage,
+  buildTifrsDecisionMessage,
 } from '@/lib/ai/prompts/templates';
-import type { CrewPackageResult, LlmInvokeOptions, NotamImportanceResult } from '@/lib/ai/types';
+import type {
+  CrewPackageResult,
+  LlmInvokeOptions,
+  NotamImportanceResult,
+  TifrsDecisionResult,
+} from '@/lib/ai/types';
 import type { Airport } from '@/types/airport';
 import type { BriefingType } from '@/types/briefing';
 import type { Flight } from '@/types/flight';
@@ -109,7 +121,12 @@ export async function analyzeNotamImportance(
   const text = await invokeModel(NOTAM_IMPORTANCE_SYSTEM_PROMPT, userMessage, { temperature: 0.1 });
 
   const fallback = qCode
-    ? { subject: qCode.subject, condition: qCode.condition, defaultImportance: qCode.defaultImportance, descriptionKo: qCode.descriptionKo }
+    ? {
+        subject: qCode.subject,
+        condition: qCode.condition,
+        defaultImportance: qCode.defaultImportance,
+        descriptionKo: qCode.descriptionKo,
+      }
     : undefined;
 
   return parseImportanceResult(text, fallback);
@@ -230,7 +247,10 @@ export async function generateShiftHandoverReport(
   shiftEndTime: string,
 ): Promise<string> {
   const userMessage = buildShiftHandoverMessage(notams, shiftStartTime, shiftEndTime);
-  return invokeModel(SHIFT_HANDOVER_SYSTEM_PROMPT, userMessage, { temperature: 0.3, maxTokens: 6144 });
+  return invokeModel(SHIFT_HANDOVER_SYSTEM_PROMPT, userMessage, {
+    temperature: 0.3,
+    maxTokens: 6144,
+  });
 }
 
 /**
@@ -257,7 +277,9 @@ export async function suggestRouteAlternatives(
   }
 
   const userMessage = buildRouteAlternativesMessage(route, notam, alternateRoutes);
-  const text = await invokeModel(ROUTE_ALTERNATIVES_SYSTEM_PROMPT, userMessage, { temperature: 0.2 });
+  const text = await invokeModel(ROUTE_ALTERNATIVES_SYSTEM_PROMPT, userMessage, {
+    temperature: 0.2,
+  });
 
   const aiResult = parseRouteAlternativesResult(text);
 
@@ -267,7 +289,8 @@ export async function suggestRouteAlternatives(
       route: altRoute,
       reason: altInfo?.reason ?? `${altRoute.routeName} 대체 항로 사용 가능`,
       distanceDifference: altInfo?.distanceDifference ?? altRoute.distance - route.distance,
-      timeDifference: altInfo?.timeDifference ?? Math.round((altRoute.distance - route.distance) / 8),
+      timeDifference:
+        altInfo?.timeDifference ?? Math.round((altRoute.distance - route.distance) / 8),
       avoidedNotams: [notam.id],
     };
   });
@@ -276,4 +299,29 @@ export async function suggestRouteAlternatives(
     alternatives,
     reasoning: aiResult?.reasoning ?? text,
   };
+}
+
+/**
+ * TIFRS 프레임워크로 NOTAM 의사결정을 AI 분석한다.
+ *
+ * Time, Impact, Facilities, Route, Schedule 5가지 기준으로
+ * NOTAM 영향을 평가하고, 의사결정 유형을 제안한다.
+ * 운항관리사가 최종 결정 전에 참고하는 AI 사전 분석.
+ *
+ * @param notam - 분석 대상 NOTAM
+ * @param affectedRoutes - 영향받는 항로 목록
+ * @param affectedFlights - 영향받는 운항편 목록
+ * @param airport - 해당 공항 정보
+ * @returns TIFRS 분석 결과와 제안 의사결정
+ */
+export async function analyzeTifrsDecision(
+  notam: Notam,
+  affectedRoutes: NotamRouteImpact[],
+  affectedFlights: NotamFlightImpact[],
+  airport: Airport | undefined,
+): Promise<TifrsDecisionResult> {
+  const userMessage = buildTifrsDecisionMessage(notam, affectedRoutes, affectedFlights, airport);
+  const text = await invokeModel(TIFRS_DECISION_SYSTEM_PROMPT, userMessage, { temperature: 0.2 });
+
+  return parseTifrsDecisionResult(text);
 }

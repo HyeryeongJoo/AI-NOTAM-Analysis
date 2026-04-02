@@ -1,0 +1,72 @@
+{
+  "verdict": "PASS",
+  "return_to": null,
+  "findings": [
+    {
+      "severity": "medium",
+      "cwe": "CWE-20",
+      "file": "src/app/api/briefings/route.ts",
+      "line": 17,
+      "description": "Briefings GET API accepts query parameters (sortBy, order, page, pageSize, type, status) without zod schema validation, using raw parseInt and type casting instead",
+      "remediation": "Add briefingQuerySchema with zod enum whitelist for sortBy/type/status and coerce validation for page/pageSize, matching the pattern used in all other GET endpoints"
+    },
+    {
+      "severity": "medium",
+      "cwe": "CWE-79",
+      "file": "src/middleware.ts",
+      "line": 29,
+      "description": "Content-Security-Policy includes 'unsafe-eval' and 'unsafe-inline' in script-src directive, weakening XSS protection",
+      "remediation": "Remove 'unsafe-eval' (likely unnecessary for production). Replace 'unsafe-inline' with nonce-based CSP using Next.js middleware nonce generation"
+    },
+    {
+      "severity": "medium",
+      "cwe": "CWE-209",
+      "file": "src/app/api/notams/analyze/route.ts",
+      "line": 67,
+      "description": "Seven API route catch blocks log full error objects via console.error, potentially exposing AWS credentials, Bedrock endpoints, or internal paths in server logs",
+      "remediation": "Log only err.message or use a structured logger (pino/winston) with sensitive field masking"
+    },
+    {
+      "severity": "low",
+      "cwe": "CWE-942",
+      "file": "src/middleware.ts",
+      "line": 34,
+      "description": "CORS Access-Control-Allow-Origin set to '*' for all API routes",
+      "remediation": "Restrict to specific allowed origins in production deployment"
+    },
+    {
+      "severity": "low",
+      "cwe": "CWE-319",
+      "file": "src/middleware.ts",
+      "line": 0,
+      "description": "Strict-Transport-Security header not set (acceptable for prototype HTTP development)",
+      "remediation": "Add HSTS header for production HTTPS deployment"
+    },
+    {
+      "severity": "low",
+      "cwe": "CWE-312",
+      "file": "src/app/api/auth/login/route.ts",
+      "line": 41,
+      "description": "Mock auth token is unsigned Base64-encoded JSON, easily forgeable (intentional prototype design per NFR-001)",
+      "remediation": "Replace with Amazon Cognito or signed JWT with httpOnly cookies for production"
+    }
+  ],
+  "npm_audit": {
+    "critical": 0,
+    "high": 0,
+    "moderate": 0,
+    "low": 0
+  },
+  "production_notes": [
+    "Implement real authentication with Amazon Cognito and httpOnly cookie sessions",
+    "Add authentication middleware to all API routes (currently all endpoints are publicly accessible)",
+    "Strengthen CSP by removing 'unsafe-eval' and 'unsafe-inline', switching to nonce-based policy",
+    "Restrict CORS Access-Control-Allow-Origin from '*' to specific allowed domains",
+    "Add Strict-Transport-Security header for HTTPS production deployment",
+    "Add rate limiting to all API endpoints",
+    "Replace console.error with structured logging (pino/winston) with sensitive field masking",
+    "Add zod validation to GET /api/briefings query parameters",
+    "Replace localStorage auth with httpOnly cookie-based sessions",
+    "Replace in-memory seed data with persistent data store (RDS/DynamoDB)"
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "current_version": 1,
+  "current_version": 2,
   "versions": {
     "1": {
       "status": "completed",
@@ -85,7 +85,10 @@
               { "check": "npm run build passes", "passed": true },
               { "check": "All API routes created", "passed": true },
               { "check": "Types, repositories, services, validation created", "passed": true },
-              { "check": "Seed data (50 NOTAMs, 10 routes, 30 flights, 15 airports)", "passed": true }
+              {
+                "check": "Seed data (50 NOTAMs, 10 routes, 30 flights, 15 airports)",
+                "passed": true
+              }
             ],
             "retries": 0
           }
@@ -111,14 +114,14 @@
         {
           "stage": "code-gen-frontend",
           "status": "completed",
-          "notes": "71 frontend files generated: 16 hooks, 3 contexts, 2 layout components, 8 shared components, 23 feature components, 11 page routes, 1 fetcher, 1 providers wrapper, plus eslint config update. Zero build errors, zero lint errors (8 jsdoc/require-returns warnings non-blocking).",
+          "notes": "71 frontend files generated.",
           "checkpoint": {
             "passed": true,
             "items": [
               { "check": "npm run build passes", "passed": true },
               { "check": "eslint produces zero errors", "passed": true },
               { "check": "All 11 page routes created", "passed": true },
-              { "check": "All hooks use SWR (no raw fetch in components)", "passed": true },
+              { "check": "All hooks use SWR", "passed": true },
               { "check": "TopNavigation outside AppLayout", "passed": true },
               { "check": "No any types", "passed": true },
               { "check": "All Cloudscape imports from individual paths", "passed": true },
@@ -139,48 +142,174 @@
         "categories_pass": 9,
         "categories_fail": 0,
         "critical_issues": 0,
-        "minor_issues": 2,
-        "artifacts": [
-          ".pipeline/artifacts/v1/05-review/review-report.md",
-          ".pipeline/artifacts/v1/05-review/review-result.json"
-        ]
+        "minor_issues": 2
       },
       "security_auditor": {
         "status": "completed",
         "verdict": "PASS",
-        "findings": {
-          "critical": 0,
-          "high": 0,
-          "medium": 3,
-          "low": 4
-        },
-        "npm_audit": {
-          "critical": 0,
-          "high": 0,
-          "moderate": 0,
-          "low": 0
-        },
-        "checks_performed": 8,
-        "artifacts": [
-          ".pipeline/artifacts/v1/06-security/security-audit.md",
-          ".pipeline/artifacts/v1/06-security/security-result.json"
-        ]
+        "findings": { "critical": 0, "high": 0, "medium": 3, "low": 4 }
       },
       "qa_engineer": {
         "status": "completed",
         "total_tests": 52,
         "passed": 52,
         "failed": 0,
-        "iterations": 3,
-        "infrastructure_fixes": 16,
-        "functional_feedbacks": 0,
-        "p0_coverage": "7/7 (100%)",
-        "artifacts": [
-          "e2e/ (10 test files)",
-          ".pipeline/artifacts/v1/05-review/test-result.json",
-          ".pipeline/artifacts/v1/05-review/test-report.md"
-        ]
+        "iterations": 3
       }
+    },
+    "2": {
+      "status": "completed",
+      "started_at": "2026-04-02T00:00:00Z",
+      "trigger": "iterate",
+      "branch": "iterate/v2",
+      "current_stage": "completed",
+      "completed_at": "2026-04-02T12:00:00Z",
+      "stages": [
+        {
+          "stage": "requirements-analyst",
+          "status": "completed",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "01-requirements/requirements.json exists", "passed": true },
+              { "check": "01-requirements/requirements.md exists", "passed": true },
+              { "check": "At least 1 FR with acceptance criteria", "passed": true },
+              { "check": "Every FR has unique sequential ID", "passed": true },
+              { "check": "Every FR has priority classification", "passed": true },
+              { "check": "At least 1 persona defined", "passed": true },
+              { "check": "Auth NFR exists", "passed": true },
+              { "check": "JSON is valid and parseable", "passed": true },
+              { "check": "All v1 FRs preserved (FR-001 through FR-019)", "passed": true },
+              { "check": "Demo feedback mapped to existing FRs as AC updates", "passed": true },
+              { "check": "Workflow diagram insights incorporated", "passed": true }
+            ],
+            "retries": 0
+          }
+        },
+        {
+          "stage": "architect",
+          "status": "completed",
+          "notes": "v2 architecture: 12 pages (+1 /decisions), 20 FRs covered. 4 new components, 3 new hooks, 2 new API routes, 2 new types for FR-020. 8 existing components marked v2_status:implemented for already-applied code changes.",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "02-architecture/architecture.json exists", "passed": true },
+              { "check": "02-architecture/architecture.md exists", "passed": true },
+              { "check": "Every FR mapped in requirements_coverage (20/20)", "passed": true },
+              { "check": "Every route has valid Cloudscape pattern", "passed": true },
+              { "check": "TopNavigation outside AppLayout", "passed": true },
+              { "check": "TypeScript types defined for all entities", "passed": true },
+              { "check": "Routes under 20 (12 routes)", "passed": true },
+              { "check": "No orphan components", "passed": true },
+              { "check": "FR-020 new components, API, hooks, types added", "passed": true },
+              { "check": "v2_status markers on implemented components", "passed": true }
+            ],
+            "retries": 0
+          }
+        },
+        {
+          "stage": "spec-writer",
+          "status": "completed",
+          "notes": "v2 specs: Backend 45 + Frontend 44 = 89 total. All 20 FRs covered. Frontend delta: 3 hooks, 1 shared, 3 feature, 1 page for FR-020. 8 components marked v2_status:implemented.",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "03-specs/backend-spec.json exists", "passed": true },
+              { "check": "03-specs/backend-spec.md exists", "passed": true },
+              { "check": "03-specs/frontend-spec.json exists", "passed": true },
+              { "check": "03-specs/frontend-spec.md exists", "passed": true },
+              { "check": "03-specs/specs-summary.md exists", "passed": true },
+              { "check": "03-specs/_manifest.json exists", "passed": true },
+              { "check": "All 20 FRs covered in requirements_coverage", "passed": true },
+              { "check": "No uncovered requirements", "passed": true },
+              { "check": "Generation order respects dependency graph", "passed": true },
+              {
+                "check": "FR-020 frontend specs complete (hooks, shared, feature, page)",
+                "passed": true
+              }
+            ],
+            "retries": 0
+          }
+        }
+      ],
+      "qa_engineer": {
+        "status": "completed",
+        "total_tests": 63,
+        "passed": 63,
+        "failed": 0,
+        "iterations": 4,
+        "v1_tests_preserved": 52,
+        "v2_tests_added": 11,
+        "infrastructure_fixes": 10,
+        "functional_feedbacks": 0
+      },
+      "reviewer": {
+        "status": "completed",
+        "verdict": "PASS",
+        "iteration": 1,
+        "categories_pass": 9,
+        "categories_fail": 0,
+        "critical_issues": 0,
+        "minor_issues": 2
+      },
+      "security_auditor": {
+        "status": "skipped",
+        "reason": "User requested skip"
+      },
+      "feedback_loops": [],
+      "stages_completed": [
+        {
+          "stage": "code-gen-frontend",
+          "status": "completed",
+          "notes": "v2 incremental: 8 new files created, 2 existing files modified. 3 hooks (useDecisions, useNotamDecision, useRecordDecision), 1 badge (DecisionTypeBadge), 2 decision components (DecisionTable, DecisionSplitPanelDetail), 1 NOTAM section (NotamDecisionSection), 1 page (/decisions). AppShell updated with nav link. NOTAM detail page updated with decision section. Build and lint pass.",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "npm run build passes", "passed": true },
+              { "check": "eslint 0 errors on new/modified files", "passed": true },
+              { "check": "3 SWR hooks created for decision API", "passed": true },
+              { "check": "DecisionTypeBadge component created", "passed": true },
+              { "check": "DecisionTable with useCollection created", "passed": true },
+              { "check": "DecisionSplitPanelDetail created", "passed": true },
+              { "check": "NotamDecisionSection with TIFRS form created", "passed": true },
+              { "check": "/decisions page created", "passed": true },
+              { "check": "AppShell side nav updated", "passed": true },
+              { "check": "NOTAM detail page updated", "passed": true },
+              { "check": "No any types", "passed": true },
+              { "check": "All Cloudscape imports from individual paths", "passed": true },
+              { "check": "generation-log-frontend.json created", "passed": true }
+            ],
+            "retries": 0
+          }
+        },
+        {
+          "stage": "code-gen-backend",
+          "status": "completed",
+          "notes": "v2 incremental: 6 new files created, 9 existing files modified. Decision type/repository/validation/seed/API routes added. Bedrock TIFRS analysis function added. AuditAction updated with record-decision. Build and lint pass.",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "npm run build passes", "passed": true },
+              { "check": "eslint 0 errors on new/modified files", "passed": true },
+              { "check": "DecisionRecord type defined in src/types/decision.ts", "passed": true },
+              { "check": "Decision repository with CRUD + findByNotamId", "passed": true },
+              { "check": "Zod validation for decision creation and query", "passed": true },
+              { "check": "5 TIFRS decision seed records created", "passed": true },
+              { "check": "GET/POST /api/notams/[id]/decision route created", "passed": true },
+              { "check": "GET /api/decisions route created", "passed": true },
+              { "check": "analyzeTifrsDecision() added to bedrock.service.ts", "passed": true },
+              { "check": "TIFRS_DECISION_SYSTEM_PROMPT added", "passed": true },
+              { "check": "AuditAction includes record-decision", "passed": true },
+              {
+                "check": "Existing v1 files not modified (except targeted updates)",
+                "passed": true
+              },
+              { "check": "generation-log-backend.json created", "passed": true }
+            ],
+            "retries": 0
+          }
+        }
+      ]
     }
   }
 }

@@ -1,0 +1,186 @@
+{
+  "total": 63,
+  "passed": 63,
+  "failed": 0,
+  "skipped": 0,
+  "duration_seconds": 35,
+  "coverage": {
+    "frs_with_tests": 15,
+    "frs_total": 20,
+    "p0_frs_with_interaction_tests": 8,
+    "p0_frs_total": 8
+  },
+  "test_files": [
+    {
+      "file": "e2e/api.spec.ts",
+      "tests": 11,
+      "frs": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004",
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-010",
+        "FR-013",
+        "FR-017"
+      ]
+    },
+    { "file": "e2e/audit-log.spec.ts", "tests": 2, "frs": ["FR-017"] },
+    { "file": "e2e/briefings.spec.ts", "tests": 3, "frs": ["FR-007"] },
+    { "file": "e2e/dashboard.spec.ts", "tests": 6, "frs": ["FR-006", "FR-016"] },
+    { "file": "e2e/decisions-api.spec.ts", "tests": 3, "frs": ["FR-020"] },
+    { "file": "e2e/decisions.spec.ts", "tests": 4, "frs": ["FR-020"] },
+    { "file": "e2e/flights.spec.ts", "tests": 5, "frs": ["FR-004", "FR-013"] },
+    { "file": "e2e/navigation.spec.ts", "tests": 9, "frs": ["all"] },
+    { "file": "e2e/notam-decision.spec.ts", "tests": 3, "frs": ["FR-020"] },
+    { "file": "e2e/notam-detail.spec.ts", "tests": 5, "frs": ["FR-002", "FR-003", "FR-012"] },
+    { "file": "e2e/notams.spec.ts", "tests": 5, "frs": ["FR-001", "FR-005", "FR-019"] },
+    { "file": "e2e/ref-book.spec.ts", "tests": 3, "frs": ["FR-011"] },
+    { "file": "e2e/routes.spec.ts", "tests": 4, "frs": ["FR-009", "FR-010"] }
+  ],
+  "v2_new_tests": {
+    "files_added": [
+      "e2e/decisions-api.spec.ts",
+      "e2e/decisions.spec.ts",
+      "e2e/notam-decision.spec.ts"
+    ],
+    "tests_added": 10,
+    "files_updated": ["e2e/navigation.spec.ts"],
+    "frs_covered": ["FR-020"]
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "total": 63,
+      "passed": 59,
+      "failed": 4,
+      "infrastructure_fixes": 0,
+      "functional_feedbacks": 0,
+      "failures": [
+        {
+          "test": "dashboard.spec.ts:48 - route selection should filter map display",
+          "type": "infrastructure",
+          "reason": "Selector [class*='select'] does not match Cloudscape Select with '전체' text"
+        },
+        {
+          "test": "decisions.spec.ts:43 - clicking a decision row should open SplitPanel",
+          "type": "infrastructure",
+          "reason": "Selector 'table tbody tr' does not match Cloudscape grid rows; need radio button click"
+        },
+        {
+          "test": "notam-decision.spec.ts:28 - TIFRS form or existing decision",
+          "type": "infrastructure",
+          "reason": "TIFRS label regexes did not match actual label format; section below viewport"
+        },
+        {
+          "test": "notam-decision.spec.ts:59 - decision form selector and rationale",
+          "type": "infrastructure",
+          "reason": "Form element selectors did not match Cloudscape components"
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "total": 63,
+      "passed": 60,
+      "failed": 3,
+      "infrastructure_fixes": 4,
+      "functional_feedbacks": 0,
+      "fixes_applied": [
+        {
+          "type": "infrastructure",
+          "test": "dashboard.spec.ts:48",
+          "change": "Changed selector to getByRole('combobox') and regex /전체|항로 선택/",
+          "assertion_changed": false
+        },
+        {
+          "type": "infrastructure",
+          "test": "decisions.spec.ts:43",
+          "change": "Changed to getByRole('grid') + getByRole('radio') for Cloudscape table row selection",
+          "assertion_changed": false
+        },
+        {
+          "type": "infrastructure",
+          "test": "notam-decision.spec.ts:28",
+          "change": "Updated TIFRS label regexes to match actual format: /T\\s*—\\s*Time/, added scrollIntoViewIfNeeded",
+          "assertion_changed": false
+        },
+        {
+          "type": "infrastructure",
+          "test": "notam-decision.spec.ts:59",
+          "change": "Changed to getByRole('button', { name: /의사결정 유형/ }), getByRole('textbox') for Cloudscape",
+          "assertion_changed": false
+        }
+      ],
+      "remaining_failures": [
+        {
+          "test": "notam-decision.spec.ts:28",
+          "type": "infrastructure",
+          "reason": "TIFRS labels still not visible - page needs scrolling in Cloudscape AppLayout"
+        },
+        {
+          "test": "notam-decision.spec.ts:59",
+          "type": "infrastructure",
+          "reason": "Form elements not found - NOTAM already has decision from parallel API test"
+        },
+        {
+          "test": "notam-detail.spec.ts:88",
+          "type": "infrastructure",
+          "reason": "AI analysis elements not found - needs scrollIntoViewIfNeeded"
+        }
+      ]
+    },
+    {
+      "iteration": 3,
+      "total": 63,
+      "passed": 62,
+      "failed": 1,
+      "infrastructure_fixes": 3,
+      "functional_feedbacks": 0,
+      "fixes_applied": [
+        {
+          "type": "infrastructure",
+          "test": "notam-detail.spec.ts:88",
+          "change": "Added scrollIntoViewIfNeeded for AI analysis heading, changed to getByRole('button') for 영향 분석",
+          "assertion_changed": false
+        },
+        {
+          "type": "infrastructure",
+          "test": "notam-decision.spec.ts:28",
+          "change": "Added scrollIntoViewIfNeeded for TIFRS heading",
+          "assertion_changed": false
+        },
+        {
+          "type": "infrastructure",
+          "test": "notam-decision.spec.ts:59",
+          "change": "Added check for existing decision display (결정 유형, TIFRS 분석 text)",
+          "assertion_changed": false
+        }
+      ]
+    },
+    {
+      "iteration": 4,
+      "total": 63,
+      "passed": 63,
+      "failed": 0,
+      "infrastructure_fixes": 3,
+      "functional_feedbacks": 0,
+      "fixes_applied": [
+        {
+          "type": "infrastructure",
+          "test": "notam-decision.spec.ts:28",
+          "change": "Added loading state wait (불러오는 중), scrollIntoViewIfNeeded for each TIFRS label",
+          "assertion_changed": false
+        },
+        {
+          "type": "infrastructure",
+          "test": "notam-decision.spec.ts:64",
+          "change": "Added loading state wait, added T — Time label check for existing decision view",
+          "assertion_changed": false
+        }
+      ]
+    }
+  ]
+}

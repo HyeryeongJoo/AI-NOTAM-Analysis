@@ -4,7 +4,7 @@
  * LLM JSON 응답을 안전하게 파싱하고 검증하는 함수 모음.
  * 파싱 실패 시 도메인 기반 폴백 값을 반환.
  *
- * @requirements FR-001, FR-008, FR-009
+ * @requirements FR-001, FR-008, FR-009, FR-020
  */
 
 import type {
@@ -12,25 +12,27 @@ import type {
   NotamImportanceResult,
   QCodeFallbackInfo,
   RouteAlternativeAiResult,
+  TifrsDecisionResult,
 } from './types';
+import type { DecisionType } from '@/types/decision';
 import type { ImportanceLevel } from '@/types/notam';
 
 /** 중요도 등급별 기본 점수 매핑 */
 const IMPORTANCE_SCORE_MAP: Record<ImportanceLevel, number> = {
-  critical: 0.90,
-  high: 0.70,
-  medium: 0.50,
-  low: 0.30,
-  routine: 0.10,
+  critical: 0.9,
+  high: 0.7,
+  medium: 0.5,
+  low: 0.3,
+  routine: 0.1,
 };
 
 /** 점수 범위별 등급 매핑 */
 const SCORE_TO_LEVEL: Array<{ min: number; level: ImportanceLevel }> = [
   { min: 0.85, level: 'critical' },
   { min: 0.65, level: 'high' },
-  { min: 0.40, level: 'medium' },
-  { min: 0.20, level: 'low' },
-  { min: 0.00, level: 'routine' },
+  { min: 0.4, level: 'medium' },
+  { min: 0.2, level: 'low' },
+  { min: 0.0, level: 'routine' },
 ];
 
 /**
@@ -76,7 +78,11 @@ export function parseImportanceResult(
 ): NotamImportanceResult {
   const parsed = extractJson<Record<string, unknown>>(text);
 
-  if (parsed && typeof parsed.importanceScore === 'number' && typeof parsed.aiSummary === 'string') {
+  if (
+    parsed &&
+    typeof parsed.importanceScore === 'number' &&
+    typeof parsed.aiSummary === 'string'
+  ) {
     const score = Math.max(0, Math.min(1, Number(parsed.importanceScore)));
     const declaredLevel = String(parsed.importanceLevel ?? '');
     // 점수-등급 일관성 보장: 점수 기준이 우선
@@ -158,4 +164,63 @@ export function parseRouteAlternativesResult(text: string): RouteAlternativeAiRe
  */
 function isValidImportanceLevel(value: string): value is ImportanceLevel {
   return ['critical', 'high', 'medium', 'low', 'routine'].includes(value);
+}
+
+/** 유효한 의사결정 유형 목록 */
+const VALID_DECISION_TYPES: DecisionType[] = [
+  'no-action',
+  'monitor',
+  'route-change',
+  'schedule-change',
+  'cancel-flight',
+  'divert',
+];
+
+/**
+ * 문자열이 유효한 DecisionType인지 확인한다.
+ *
+ * @param value - 검사할 문자열
+ * @returns DecisionType 여부
+ */
+function isValidDecisionType(value: string): value is DecisionType {
+  return VALID_DECISION_TYPES.includes(value as DecisionType);
+}
+
+/**
+ * TIFRS 의사결정 분석 응답을 파싱한다.
+ *
+ * @param text - LLM 응답 텍스트
+ * @returns 파싱된 TIFRS 분석 결과 (파싱 실패 시 monitor 기본값)
+ */
+export function parseTifrsDecisionResult(text: string): TifrsDecisionResult {
+  const parsed = extractJson<Record<string, unknown>>(text);
+
+  if (
+    parsed &&
+    typeof parsed.suggestedDecision === 'string' &&
+    typeof parsed.rationale === 'string'
+  ) {
+    const suggested = String(parsed.suggestedDecision);
+
+    return {
+      suggestedDecision: isValidDecisionType(suggested) ? suggested : 'monitor',
+      tifrsTime: String(parsed.tifrsTime ?? '분석 정보 없음'),
+      tifrsImpact: String(parsed.tifrsImpact ?? '분석 정보 없음'),
+      tifrsFacilities: String(parsed.tifrsFacilities ?? '분석 정보 없음'),
+      tifrsRoute: String(parsed.tifrsRoute ?? '분석 정보 없음'),
+      tifrsSchedule: String(parsed.tifrsSchedule ?? '분석 정보 없음'),
+      rationale: String(parsed.rationale),
+    };
+  }
+
+  // 파싱 실패: 보수적 폴백 (모니터링 권고)
+  return {
+    suggestedDecision: 'monitor',
+    tifrsTime: '자동 분석 실패 — 수동 확인 필요',
+    tifrsImpact: '자동 분석 실패 — 수동 확인 필요',
+    tifrsFacilities: '자동 분석 실패 — 수동 확인 필요',
+    tifrsRoute: '자동 분석 실패 — 수동 확인 필요',
+    tifrsSchedule: '자동 분석 실패 — 수동 확인 필요',
+    rationale: text.slice(0, 500),
+  };
 }

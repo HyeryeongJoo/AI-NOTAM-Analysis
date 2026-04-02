@@ -1,0 +1,107 @@
+{
+  "metadata": {
+    "created": "2026-04-01T18:00:00Z",
+    "version": 2,
+    "previous_version": 1,
+    "generator": "backend",
+    "strategy": "incremental — v1 code preserved, only new decision-related files added and minimal modifications to existing files"
+  },
+  "files_created": [
+    {
+      "path": "src/types/decision.ts",
+      "spec": "backend-spec.json",
+      "lines": 58,
+      "status": "created",
+      "description": "DecisionRecord, CreateDecisionRecordRequest, DecisionType type definitions"
+    },
+    {
+      "path": "src/lib/validation/decision.validation.ts",
+      "spec": "backend-spec.json",
+      "lines": 34,
+      "status": "created",
+      "description": "Zod schemas for decision creation and query validation"
+    },
+    {
+      "path": "src/data/decisions.ts",
+      "spec": "backend-spec.json",
+      "lines": 101,
+      "status": "created",
+      "description": "5 TIFRS decision seed records linked to existing NOTAMs"
+    },
+    {
+      "path": "src/lib/db/decision.repository.ts",
+      "spec": "backend-spec.json",
+      "lines": 151,
+      "status": "created",
+      "description": "Decision CRUD with filtering/sorting/pagination, findByNotamId"
+    },
+    {
+      "path": "src/app/api/notams/[id]/decision/route.ts",
+      "spec": "backend-spec.json",
+      "lines": 111,
+      "status": "created",
+      "description": "GET (decision by NOTAM), POST (create with Bedrock TIFRS analysis)"
+    },
+    {
+      "path": "src/app/api/decisions/route.ts",
+      "spec": "backend-spec.json",
+      "lines": 38,
+      "status": "created",
+      "description": "GET (list all decisions with filtering)"
+    }
+  ],
+  "files_modified": [
+    {
+      "path": "src/types/auditLog.ts",
+      "change": "Added 'record-decision' to AuditAction union type"
+    },
+    {
+      "path": "src/lib/validation/auditLog.validation.ts",
+      "change": "Added 'record-decision' to both auditLogQuerySchema and createAuditLogSchema action enums"
+    },
+    {
+      "path": "src/lib/db/store.ts",
+      "change": "Added decisions Map<string, DecisionRecord> to Store interface, imported SEED_DECISIONS, initialized in initializeStore()"
+    },
+    {
+      "path": "src/data/auditLogs.ts",
+      "change": "Added 3 record-decision audit entries (audit-016 through audit-018), count updated from 15 to 18"
+    },
+    {
+      "path": "src/lib/ai/prompts/system.ts",
+      "change": "Added TIFRS_DECISION_SYSTEM_PROMPT for TIFRS framework analysis"
+    },
+    {
+      "path": "src/lib/ai/prompts/templates.ts",
+      "change": "Added buildTifrsDecisionMessage() template builder"
+    },
+    { "path": "src/lib/ai/types.ts", "change": "Added TifrsDecisionResult interface" },
+    {
+      "path": "src/lib/ai/parsers.ts",
+      "change": "Added parseTifrsDecisionResult() with monitor fallback on parse failure"
+    },
+    {
+      "path": "src/lib/services/bedrock.service.ts",
+      "change": "Added analyzeTifrsDecision() function calling Bedrock with TIFRS prompt"
+    }
+  ],
+  "files_unchanged": "All other existing files preserved (v1 code + v1 demo feedback changes intact)",
+  "dependencies_installed": [],
+  "build_result": {
+    "success": true,
+    "attempts": 1,
+    "errors": [],
+    "warnings": []
+  },
+  "lint_result": {
+    "success": true,
+    "errors": 0,
+    "warnings": 0,
+    "note": "Only linted new/modified files; pre-existing warnings in frontend files not counted"
+  },
+  "api_endpoints_added": [
+    "GET /api/notams/[id]/decision — Retrieve decision record for a NOTAM",
+    "POST /api/notams/[id]/decision — Create TIFRS decision with Bedrock AI pre-analysis",
+    "GET /api/decisions — List all decisions with filtering/sorting/pagination"
+  ]
+}

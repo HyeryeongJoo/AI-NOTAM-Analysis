@@ -1,0 +1,286 @@
+{
+  "version": "v2",
+  "metadata": {
+    "created": "2026-04-01T15:00:00Z",
+    "total_specs": 89,
+    "backend_specs": 45,
+    "frontend_specs": 44
+  },
+  "specs": ["backend-spec.json", "frontend-spec.json"],
+  "requirements_coverage": {
+    "FR-001": {
+      "backend": [
+        "notam-types",
+        "analyzeNotamSchema",
+        "notam-repository",
+        "bedrock-service",
+        "notam-analyze-api",
+        "notam-list-api"
+      ],
+      "frontend": [
+        "useNotams",
+        "useNotamAnalysis",
+        "NotamTable",
+        "NotamAiAnalysis",
+        "ImportanceBadge",
+        "ImportanceScoreBar",
+        "NotamSplitPanelDetail",
+        "NotamListPage",
+        "NotamDetailPage"
+      ]
+    },
+    "FR-002": {
+      "backend": ["notam-types", "qcode-types", "qcode-service", "notam-detail-api", "qcode-api"],
+      "frontend": [
+        "useNotam",
+        "NotamTable",
+        "NotamRawAndParsed",
+        "NotamSplitPanelDetail",
+        "NotamListPage",
+        "NotamDetailPage"
+      ]
+    },
+    "FR-003": {
+      "backend": ["impact-types", "bedrock-service", "notam-impact-analysis-api"],
+      "frontend": ["useNotam", "NotamAiAnalysis", "NotamImpactSection", "NotamDetailPage"]
+    },
+    "FR-004": {
+      "backend": [
+        "impact-types",
+        "flight-types",
+        "matching-service",
+        "notam-affected-flights-api",
+        "notam-affected-routes-api",
+        "flight-detail-api"
+      ],
+      "frontend": [
+        "useFlights",
+        "useFlight",
+        "FlightTable",
+        "FlightNotamImpact",
+        "NotamImpactSection",
+        "FlightListPage",
+        "FlightDetailPage",
+        "NotamDetailPage"
+      ]
+    },
+    "FR-005": {
+      "backend": ["notam-types", "notam-repository", "notam-list-api", "notam-stats-api"],
+      "frontend": [
+        "useNotams",
+        "useDashboard",
+        "NotamTable",
+        "DashboardSummaryCards",
+        "RecentCriticalNotams",
+        "DashboardPage",
+        "NotamListPage"
+      ]
+    },
+    "FR-006": {
+      "backend": [
+        "dashboard-types",
+        "route-types",
+        "impact-types",
+        "dashboard-route-impact-api",
+        "route-list-api",
+        "route-detail-api"
+      ],
+      "frontend": [
+        "useDashboard",
+        "useRoutes",
+        "useRoute",
+        "RouteImpactMap",
+        "DashboardSummaryCards",
+        "AffectedFlightsSummary",
+        "RouteTable",
+        "RouteMapVisualization",
+        "LeafletMapWrapper",
+        "DashboardPage",
+        "RouteListPage",
+        "RouteDetailPage"
+      ]
+    },
+    "FR-007": {
+      "backend": [
+        "briefing-types",
+        "briefing-validation",
+        "bedrock-service",
+        "briefing-generate-api",
+        "briefing-list-api",
+        "briefing-detail-api"
+      ],
+      "frontend": [
+        "useBriefings",
+        "useBriefing",
+        "useGenerateBriefing",
+        "BriefingTable",
+        "BriefingInfo",
+        "BriefingContentPreview",
+        "BriefingApprovalActions",
+        "FlightBriefingActions",
+        "BriefingListPage",
+        "BriefingDetailPage",
+        "FlightDetailPage"
+      ]
+    },
+    "FR-008": {
+      "backend": [
+        "briefing-types",
+        "bedrock-service",
+        "briefing-generate-crew-api",
+        "briefing-crew-package-api"
+      ],
+      "frontend": [
+        "useBriefings",
+        "useGenerateBriefing",
+        "BriefingTable",
+        "BriefingContentPreview",
+        "FlightBriefingActions",
+        "BriefingListPage",
+        "BriefingDetailPage",
+        "FlightDetailPage"
+      ]
+    },
+    "FR-009": {
+      "backend": ["route-types", "bedrock-service", "route-alternatives-api", "route-impact-api"],
+      "frontend": [
+        "useRouteAlternatives",
+        "useFlight",
+        "useRoute",
+        "RouteDeviationGuidance",
+        "FlightRouteMap",
+        "RouteAlternatives",
+        "FlightDetailPage",
+        "RouteDetailPage"
+      ]
+    },
+    "FR-010": {
+      "backend": [
+        "impact-types",
+        "matching-service",
+        "matching-calculate-api",
+        "matching-results-api",
+        "route-list-api",
+        "route-detail-api"
+      ],
+      "frontend": [
+        "useRoutes",
+        "useRoute",
+        "RouteTable",
+        "RouteInfo",
+        "RouteMapVisualization",
+        "RouteNotamImpacts",
+        "RouteListPage",
+        "RouteDetailPage"
+      ]
+    },
+    "FR-011": {
+      "backend": [
+        "refbook-types",
+        "refbook-validation",
+        "refbook-repository",
+        "refbook-api",
+        "refbook-detail-api"
+      ],
+      "frontend": ["useRefBook", "RefBookTable", "RefBookRegistrationModal", "RefBookPage"]
+    },
+    "FR-012": {
+      "backend": ["notam-types", "notam-detail-api"],
+      "frontend": [
+        "useNotam",
+        "NotamRawAndParsed",
+        "NotamAiAnalysis",
+        "NotamMiniMap",
+        "NotamDetailPage"
+      ]
+    },
+    "FR-013": {
+      "backend": [
+        "flight-types",
+        "flight-validation",
+        "flight-repository",
+        "flight-list-api",
+        "flight-detail-api"
+      ],
+      "frontend": [
+        "useFlights",
+        "useFlight",
+        "FlightTable",
+        "FlightInfo",
+        "FlightListPage",
+        "FlightDetailPage"
+      ]
+    },
+    "FR-014": {
+      "backend": ["briefing-types", "briefing-validation", "bedrock-service", "shift-handover-api"],
+      "frontend": ["useBriefings", "BriefingTable", "BriefingListPage"]
+    },
+    "FR-015": {
+      "backend": ["notam-types", "bedrock-service", "notam-summarize-api"],
+      "frontend": ["useNotam", "NotamAiAnalysis", "NotamDetailPage"]
+    },
+    "FR-016": {
+      "backend": ["notam-types", "notam-repository", "notam-alerts-api"],
+      "frontend": [
+        "useDashboard",
+        "AlertContext",
+        "CriticalAlertBanner",
+        "RecentCriticalNotams",
+        "DashboardPage"
+      ]
+    },
+    "FR-017": {
+      "backend": ["auditlog-types", "auditlog-validation", "auditlog-repository", "auditlog-api"],
+      "frontend": ["useAuditLog", "AuditLogTable", "AuditLogPage"]
+    },
+    "FR-018": {
+      "backend": ["notam-types", "notam-repository", "notam-diff-api"],
+      "frontend": ["useNotam", "NotamDiffView", "NotamDetailPage"]
+    },
+    "FR-019": {
+      "backend": ["notam-types", "notam-repository", "notam-list-api"],
+      "frontend": ["useNotams", "NotamTable", "NotamExpiryIndicator", "NotamListPage"]
+    },
+    "FR-020": {
+      "backend": [
+        "decision-types",
+        "decision-validation",
+        "decision-seed-data",
+        "decision-repository",
+        "notam-decision-api",
+        "decisions-list-api"
+      ],
+      "frontend": [
+        "useDecisions",
+        "useNotamDecision",
+        "useRecordDecision",
+        "DecisionTypeBadge",
+        "NotamDecisionSection",
+        "DecisionTable",
+        "DecisionSplitPanelDetail",
+        "DecisionListPage",
+        "NotamDetailPage"
+      ]
+    }
+  },
+  "uncovered_requirements": [],
+  "generation_order": [
+    { "phase": "types", "generator": "backend", "file": "backend-spec.json" },
+    { "phase": "validation", "generator": "backend", "file": "backend-spec.json" },
+    { "phase": "data", "generator": "backend", "file": "backend-spec.json" },
+    { "phase": "db", "generator": "backend", "file": "backend-spec.json" },
+    { "phase": "services", "generator": "backend", "file": "backend-spec.json" },
+    { "phase": "api", "generator": "backend", "file": "backend-spec.json" },
+    { "phase": "middleware", "generator": "backend", "file": "backend-spec.json" },
+    { "phase": "hooks", "generator": "frontend", "file": "frontend-spec.json" },
+    { "phase": "contexts", "generator": "frontend", "file": "frontend-spec.json" },
+    { "phase": "layout", "generator": "frontend", "file": "frontend-spec.json" },
+    { "phase": "shared", "generator": "frontend", "file": "frontend-spec.json" },
+    { "phase": "feature", "generator": "frontend", "file": "frontend-spec.json" },
+    { "phase": "page", "generator": "frontend", "file": "frontend-spec.json" }
+  ],
+  "output_files": {
+    "machine_readable": ["backend-spec.json", "frontend-spec.json"],
+    "human_readable": ["backend-spec.md", "frontend-spec.md", "specs-summary.md"]
+  }
+}

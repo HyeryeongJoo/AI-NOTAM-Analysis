@@ -1,0 +1,1905 @@
+{
+  "metadata": {
+    "created": "2026-04-01T14:00:00Z",
+    "version": 2,
+    "previous_version": 1,
+    "nextjs_version": "15",
+    "router": "app",
+    "architect_notes": "v2 iterates on v1 architecture (11 pages, ~80 components). Changes: (1) New /decisions page for FR-020 TIFRS decision documentation. (2) New DecisionRecord type, DecisionType enum, decision API routes, and decision-related components. (3) Updated 6 existing components with v2_status:implemented marking for already-applied code changes (RouteImpactMap, FlightRouteMap, LeafletMapInner, RouteTable, FlightTable, RecentCriticalNotams). (4) NotamDetailPage gains NotamDecisionSection child for inline TIFRS decision recording. (5) Side navigation updated with decisions link under management section. Total: 12 pages, 20 FRs covered."
+  },
+  "pages": [
+    {
+      "route": "/",
+      "page_type": "dashboard",
+      "cloudscape_pattern": "dashboard",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/page.tsx",
+      "component_tree": [
+        {
+          "name": "DashboardPage",
+          "type": "page",
+          "path": "src/app/page.tsx",
+          "cloudscape_components": ["ContentLayout", "Header", "Grid", "SpaceBetween"],
+          "props_interface": "DashboardPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-006", "FR-005", "FR-016"],
+          "children": [
+            {
+              "name": "CriticalAlertBanner",
+              "type": "feature",
+              "path": "src/components/dashboard/CriticalAlertBanner.tsx",
+              "cloudscape_components": ["Flashbar"],
+              "props_interface": "CriticalAlertBannerProps",
+              "state": "context",
+              "requirements_mapped": ["FR-016"],
+              "children": []
+            },
+            {
+              "name": "DashboardSummaryCards",
+              "type": "feature",
+              "path": "src/components/dashboard/DashboardSummaryCards.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "Box",
+                "ColumnLayout",
+                "StatusIndicator",
+                "SpaceBetween"
+              ],
+              "props_interface": "DashboardSummaryCardsProps",
+              "state": "local",
+              "requirements_mapped": ["FR-006", "FR-005"],
+              "children": []
+            },
+            {
+              "name": "RouteImpactMap",
+              "type": "feature",
+              "path": "src/components/dashboard/RouteImpactMap.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "Select",
+                "SpaceBetween",
+                "Popover",
+                "Icon",
+                "Box",
+                "Link"
+              ],
+              "props_interface": "RouteImpactMapProps",
+              "state": "local",
+              "requirements_mapped": ["FR-006"],
+              "children": [],
+              "external_libs": ["leaflet", "react-leaflet"],
+              "v2_status": "implemented",
+              "v2_changes": [
+                "Added map legend (red=critical, orange=high, blue=other, route line color)",
+                "NOTAM circles are clickable with popup (summary + link to /notams/{id})",
+                "Header info popover explaining map elements",
+                "Route dropdown includes '전체' (All) option as default",
+                "Map shows ALL NOTAMs for selected routes (not just critical)",
+                "Data source changed from criticalNotams to routeImpacts.notams",
+                "Wrapper div with position:relative for Grid sizing"
+              ]
+            },
+            {
+              "name": "RecentCriticalNotams",
+              "type": "feature",
+              "path": "src/components/dashboard/RecentCriticalNotams.tsx",
+              "cloudscape_components": ["Table", "Header", "StatusIndicator", "Link", "Badge"],
+              "props_interface": "RecentCriticalNotamsProps",
+              "state": "local",
+              "requirements_mapped": ["FR-005", "FR-016"],
+              "children": [],
+              "v2_status": "implemented",
+              "v2_changes": ["Now shows critical AND high importance NOTAMs (was critical-only)"]
+            },
+            {
+              "name": "AffectedFlightsSummary",
+              "type": "feature",
+              "path": "src/components/dashboard/AffectedFlightsSummary.tsx",
+              "cloudscape_components": ["Container", "Header", "Table", "StatusIndicator", "Link"],
+              "props_interface": "AffectedFlightsSummaryProps",
+              "state": "local",
+              "requirements_mapped": ["FR-006"],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/notams",
+      "page_type": "table-view",
+      "cloudscape_pattern": "resource-management/view/table-view",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/notams/page.tsx",
+      "component_tree": [
+        {
+          "name": "NotamListPage",
+          "type": "page",
+          "path": "src/app/notams/page.tsx",
+          "cloudscape_components": ["SpaceBetween"],
+          "props_interface": "NotamListPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-001", "FR-002", "FR-005", "FR-019"],
+          "children": [
+            {
+              "name": "NotamTable",
+              "type": "feature",
+              "path": "src/components/notams/NotamTable.tsx",
+              "cloudscape_components": [
+                "Table",
+                "Header",
+                "Pagination",
+                "PropertyFilter",
+                "CollectionPreferences",
+                "SpaceBetween",
+                "Button",
+                "Badge",
+                "StatusIndicator",
+                "Link",
+                "Box"
+              ],
+              "props_interface": "NotamTableProps",
+              "state": "local",
+              "requirements_mapped": ["FR-001", "FR-002", "FR-005", "FR-019"],
+              "children": [
+                {
+                  "name": "ImportanceBadge",
+                  "type": "shared",
+                  "path": "src/components/common/ImportanceBadge.tsx",
+                  "cloudscape_components": ["Badge"],
+                  "props_interface": "ImportanceBadgeProps",
+                  "state": "local",
+                  "requirements_mapped": ["FR-001"],
+                  "children": []
+                },
+                {
+                  "name": "NotamExpiryIndicator",
+                  "type": "shared",
+                  "path": "src/components/common/NotamExpiryIndicator.tsx",
+                  "cloudscape_components": ["StatusIndicator", "Box"],
+                  "props_interface": "NotamExpiryIndicatorProps",
+                  "state": "local",
+                  "requirements_mapped": ["FR-019"],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "NotamSplitPanelDetail",
+              "type": "feature",
+              "path": "src/components/notams/NotamSplitPanelDetail.tsx",
+              "cloudscape_components": [
+                "SplitPanel",
+                "KeyValuePairs",
+                "StatusIndicator",
+                "Badge",
+                "Box",
+                "Link",
+                "SpaceBetween"
+              ],
+              "props_interface": "NotamSplitPanelDetailProps",
+              "state": "local",
+              "requirements_mapped": ["FR-001", "FR-002"],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/notams/[id]",
+      "page_type": "detail",
+      "cloudscape_pattern": "resource-management/view/detail",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/notams/[id]/page.tsx",
+      "component_tree": [
+        {
+          "name": "NotamDetailPage",
+          "type": "page",
+          "path": "src/app/notams/[id]/page.tsx",
+          "cloudscape_components": ["ContentLayout", "Header", "SpaceBetween"],
+          "props_interface": "NotamDetailPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-002", "FR-003", "FR-012", "FR-015", "FR-018", "FR-020"],
+          "children": [
+            {
+              "name": "NotamRawAndParsed",
+              "type": "feature",
+              "path": "src/components/notams/NotamRawAndParsed.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "ColumnLayout",
+                "KeyValuePairs",
+                "Box",
+                "CopyToClipboard"
+              ],
+              "props_interface": "NotamRawAndParsedProps",
+              "state": "local",
+              "requirements_mapped": ["FR-002", "FR-012"],
+              "children": []
+            },
+            {
+              "name": "NotamAiAnalysis",
+              "type": "feature",
+              "path": "src/components/notams/NotamAiAnalysis.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "StatusIndicator",
+                "ExpandableSection",
+                "Box",
+                "SpaceBetween",
+                "Button"
+              ],
+              "props_interface": "NotamAiAnalysisProps",
+              "state": "local",
+              "requirements_mapped": ["FR-001", "FR-003", "FR-015"],
+              "children": [
+                {
+                  "name": "ImportanceBadge",
+                  "type": "shared",
+                  "path": "src/components/common/ImportanceBadge.tsx",
+                  "cloudscape_components": ["Badge"],
+                  "props_interface": "ImportanceBadgeProps",
+                  "state": "local",
+                  "requirements_mapped": ["FR-001"],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "NotamImpactSection",
+              "type": "feature",
+              "path": "src/components/notams/NotamImpactSection.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "Table",
+                "StatusIndicator",
+                "Link",
+                "Tabs"
+              ],
+              "props_interface": "NotamImpactSectionProps",
+              "state": "local",
+              "requirements_mapped": ["FR-003", "FR-004"],
+              "children": []
+            },
+            {
+              "name": "NotamMiniMap",
+              "type": "feature",
+              "path": "src/components/notams/NotamMiniMap.tsx",
+              "cloudscape_components": ["Container", "Header"],
+              "props_interface": "NotamMiniMapProps",
+              "state": "local",
+              "requirements_mapped": ["FR-012"],
+              "children": [],
+              "external_libs": ["leaflet", "react-leaflet"],
+              "v2_status": "implemented",
+              "v2_changes": [
+                "NOTAM circle uses importance-based color coding consistent with dashboard map"
+              ]
+            },
+            {
+              "name": "NotamDiffView",
+              "type": "feature",
+              "path": "src/components/notams/NotamDiffView.tsx",
+              "cloudscape_components": ["Container", "Header", "Box", "ColumnLayout"],
+              "props_interface": "NotamDiffViewProps",
+              "state": "local",
+              "requirements_mapped": ["FR-018"],
+              "children": []
+            },
+            {
+              "name": "NotamDecisionSection",
+              "type": "feature",
+              "path": "src/components/notams/NotamDecisionSection.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "SpaceBetween",
+                "FormField",
+                "Input",
+                "Textarea",
+                "Select",
+                "Button",
+                "ColumnLayout",
+                "Box",
+                "StatusIndicator",
+                "Alert",
+                "ExpandableSection"
+              ],
+              "props_interface": "NotamDecisionSectionProps",
+              "state": "local",
+              "requirements_mapped": ["FR-020"],
+              "children": [],
+              "v2_status": "new",
+              "v2_notes": "TIFRS decision recording form embedded in NOTAM detail page. Shows AI-suggested decision with editable TIFRS criteria fields. Supports record-decision action for audit trail."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/flights",
+      "page_type": "table-view",
+      "cloudscape_pattern": "resource-management/view/table-view",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/flights/page.tsx",
+      "component_tree": [
+        {
+          "name": "FlightListPage",
+          "type": "page",
+          "path": "src/app/flights/page.tsx",
+          "cloudscape_components": ["SpaceBetween"],
+          "props_interface": "FlightListPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-004", "FR-013"],
+          "children": [
+            {
+              "name": "FlightTable",
+              "type": "feature",
+              "path": "src/components/flights/FlightTable.tsx",
+              "cloudscape_components": [
+                "Table",
+                "Header",
+                "Pagination",
+                "PropertyFilter",
+                "CollectionPreferences",
+                "StatusIndicator",
+                "Link",
+                "Badge",
+                "SpaceBetween",
+                "Box",
+                "Popover"
+              ],
+              "props_interface": "FlightTableProps",
+              "state": "local",
+              "requirements_mapped": ["FR-004", "FR-013"],
+              "children": [],
+              "v2_status": "implemented",
+              "v2_changes": [
+                "Status column header includes info popover explaining scheduled/dispatched/in-flight/arrived/cancelled/diverted status values"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/flights/[id]",
+      "page_type": "detail",
+      "cloudscape_pattern": "resource-management/view/detail",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/flights/[id]/page.tsx",
+      "component_tree": [
+        {
+          "name": "FlightDetailPage",
+          "type": "page",
+          "path": "src/app/flights/[id]/page.tsx",
+          "cloudscape_components": ["ContentLayout", "Header", "SpaceBetween"],
+          "props_interface": "FlightDetailPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-004", "FR-009", "FR-013"],
+          "children": [
+            {
+              "name": "FlightInfo",
+              "type": "feature",
+              "path": "src/components/flights/FlightInfo.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "KeyValuePairs",
+                "ColumnLayout",
+                "StatusIndicator"
+              ],
+              "props_interface": "FlightInfoProps",
+              "state": "local",
+              "requirements_mapped": ["FR-013"],
+              "children": []
+            },
+            {
+              "name": "FlightNotamImpact",
+              "type": "feature",
+              "path": "src/components/flights/FlightNotamImpact.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "Table",
+                "StatusIndicator",
+                "Link",
+                "Badge"
+              ],
+              "props_interface": "FlightNotamImpactProps",
+              "state": "local",
+              "requirements_mapped": ["FR-004"],
+              "children": []
+            },
+            {
+              "name": "FlightRouteMap",
+              "type": "feature",
+              "path": "src/components/flights/FlightRouteMap.tsx",
+              "cloudscape_components": ["Container", "Header"],
+              "props_interface": "FlightRouteMapProps",
+              "state": "local",
+              "requirements_mapped": ["FR-009"],
+              "children": [],
+              "external_libs": ["leaflet", "react-leaflet"],
+              "v2_status": "implemented",
+              "v2_changes": [
+                "NOTAM circles use per-importance color coding (red=critical, orange=high, blue=other)",
+                "NOTAM circles are clickable with popup showing summary and link to detail page"
+              ]
+            },
+            {
+              "name": "FlightBriefingActions",
+              "type": "feature",
+              "path": "src/components/flights/FlightBriefingActions.tsx",
+              "cloudscape_components": ["Container", "Header", "Button", "SpaceBetween", "Select"],
+              "props_interface": "FlightBriefingActionsProps",
+              "state": "local",
+              "requirements_mapped": ["FR-007", "FR-008"],
+              "children": []
+            },
+            {
+              "name": "RouteDeviationGuidance",
+              "type": "feature",
+              "path": "src/components/flights/RouteDeviationGuidance.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "Table",
+                "StatusIndicator",
+                "Alert",
+                "Box",
+                "SpaceBetween"
+              ],
+              "props_interface": "RouteDeviationGuidanceProps",
+              "state": "local",
+              "requirements_mapped": ["FR-009"],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/routes",
+      "page_type": "table-view",
+      "cloudscape_pattern": "resource-management/view/table-view",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/routes/page.tsx",
+      "component_tree": [
+        {
+          "name": "RouteListPage",
+          "type": "page",
+          "path": "src/app/routes/page.tsx",
+          "cloudscape_components": ["SpaceBetween"],
+          "props_interface": "RouteListPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-010", "FR-006"],
+          "children": [
+            {
+              "name": "RouteTable",
+              "type": "feature",
+              "path": "src/components/routes/RouteTable.tsx",
+              "cloudscape_components": [
+                "Table",
+                "Header",
+                "Pagination",
+                "PropertyFilter",
+                "CollectionPreferences",
+                "StatusIndicator",
+                "Link",
+                "Badge",
+                "SpaceBetween",
+                "Box",
+                "Popover"
+              ],
+              "props_interface": "RouteTableProps",
+              "state": "local",
+              "requirements_mapped": ["FR-010", "FR-006"],
+              "children": [],
+              "v2_status": "implemented",
+              "v2_changes": [
+                "Status column header includes info popover explaining active/suspended/alternate status values"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/routes/[id]",
+      "page_type": "detail",
+      "cloudscape_pattern": "resource-management/view/detail",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/routes/[id]/page.tsx",
+      "component_tree": [
+        {
+          "name": "RouteDetailPage",
+          "type": "page",
+          "path": "src/app/routes/[id]/page.tsx",
+          "cloudscape_components": ["ContentLayout", "Header", "SpaceBetween"],
+          "props_interface": "RouteDetailPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-009", "FR-010"],
+          "children": [
+            {
+              "name": "RouteInfo",
+              "type": "feature",
+              "path": "src/components/routes/RouteInfo.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "KeyValuePairs",
+                "ColumnLayout",
+                "StatusIndicator"
+              ],
+              "props_interface": "RouteInfoProps",
+              "state": "local",
+              "requirements_mapped": ["FR-010"],
+              "children": []
+            },
+            {
+              "name": "RouteMapVisualization",
+              "type": "feature",
+              "path": "src/components/routes/RouteMapVisualization.tsx",
+              "cloudscape_components": ["Container", "Header"],
+              "props_interface": "RouteMapVisualizationProps",
+              "state": "local",
+              "requirements_mapped": ["FR-006", "FR-010"],
+              "children": [],
+              "external_libs": ["leaflet", "react-leaflet"]
+            },
+            {
+              "name": "RouteNotamImpacts",
+              "type": "feature",
+              "path": "src/components/routes/RouteNotamImpacts.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "Table",
+                "StatusIndicator",
+                "Link",
+                "Badge"
+              ],
+              "props_interface": "RouteNotamImpactsProps",
+              "state": "local",
+              "requirements_mapped": ["FR-010"],
+              "children": []
+            },
+            {
+              "name": "RouteAlternatives",
+              "type": "feature",
+              "path": "src/components/routes/RouteAlternatives.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "Table",
+                "StatusIndicator",
+                "Link",
+                "SpaceBetween"
+              ],
+              "props_interface": "RouteAlternativesProps",
+              "state": "local",
+              "requirements_mapped": ["FR-009"],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/ref-book",
+      "page_type": "table-view",
+      "cloudscape_pattern": "resource-management/view/table-view",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/ref-book/page.tsx",
+      "component_tree": [
+        {
+          "name": "RefBookPage",
+          "type": "page",
+          "path": "src/app/ref-book/page.tsx",
+          "cloudscape_components": ["SpaceBetween"],
+          "props_interface": "RefBookPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-011"],
+          "children": [
+            {
+              "name": "RefBookTable",
+              "type": "feature",
+              "path": "src/components/ref-book/RefBookTable.tsx",
+              "cloudscape_components": [
+                "Table",
+                "Header",
+                "Pagination",
+                "PropertyFilter",
+                "CollectionPreferences",
+                "StatusIndicator",
+                "Link",
+                "Badge",
+                "SpaceBetween",
+                "Button",
+                "Box"
+              ],
+              "props_interface": "RefBookTableProps",
+              "state": "local",
+              "requirements_mapped": ["FR-011"],
+              "children": []
+            },
+            {
+              "name": "RefBookRegistrationModal",
+              "type": "feature",
+              "path": "src/components/ref-book/RefBookRegistrationModal.tsx",
+              "cloudscape_components": [
+                "Modal",
+                "Form",
+                "FormField",
+                "Input",
+                "Textarea",
+                "Select",
+                "SpaceBetween",
+                "Button"
+              ],
+              "props_interface": "RefBookRegistrationModalProps",
+              "state": "local",
+              "requirements_mapped": ["FR-011"],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/briefings",
+      "page_type": "table-view",
+      "cloudscape_pattern": "resource-management/view/table-view",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/briefings/page.tsx",
+      "component_tree": [
+        {
+          "name": "BriefingListPage",
+          "type": "page",
+          "path": "src/app/briefings/page.tsx",
+          "cloudscape_components": ["SpaceBetween"],
+          "props_interface": "BriefingListPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-007", "FR-008", "FR-014"],
+          "children": [
+            {
+              "name": "BriefingTable",
+              "type": "feature",
+              "path": "src/components/briefings/BriefingTable.tsx",
+              "cloudscape_components": [
+                "Table",
+                "Header",
+                "Pagination",
+                "PropertyFilter",
+                "CollectionPreferences",
+                "StatusIndicator",
+                "Link",
+                "Badge",
+                "SpaceBetween",
+                "Button",
+                "Box"
+              ],
+              "props_interface": "BriefingTableProps",
+              "state": "local",
+              "requirements_mapped": ["FR-007", "FR-008", "FR-014"],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/briefings/[id]",
+      "page_type": "detail",
+      "cloudscape_pattern": "resource-management/view/detail",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/briefings/[id]/page.tsx",
+      "component_tree": [
+        {
+          "name": "BriefingDetailPage",
+          "type": "page",
+          "path": "src/app/briefings/[id]/page.tsx",
+          "cloudscape_components": ["ContentLayout", "Header", "SpaceBetween"],
+          "props_interface": "BriefingDetailPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-007", "FR-008"],
+          "children": [
+            {
+              "name": "BriefingInfo",
+              "type": "feature",
+              "path": "src/components/briefings/BriefingInfo.tsx",
+              "cloudscape_components": [
+                "Container",
+                "Header",
+                "KeyValuePairs",
+                "ColumnLayout",
+                "StatusIndicator",
+                "Badge"
+              ],
+              "props_interface": "BriefingInfoProps",
+              "state": "local",
+              "requirements_mapped": ["FR-007"],
+              "children": []
+            },
+            {
+              "name": "BriefingContentPreview",
+              "type": "feature",
+              "path": "src/components/briefings/BriefingContentPreview.tsx",
+              "cloudscape_components": ["Container", "Header", "Box", "Tabs"],
+              "props_interface": "BriefingContentPreviewProps",
+              "state": "local",
+              "requirements_mapped": ["FR-007", "FR-008"],
+              "children": []
+            },
+            {
+              "name": "BriefingApprovalActions",
+              "type": "feature",
+              "path": "src/components/briefings/BriefingApprovalActions.tsx",
+              "cloudscape_components": ["Container", "Header", "Button", "SpaceBetween", "Alert"],
+              "props_interface": "BriefingApprovalActionsProps",
+              "state": "local",
+              "requirements_mapped": ["FR-007"],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/audit-log",
+      "page_type": "table-view",
+      "cloudscape_pattern": "resource-management/view/table-view",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/audit-log/page.tsx",
+      "component_tree": [
+        {
+          "name": "AuditLogPage",
+          "type": "page",
+          "path": "src/app/audit-log/page.tsx",
+          "cloudscape_components": ["SpaceBetween"],
+          "props_interface": "AuditLogPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-017"],
+          "children": [
+            {
+              "name": "AuditLogTable",
+              "type": "feature",
+              "path": "src/components/audit-log/AuditLogTable.tsx",
+              "cloudscape_components": [
+                "Table",
+                "Header",
+                "Pagination",
+                "PropertyFilter",
+                "CollectionPreferences",
+                "StatusIndicator",
+                "Link",
+                "Box"
+              ],
+              "props_interface": "AuditLogTableProps",
+              "state": "local",
+              "requirements_mapped": ["FR-017"],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/decisions",
+      "page_type": "table-view",
+      "cloudscape_pattern": "resource-management/view/table-view",
+      "layout_group": "(main)",
+      "requires_auth": true,
+      "data_source": "api-route",
+      "file_path": "src/app/decisions/page.tsx",
+      "v2_status": "new",
+      "component_tree": [
+        {
+          "name": "DecisionListPage",
+          "type": "page",
+          "path": "src/app/decisions/page.tsx",
+          "cloudscape_components": ["SpaceBetween", "ContentLayout", "Header"],
+          "props_interface": "DecisionListPageProps",
+          "state": "server",
+          "requirements_mapped": ["FR-020"],
+          "children": [
+            {
+              "name": "DecisionTable",
+              "type": "feature",
+              "path": "src/components/decisions/DecisionTable.tsx",
+              "cloudscape_components": [
+                "Table",
+                "Header",
+                "Pagination",
+                "PropertyFilter",
+                "CollectionPreferences",
+                "StatusIndicator",
+                "Link",
+                "Badge",
+                "SpaceBetween",
+                "Box"
+              ],
+              "props_interface": "DecisionTableProps",
+              "state": "local",
+              "requirements_mapped": ["FR-020"],
+              "children": [],
+              "v2_status": "new",
+              "v2_notes": "Table of all TIFRS decision records. Columns: NOTAM ID, decided by, decided at, overall decision (DecisionType badge), TIFRS summary. Filterable by decision type, date range. Links to NOTAM detail page. Uses useCollection hook."
+            },
+            {
+              "name": "DecisionSplitPanelDetail",
+              "type": "feature",
+              "path": "src/components/decisions/DecisionSplitPanelDetail.tsx",
+              "cloudscape_components": [
+                "SplitPanel",
+                "KeyValuePairs",
+                "StatusIndicator",
+                "Badge",
+                "Box",
+                "Link",
+                "SpaceBetween"
+              ],
+              "props_interface": "DecisionSplitPanelDetailProps",
+              "state": "local",
+              "requirements_mapped": ["FR-020"],
+              "children": [],
+              "v2_status": "new",
+              "v2_notes": "Split panel showing full TIFRS criteria breakdown: Time, Impact, Facilities, Route, Schedule fields. Shows both AI-suggested and dispatcher-final decision side by side."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "api_routes": [
+    {
+      "path": "/api/notams",
+      "methods": ["GET"],
+      "file_path": "src/app/api/notams/route.ts",
+      "query_params": [
+        "importance",
+        "status",
+        "airport",
+        "qCode",
+        "sortBy",
+        "order",
+        "page",
+        "pageSize",
+        "expiryStatus"
+      ],
+      "request_schema": null,
+      "response_schema": "{ items: Notam[]; total: number; stats: NotamStats }",
+      "requirements_mapped": ["FR-001", "FR-005", "FR-019"]
+    },
+    {
+      "path": "/api/notams/[id]",
+      "methods": ["GET"],
+      "file_path": "src/app/api/notams/[id]/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "Notam",
+      "requirements_mapped": ["FR-002", "FR-012"]
+    },
+    {
+      "path": "/api/notams/analyze",
+      "methods": ["POST"],
+      "file_path": "src/app/api/notams/analyze/route.ts",
+      "query_params": [],
+      "request_schema": "{ notamId: string }",
+      "response_schema": "{ importanceScore: number; importanceLevel: ImportanceLevel; aiSummary: string; aiAnalysis: string }",
+      "requirements_mapped": ["FR-001", "FR-003"]
+    },
+    {
+      "path": "/api/notams/[id]/summarize",
+      "methods": ["POST"],
+      "file_path": "src/app/api/notams/[id]/summarize/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "{ summary: string }",
+      "requirements_mapped": ["FR-015"]
+    },
+    {
+      "path": "/api/notams/[id]/impact-analysis",
+      "methods": ["POST"],
+      "file_path": "src/app/api/notams/[id]/impact-analysis/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "{ affectedRoutes: NotamRouteImpact[]; affectedFlights: NotamFlightImpact[]; contextualSeverity: string }",
+      "requirements_mapped": ["FR-003"]
+    },
+    {
+      "path": "/api/notams/[id]/affected-flights",
+      "methods": ["GET"],
+      "file_path": "src/app/api/notams/[id]/affected-flights/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "NotamFlightImpact[]",
+      "requirements_mapped": ["FR-004"]
+    },
+    {
+      "path": "/api/notams/[id]/affected-routes",
+      "methods": ["GET"],
+      "file_path": "src/app/api/notams/[id]/affected-routes/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "NotamRouteImpact[]",
+      "requirements_mapped": ["FR-004"]
+    },
+    {
+      "path": "/api/notams/[id]/diff",
+      "methods": ["GET"],
+      "file_path": "src/app/api/notams/[id]/diff/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "{ original: Notam; replacement: Notam; changes: DiffChange[] }",
+      "requirements_mapped": ["FR-018"]
+    },
+    {
+      "path": "/api/notams/[id]/decision",
+      "methods": ["GET", "POST"],
+      "file_path": "src/app/api/notams/[id]/decision/route.ts",
+      "query_params": [],
+      "request_schema": "CreateDecisionRecordRequest",
+      "response_schema": "DecisionRecord",
+      "requirements_mapped": ["FR-020"],
+      "v2_status": "new",
+      "v2_notes": "GET returns existing decision for this NOTAM (or 404). POST creates/updates decision record with TIFRS criteria. AI pre-fills via Bedrock before dispatcher confirms."
+    },
+    {
+      "path": "/api/notams/alerts",
+      "methods": ["GET"],
+      "file_path": "src/app/api/notams/alerts/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "Notam[]",
+      "requirements_mapped": ["FR-016"]
+    },
+    {
+      "path": "/api/notams/stats",
+      "methods": ["GET"],
+      "file_path": "src/app/api/notams/stats/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "NotamStats",
+      "requirements_mapped": ["FR-005"]
+    },
+    {
+      "path": "/api/q-codes",
+      "methods": ["GET"],
+      "file_path": "src/app/api/q-codes/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "QCode[]",
+      "requirements_mapped": ["FR-002"]
+    },
+    {
+      "path": "/api/flights",
+      "methods": ["GET"],
+      "file_path": "src/app/api/flights/route.ts",
+      "query_params": [
+        "airport",
+        "route",
+        "date",
+        "impactStatus",
+        "sortBy",
+        "order",
+        "page",
+        "pageSize"
+      ],
+      "request_schema": null,
+      "response_schema": "{ items: Flight[]; total: number }",
+      "requirements_mapped": ["FR-013"]
+    },
+    {
+      "path": "/api/flights/[id]",
+      "methods": ["GET"],
+      "file_path": "src/app/api/flights/[id]/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "Flight & { route: Route; affectedNotams: Notam[] }",
+      "requirements_mapped": ["FR-004", "FR-013"]
+    },
+    {
+      "path": "/api/routes",
+      "methods": ["GET"],
+      "file_path": "src/app/api/routes/route.ts",
+      "query_params": ["status", "sortBy", "order", "page", "pageSize"],
+      "request_schema": null,
+      "response_schema": "{ items: Route[]; total: number }",
+      "requirements_mapped": ["FR-006", "FR-010"]
+    },
+    {
+      "path": "/api/routes/[id]",
+      "methods": ["GET"],
+      "file_path": "src/app/api/routes/[id]/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "Route & { impacts: NotamRouteImpact[]; activeNotams: Notam[] }",
+      "requirements_mapped": ["FR-010"]
+    },
+    {
+      "path": "/api/routes/[id]/alternatives",
+      "methods": ["POST"],
+      "file_path": "src/app/api/routes/[id]/alternatives/route.ts",
+      "query_params": [],
+      "request_schema": "{ notamId: string }",
+      "response_schema": "{ alternatives: RouteAlternative[]; reasoning: string }",
+      "requirements_mapped": ["FR-009"]
+    },
+    {
+      "path": "/api/routes/[id]/impact",
+      "methods": ["GET"],
+      "file_path": "src/app/api/routes/[id]/impact/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "{ notamImpacts: NotamRouteImpact[]; summary: string }",
+      "requirements_mapped": ["FR-010"]
+    },
+    {
+      "path": "/api/matching/calculate",
+      "methods": ["POST"],
+      "file_path": "src/app/api/matching/calculate/route.ts",
+      "query_params": [],
+      "request_schema": "{ notamId?: string }",
+      "response_schema": "{ routeImpacts: NotamRouteImpact[]; flightImpacts: NotamFlightImpact[] }",
+      "requirements_mapped": ["FR-010"]
+    },
+    {
+      "path": "/api/matching/results",
+      "methods": ["GET"],
+      "file_path": "src/app/api/matching/results/route.ts",
+      "query_params": ["notamId", "routeId", "flightId"],
+      "request_schema": null,
+      "response_schema": "{ routeImpacts: NotamRouteImpact[]; flightImpacts: NotamFlightImpact[] }",
+      "requirements_mapped": ["FR-010"]
+    },
+    {
+      "path": "/api/ref-book",
+      "methods": ["GET", "POST"],
+      "file_path": "src/app/api/ref-book/route.ts",
+      "query_params": ["status", "sortBy", "order", "page", "pageSize"],
+      "request_schema": "CreateRefBookEntryRequest",
+      "response_schema": "RefBookEntry | { items: RefBookEntry[]; total: number }",
+      "requirements_mapped": ["FR-011"]
+    },
+    {
+      "path": "/api/ref-book/[id]",
+      "methods": ["PUT", "DELETE"],
+      "file_path": "src/app/api/ref-book/[id]/route.ts",
+      "query_params": [],
+      "request_schema": "UpdateRefBookEntryRequest",
+      "response_schema": "RefBookEntry",
+      "requirements_mapped": ["FR-011"]
+    },
+    {
+      "path": "/api/briefings",
+      "methods": ["GET"],
+      "file_path": "src/app/api/briefings/route.ts",
+      "query_params": ["flightId", "type", "status", "sortBy", "order", "page", "pageSize"],
+      "request_schema": null,
+      "response_schema": "{ items: Briefing[]; total: number }",
+      "requirements_mapped": ["FR-007", "FR-008"]
+    },
+    {
+      "path": "/api/briefings/generate",
+      "methods": ["POST"],
+      "file_path": "src/app/api/briefings/generate/route.ts",
+      "query_params": [],
+      "request_schema": "{ flightId: string; type: BriefingType }",
+      "response_schema": "Briefing",
+      "requirements_mapped": ["FR-007"]
+    },
+    {
+      "path": "/api/briefings/generate-crew",
+      "methods": ["POST"],
+      "file_path": "src/app/api/briefings/generate-crew/route.ts",
+      "query_params": [],
+      "request_schema": "{ flightId: string }",
+      "response_schema": "Briefing",
+      "requirements_mapped": ["FR-008"]
+    },
+    {
+      "path": "/api/briefings/[id]",
+      "methods": ["GET", "PUT"],
+      "file_path": "src/app/api/briefings/[id]/route.ts",
+      "query_params": [],
+      "request_schema": "UpdateBriefingRequest",
+      "response_schema": "Briefing",
+      "requirements_mapped": ["FR-007", "FR-008"]
+    },
+    {
+      "path": "/api/briefings/[id]/crew-package",
+      "methods": ["GET"],
+      "file_path": "src/app/api/briefings/[id]/crew-package/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "{ dispComment: string; companyNotam: string; crewBriefing: string }",
+      "requirements_mapped": ["FR-008"]
+    },
+    {
+      "path": "/api/reports/shift-handover",
+      "methods": ["POST"],
+      "file_path": "src/app/api/reports/shift-handover/route.ts",
+      "query_params": [],
+      "request_schema": "{ shiftStartTime: string; shiftEndTime: string }",
+      "response_schema": "Briefing",
+      "requirements_mapped": ["FR-014"]
+    },
+    {
+      "path": "/api/reports/shift-handover/[id]",
+      "methods": ["GET"],
+      "file_path": "src/app/api/reports/shift-handover/[id]/route.ts",
+      "query_params": [],
+      "request_schema": null,
+      "response_schema": "Briefing",
+      "requirements_mapped": ["FR-014"]
+    },
+    {
+      "path": "/api/dashboard/route-impact",
+      "methods": ["GET"],
+      "file_path": "src/app/api/dashboard/route-impact/route.ts",
+      "query_params": ["routeId"],
+      "request_schema": null,
+      "response_schema": "{ summary: DashboardSummary; routeImpacts: RouteImpactMapData[]; criticalNotams: Notam[] }",
+      "requirements_mapped": ["FR-006"],
+      "v2_status": "implemented",
+      "v2_changes": ["criticalNotams now includes both critical AND high importance NOTAMs"]
+    },
+    {
+      "path": "/api/audit-log",
+      "methods": ["GET", "POST"],
+      "file_path": "src/app/api/audit-log/route.ts",
+      "query_params": [
+        "userId",
+        "action",
+        "targetType",
+        "startDate",
+        "endDate",
+        "page",
+        "pageSize"
+      ],
+      "request_schema": "CreateAuditLogRequest",
+      "response_schema": "AuditLog | { items: AuditLog[]; total: number }",
+      "requirements_mapped": ["FR-017"]
+    },
+    {
+      "path": "/api/decisions",
+      "methods": ["GET"],
+      "file_path": "src/app/api/decisions/route.ts",
+      "query_params": [
+        "decisionType",
+        "decidedBy",
+        "startDate",
+        "endDate",
+        "sortBy",
+        "order",
+        "page",
+        "pageSize"
+      ],
+      "request_schema": null,
+      "response_schema": "{ items: DecisionRecord[]; total: number }",
+      "requirements_mapped": ["FR-020"],
+      "v2_status": "new",
+      "v2_notes": "List all decision records for the decision records table view. Supports filtering by decision type and date range."
+    },
+    {
+      "path": "/api/auth/login",
+      "methods": ["POST"],
+      "file_path": "src/app/api/auth/login/route.ts",
+      "query_params": [],
+      "request_schema": "{ username: string; password: string }",
+      "response_schema": "{ token: string; user: Dispatcher }",
+      "requirements_mapped": []
+    }
+  ],
+  "hooks": [
+    {
+      "name": "useNotams",
+      "file_path": "src/hooks/useNotams.ts",
+      "api_endpoint": "GET /api/notams",
+      "return_type": "{ data: { items: Notam[]; total: number; stats: NotamStats } | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false }
+    },
+    {
+      "name": "useNotam",
+      "file_path": "src/hooks/useNotam.ts",
+      "api_endpoint": "GET /api/notams/[id]",
+      "return_type": "{ data: Notam | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false }
+    },
+    {
+      "name": "useNotamAnalysis",
+      "file_path": "src/hooks/useNotamAnalysis.ts",
+      "api_endpoint": "POST /api/notams/analyze",
+      "return_type": "{ trigger: (notamId: string) => Promise<AnalysisResult>; isMutating: boolean }",
+      "swr_config": {}
+    },
+    {
+      "name": "useFlights",
+      "file_path": "src/hooks/useFlights.ts",
+      "api_endpoint": "GET /api/flights",
+      "return_type": "{ data: { items: Flight[]; total: number } | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false }
+    },
+    {
+      "name": "useFlight",
+      "file_path": "src/hooks/useFlight.ts",
+      "api_endpoint": "GET /api/flights/[id]",
+      "return_type": "{ data: (Flight & { route: Route; affectedNotams: Notam[] }) | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false }
+    },
+    {
+      "name": "useRoutes",
+      "file_path": "src/hooks/useRoutes.ts",
+      "api_endpoint": "GET /api/routes",
+      "return_type": "{ data: { items: Route[]; total: number } | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false }
+    },
+    {
+      "name": "useRoute",
+      "file_path": "src/hooks/useRoute.ts",
+      "api_endpoint": "GET /api/routes/[id]",
+      "return_type": "{ data: (Route & { impacts: NotamRouteImpact[]; activeNotams: Notam[] }) | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false }
+    },
+    {
+      "name": "useRefBook",
+      "file_path": "src/hooks/useRefBook.ts",
+      "api_endpoint": "GET /api/ref-book",
+      "return_type": "{ data: { items: RefBookEntry[]; total: number } | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false }
+    },
+    {
+      "name": "useBriefings",
+      "file_path": "src/hooks/useBriefings.ts",
+      "api_endpoint": "GET /api/briefings",
+      "return_type": "{ data: { items: Briefing[]; total: number } | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false }
+    },
+    {
+      "name": "useBriefing",
+      "file_path": "src/hooks/useBriefing.ts",
+      "api_endpoint": "GET /api/briefings/[id]",
+      "return_type": "{ data: Briefing | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false }
+    },
+    {
+      "name": "useDashboard",
+      "file_path": "src/hooks/useDashboard.ts",
+      "api_endpoint": "GET /api/dashboard/route-impact",
+      "return_type": "{ data: DashboardData | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false, "refreshInterval": 30000 }
+    },
+    {
+      "name": "useAuditLog",
+      "file_path": "src/hooks/useAuditLog.ts",
+      "api_endpoint": "GET /api/audit-log",
+      "return_type": "{ data: { items: AuditLog[]; total: number } | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false }
+    },
+    {
+      "name": "useGenerateBriefing",
+      "file_path": "src/hooks/useGenerateBriefing.ts",
+      "api_endpoint": "POST /api/briefings/generate",
+      "return_type": "{ trigger: (params: { flightId: string; type: BriefingType }) => Promise<Briefing>; isMutating: boolean }",
+      "swr_config": {}
+    },
+    {
+      "name": "useRouteAlternatives",
+      "file_path": "src/hooks/useRouteAlternatives.ts",
+      "api_endpoint": "POST /api/routes/[id]/alternatives",
+      "return_type": "{ trigger: (notamId: string) => Promise<{ alternatives: RouteAlternative[]; reasoning: string }>; isMutating: boolean }",
+      "swr_config": {}
+    },
+    {
+      "name": "useDecisions",
+      "file_path": "src/hooks/useDecisions.ts",
+      "api_endpoint": "GET /api/decisions",
+      "return_type": "{ data: { items: DecisionRecord[]; total: number } | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false },
+      "v2_status": "new"
+    },
+    {
+      "name": "useNotamDecision",
+      "file_path": "src/hooks/useNotamDecision.ts",
+      "api_endpoint": "GET /api/notams/[id]/decision",
+      "return_type": "{ data: DecisionRecord | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false },
+      "v2_status": "new"
+    },
+    {
+      "name": "useRecordDecision",
+      "file_path": "src/hooks/useRecordDecision.ts",
+      "api_endpoint": "POST /api/notams/[id]/decision",
+      "return_type": "{ trigger: (params: CreateDecisionRecordRequest) => Promise<DecisionRecord>; isMutating: boolean }",
+      "swr_config": {},
+      "v2_status": "new"
+    }
+  ],
+  "types": [
+    {
+      "name": "Notam",
+      "file_path": "src/types/notam.ts",
+      "fields": {
+        "id": "string",
+        "series": "string",
+        "number": "number",
+        "year": "number",
+        "type": "NotamType",
+        "qCode": "string",
+        "qCodeSubject": "string",
+        "qCodeCondition": "string",
+        "fir": "string",
+        "trafficType": "string",
+        "purpose": "string",
+        "scope": "string",
+        "lowerLimit": "string",
+        "upperLimit": "string",
+        "latitude": "number",
+        "longitude": "number",
+        "radius": "number",
+        "locationIndicator": "string",
+        "effectiveFrom": "string",
+        "effectiveTo": "string",
+        "schedule": "string | null",
+        "body": "string",
+        "rawText": "string",
+        "importanceScore": "number",
+        "importanceLevel": "ImportanceLevel",
+        "aiSummary": "string | null",
+        "aiAnalysis": "string | null",
+        "status": "NotamStatus",
+        "replacesNotamId": "string | null",
+        "createdAt": "string"
+      }
+    },
+    {
+      "name": "RefBookEntry",
+      "file_path": "src/types/refBook.ts",
+      "fields": {
+        "id": "string",
+        "notamId": "string",
+        "registeredBy": "string",
+        "registeredAt": "string",
+        "summary": "string",
+        "impactLevel": "ImportanceLevel",
+        "affectedAirports": "string[]",
+        "affectedRoutes": "string[]",
+        "remarks": "string",
+        "status": "RefBookStatus",
+        "expiresAt": "string"
+      }
+    },
+    {
+      "name": "Flight",
+      "file_path": "src/types/flight.ts",
+      "fields": {
+        "id": "string",
+        "flightNumber": "string",
+        "departureAirport": "string",
+        "arrivalAirport": "string",
+        "scheduledDeparture": "string",
+        "scheduledArrival": "string",
+        "routeId": "string",
+        "aircraftType": "string",
+        "status": "FlightStatus",
+        "notamImpactCount": "number",
+        "notamMaxSeverity": "ImportanceLevel"
+      }
+    },
+    {
+      "name": "Route",
+      "file_path": "src/types/route.ts",
+      "fields": {
+        "id": "string",
+        "routeName": "string",
+        "departureAirport": "string",
+        "arrivalAirport": "string",
+        "waypoints": "Waypoint[]",
+        "airways": "string[]",
+        "distance": "number",
+        "flightLevel": "string",
+        "status": "RouteStatus",
+        "alternateRouteIds": "string[]"
+      }
+    },
+    {
+      "name": "Waypoint",
+      "file_path": "src/types/route.ts",
+      "fields": {
+        "id": "string",
+        "name": "string",
+        "latitude": "number",
+        "longitude": "number",
+        "sequenceOrder": "number"
+      }
+    },
+    {
+      "name": "Airport",
+      "file_path": "src/types/airport.ts",
+      "fields": {
+        "icaoCode": "string",
+        "iataCode": "string",
+        "name": "string",
+        "nameKo": "string",
+        "latitude": "number",
+        "longitude": "number",
+        "runwayCount": "number",
+        "fir": "string",
+        "country": "string",
+        "timezone": "string"
+      }
+    },
+    {
+      "name": "Briefing",
+      "file_path": "src/types/briefing.ts",
+      "fields": {
+        "id": "string",
+        "type": "BriefingType",
+        "flightId": "string",
+        "generatedAt": "string",
+        "content": "string",
+        "notamIds": "string[]",
+        "status": "BriefingStatus",
+        "approvedBy": "string | null",
+        "approvedAt": "string | null"
+      }
+    },
+    {
+      "name": "AuditLog",
+      "file_path": "src/types/auditLog.ts",
+      "fields": {
+        "id": "string",
+        "userId": "string",
+        "action": "AuditAction",
+        "targetType": "string",
+        "targetId": "string",
+        "details": "string",
+        "timestamp": "string"
+      }
+    },
+    {
+      "name": "QCode",
+      "file_path": "src/types/qCode.ts",
+      "fields": {
+        "code": "string",
+        "subject": "string",
+        "condition": "string",
+        "description": "string",
+        "descriptionKo": "string",
+        "defaultImportance": "ImportanceLevel"
+      }
+    },
+    {
+      "name": "NotamRouteImpact",
+      "file_path": "src/types/impact.ts",
+      "fields": {
+        "id": "string",
+        "notamId": "string",
+        "routeId": "string",
+        "overlapType": "string",
+        "affectedSegment": "string",
+        "distanceThroughArea": "number",
+        "altitudeConflict": "boolean"
+      }
+    },
+    {
+      "name": "NotamFlightImpact",
+      "file_path": "src/types/impact.ts",
+      "fields": {
+        "id": "string",
+        "notamId": "string",
+        "flightId": "string",
+        "routeId": "string",
+        "temporalOverlap": "boolean",
+        "spatialOverlap": "boolean",
+        "impactSummary": "string"
+      }
+    },
+    {
+      "name": "DecisionRecord",
+      "file_path": "src/types/decision.ts",
+      "fields": {
+        "id": "string",
+        "notamId": "string",
+        "decidedBy": "string",
+        "decidedAt": "string",
+        "tifrsTime": "string",
+        "tifrsImpact": "string",
+        "tifrsFacilities": "string",
+        "tifrsRoute": "string",
+        "tifrsSchedule": "string",
+        "overallDecision": "DecisionType",
+        "rationale": "string",
+        "aiSuggestedDecision": "DecisionType",
+        "aiRationale": "string"
+      },
+      "v2_status": "new"
+    },
+    {
+      "name": "CreateDecisionRecordRequest",
+      "file_path": "src/types/decision.ts",
+      "fields": {
+        "notamId": "string",
+        "tifrsTime": "string",
+        "tifrsImpact": "string",
+        "tifrsFacilities": "string",
+        "tifrsRoute": "string",
+        "tifrsSchedule": "string",
+        "overallDecision": "DecisionType",
+        "rationale": "string"
+      },
+      "v2_status": "new"
+    },
+    {
+      "name": "Dispatcher",
+      "file_path": "src/types/auth.ts",
+      "fields": {
+        "id": "string",
+        "name": "string",
+        "employeeId": "string",
+        "role": "string"
+      }
+    },
+    {
+      "name": "DashboardSummary",
+      "file_path": "src/types/dashboard.ts",
+      "fields": {
+        "totalActiveNotams": "number",
+        "criticalCount": "number",
+        "highCount": "number",
+        "affectedRoutesCount": "number",
+        "affectedFlightsCount": "number",
+        "filteredVsTotalRatio": "number"
+      }
+    },
+    {
+      "name": "RouteImpactMapData",
+      "file_path": "src/types/dashboard.ts",
+      "fields": {
+        "route": "Route",
+        "impacts": "NotamRouteImpact[]",
+        "notams": "Notam[]"
+      }
+    },
+    {
+      "name": "NotamStats",
+      "file_path": "src/types/notam.ts",
+      "fields": {
+        "total": "number",
+        "bySeverity": "Record<ImportanceLevel, number>",
+        "byStatus": "Record<NotamStatus, number>",
+        "expiringSoon": "number"
+      }
+    },
+    {
+      "name": "RouteAlternative",
+      "file_path": "src/types/route.ts",
+      "fields": {
+        "route": "Route",
+        "reason": "string",
+        "distanceDifference": "number",
+        "timeDifference": "number",
+        "avoidedNotams": "string[]"
+      }
+    },
+    {
+      "name": "DiffChange",
+      "file_path": "src/types/notam.ts",
+      "fields": {
+        "field": "string",
+        "oldValue": "string",
+        "newValue": "string"
+      }
+    }
+  ],
+  "shared_components": [
+    {
+      "name": "ImportanceBadge",
+      "path": "src/components/common/ImportanceBadge.tsx",
+      "cloudscape_components": ["Badge"],
+      "props_interface": "ImportanceBadgeProps"
+    },
+    {
+      "name": "NotamExpiryIndicator",
+      "path": "src/components/common/NotamExpiryIndicator.tsx",
+      "cloudscape_components": ["StatusIndicator", "Box"],
+      "props_interface": "NotamExpiryIndicatorProps"
+    },
+    {
+      "name": "ImportanceScoreBar",
+      "path": "src/components/common/ImportanceScoreBar.tsx",
+      "cloudscape_components": ["ProgressBar", "Box"],
+      "props_interface": "ImportanceScoreBarProps"
+    },
+    {
+      "name": "AirportLabel",
+      "path": "src/components/common/AirportLabel.tsx",
+      "cloudscape_components": ["Box", "Popover"],
+      "props_interface": "AirportLabelProps"
+    },
+    {
+      "name": "LeafletMapWrapper",
+      "path": "src/components/common/LeafletMapWrapper.tsx",
+      "cloudscape_components": [],
+      "props_interface": "LeafletMapWrapperProps",
+      "external_libs": ["leaflet", "react-leaflet"]
+    },
+    {
+      "name": "LeafletMapInner",
+      "path": "src/components/common/LeafletMapInner.tsx",
+      "cloudscape_components": [],
+      "props_interface": "LeafletMapInnerProps",
+      "external_libs": ["leaflet", "react-leaflet"],
+      "v2_status": "implemented",
+      "v2_changes": [
+        "Leaflet CSS imported as ES module (not CDN)",
+        "Marker icon fix with L.Icon.Default.mergeOptions() for webpack/Next.js"
+      ]
+    },
+    {
+      "name": "LoadingState",
+      "path": "src/components/common/LoadingState.tsx",
+      "cloudscape_components": ["Spinner", "Box"],
+      "props_interface": "LoadingStateProps"
+    },
+    {
+      "name": "ErrorState",
+      "path": "src/components/common/ErrorState.tsx",
+      "cloudscape_components": ["Alert", "Box", "Button"],
+      "props_interface": "ErrorStateProps"
+    },
+    {
+      "name": "DecisionTypeBadge",
+      "path": "src/components/common/DecisionTypeBadge.tsx",
+      "cloudscape_components": ["Badge"],
+      "props_interface": "DecisionTypeBadgeProps",
+      "v2_status": "new",
+      "v2_notes": "Color-coded badge for DecisionType enum values: no-action=grey, monitor=blue, route-change=orange, schedule-change=orange, cancel-flight=red, divert=red"
+    }
+  ],
+  "layout_components": [
+    {
+      "name": "AppShell",
+      "path": "src/components/layout/AppShell.tsx",
+      "top_navigation": {
+        "identity": "NOTAM 분석 시스템",
+        "utilities": ["notifications", "shift-info", "profile"]
+      },
+      "side_navigation": {
+        "sections": [
+          {
+            "text": "운항 현황",
+            "items": [
+              { "text": "대시보드", "href": "/" },
+              { "text": "NOTAM 목록", "href": "/notams" },
+              { "text": "운항편", "href": "/flights" }
+            ]
+          },
+          {
+            "text": "항로 관리",
+            "items": [{ "text": "항로 목록", "href": "/routes" }]
+          },
+          {
+            "text": "문서 관리",
+            "items": [
+              { "text": "REF BOOK", "href": "/ref-book" },
+              { "text": "브리핑 문서", "href": "/briefings" }
+            ]
+          },
+          {
+            "text": "의사결정 및 관리",
+            "items": [
+              { "text": "의사결정 기록", "href": "/decisions" },
+              { "text": "감사 로그", "href": "/audit-log" }
+            ],
+            "v2_changes": [
+              "Added '의사결정 기록' (/decisions) link for FR-020",
+              "Renamed section from '관리' to '의사결정 및 관리'"
+            ]
+          }
+        ]
+      },
+      "breadcrumbs": true
+    }
+  ],
+  "contexts": [
+    {
+      "name": "NotificationContext",
+      "file_path": "src/contexts/NotificationContext.tsx",
+      "purpose": "Flash message notifications across pages via Flashbar in AppLayout notifications slot"
+    },
+    {
+      "name": "AlertContext",
+      "file_path": "src/contexts/AlertContext.tsx",
+      "purpose": "Critical NOTAM alert banner state — tracks unacknowledged critical alerts for persistent display"
+    },
+    {
+      "name": "AuthContext",
+      "file_path": "src/contexts/AuthContext.tsx",
+      "purpose": "Mock authentication state — current dispatcher user info and login status"
+    }
+  ],
+  "requirements_coverage": {
+    "FR-001": {
+      "pages": ["/notams", "/notams/[id]"],
+      "components": ["NotamTable", "NotamAiAnalysis", "ImportanceBadge"],
+      "api_routes": ["/api/notams", "/api/notams/analyze"],
+      "hooks": ["useNotams", "useNotamAnalysis"]
+    },
+    "FR-002": {
+      "pages": ["/notams", "/notams/[id]"],
+      "components": ["NotamTable", "NotamRawAndParsed", "NotamSplitPanelDetail"],
+      "api_routes": ["/api/notams/[id]", "/api/q-codes"],
+      "hooks": ["useNotam"]
+    },
+    "FR-003": {
+      "pages": ["/notams/[id]"],
+      "components": ["NotamAiAnalysis", "NotamImpactSection"],
+      "api_routes": ["/api/notams/[id]/impact-analysis"],
+      "hooks": ["useNotam"]
+    },
+    "FR-004": {
+      "pages": ["/flights", "/flights/[id]", "/notams/[id]"],
+      "components": ["FlightTable", "FlightNotamImpact", "NotamImpactSection"],
+      "api_routes": [
+        "/api/notams/[id]/affected-flights",
+        "/api/notams/[id]/affected-routes",
+        "/api/flights/[id]"
+      ],
+      "hooks": ["useFlights", "useFlight"]
+    },
+    "FR-005": {
+      "pages": ["/", "/notams"],
+      "components": ["DashboardSummaryCards", "NotamTable", "RecentCriticalNotams"],
+      "api_routes": ["/api/notams", "/api/notams/stats"],
+      "hooks": ["useNotams", "useDashboard"],
+      "v2_changes": ["RecentCriticalNotams now shows critical+high (implemented)"]
+    },
+    "FR-006": {
+      "pages": ["/", "/routes", "/routes/[id]"],
+      "components": [
+        "RouteImpactMap",
+        "DashboardSummaryCards",
+        "AffectedFlightsSummary",
+        "RouteTable",
+        "RouteMapVisualization"
+      ],
+      "api_routes": ["/api/dashboard/route-impact", "/api/routes", "/api/routes/[id]"],
+      "hooks": ["useDashboard", "useRoutes", "useRoute"],
+      "v2_changes": [
+        "RouteImpactMap: legend, popups, popover, all-route option, all NOTAMs (implemented)"
+      ]
+    },
+    "FR-007": {
+      "pages": ["/briefings", "/briefings/[id]", "/flights/[id]"],
+      "components": [
+        "BriefingTable",
+        "BriefingInfo",
+        "BriefingContentPreview",
+        "BriefingApprovalActions",
+        "FlightBriefingActions"
+      ],
+      "api_routes": ["/api/briefings", "/api/briefings/generate", "/api/briefings/[id]"],
+      "hooks": ["useBriefings", "useBriefing", "useGenerateBriefing"]
+    },
+    "FR-008": {
+      "pages": ["/briefings", "/briefings/[id]", "/flights/[id]"],
+      "components": ["BriefingTable", "BriefingContentPreview", "FlightBriefingActions"],
+      "api_routes": ["/api/briefings/generate-crew", "/api/briefings/[id]/crew-package"],
+      "hooks": ["useBriefings", "useGenerateBriefing"]
+    },
+    "FR-009": {
+      "pages": ["/flights/[id]", "/routes/[id]"],
+      "components": ["RouteDeviationGuidance", "FlightRouteMap", "RouteAlternatives"],
+      "api_routes": ["/api/routes/[id]/alternatives"],
+      "hooks": ["useRouteAlternatives"],
+      "v2_changes": ["FlightRouteMap: per-importance colors, clickable popups (implemented)"]
+    },
+    "FR-010": {
+      "pages": ["/routes", "/routes/[id]"],
+      "components": ["RouteTable", "RouteNotamImpacts", "RouteMapVisualization"],
+      "api_routes": ["/api/matching/calculate", "/api/matching/results", "/api/routes/[id]/impact"],
+      "hooks": ["useRoutes", "useRoute"],
+      "v2_changes": ["RouteTable: status info popover (implemented)"]
+    },
+    "FR-011": {
+      "pages": ["/ref-book"],
+      "components": ["RefBookTable", "RefBookRegistrationModal"],
+      "api_routes": ["/api/ref-book", "/api/ref-book/[id]"],
+      "hooks": ["useRefBook"]
+    },
+    "FR-012": {
+      "pages": ["/notams/[id]"],
+      "components": ["NotamRawAndParsed", "NotamAiAnalysis", "NotamImpactSection", "NotamMiniMap"],
+      "api_routes": ["/api/notams/[id]"],
+      "hooks": ["useNotam"],
+      "v2_changes": ["NotamMiniMap: importance-based color coding (implemented)"]
+    },
+    "FR-013": {
+      "pages": ["/flights", "/flights/[id]"],
+      "components": ["FlightTable", "FlightInfo"],
+      "api_routes": ["/api/flights", "/api/flights/[id]"],
+      "hooks": ["useFlights", "useFlight"],
+      "v2_changes": ["FlightTable: status info popover (implemented)"]
+    },
+    "FR-014": {
+      "pages": ["/briefings"],
+      "components": ["BriefingTable"],
+      "api_routes": ["/api/reports/shift-handover", "/api/reports/shift-handover/[id]"],
+      "hooks": ["useBriefings"]
+    },
+    "FR-015": {
+      "pages": ["/notams/[id]"],
+      "components": ["NotamAiAnalysis"],
+      "api_routes": ["/api/notams/[id]/summarize"],
+      "hooks": ["useNotam"]
+    },
+    "FR-016": {
+      "pages": ["/"],
+      "components": ["CriticalAlertBanner", "RecentCriticalNotams"],
+      "api_routes": ["/api/notams/alerts"],
+      "hooks": ["useDashboard"]
+    },
+    "FR-017": {
+      "pages": ["/audit-log"],
+      "components": ["AuditLogTable"],
+      "api_routes": ["/api/audit-log"],
+      "hooks": ["useAuditLog"],
+      "v2_changes": ["Audit log now captures record-decision action from FR-020"]
+    },
+    "FR-018": {
+      "pages": ["/notams/[id]"],
+      "components": ["NotamDiffView"],
+      "api_routes": ["/api/notams/[id]/diff"],
+      "hooks": ["useNotam"]
+    },
+    "FR-019": {
+      "pages": ["/notams"],
+      "components": ["NotamTable", "NotamExpiryIndicator"],
+      "api_routes": ["/api/notams"],
+      "hooks": ["useNotams"]
+    },
+    "FR-020": {
+      "pages": ["/notams/[id]", "/decisions"],
+      "components": [
+        "NotamDecisionSection",
+        "DecisionTable",
+        "DecisionSplitPanelDetail",
+        "DecisionTypeBadge"
+      ],
+      "api_routes": ["/api/notams/[id]/decision", "/api/decisions"],
+      "hooks": ["useNotamDecision", "useRecordDecision", "useDecisions"],
+      "v2_status": "new"
+    }
+  }
+}

@@ -9,7 +9,18 @@ import { z } from 'zod';
 /** 감사 로그 조회 쿼리 검증 */
 export const auditLogQuerySchema = z.object({
   userId: z.string().optional(),
-  action: z.enum(['view', 'analyze', 'approve', 'reject', 'register-ref-book', 'generate-briefing', 'acknowledge-alert']).optional(),
+  action: z
+    .enum([
+      'view',
+      'analyze',
+      'approve',
+      'reject',
+      'register-ref-book',
+      'generate-briefing',
+      'acknowledge-alert',
+      'record-decision',
+    ])
+    .optional(),
   targetType: z.string().optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
@@ -20,7 +31,16 @@ export const auditLogQuerySchema = z.object({
 /** 감사 로그 생성 요청 검증 */
 export const createAuditLogSchema = z.object({
   userId: z.string().min(1),
-  action: z.enum(['view', 'analyze', 'approve', 'reject', 'register-ref-book', 'generate-briefing', 'acknowledge-alert']),
+  action: z.enum([
+    'view',
+    'analyze',
+    'approve',
+    'reject',
+    'register-ref-book',
+    'generate-briefing',
+    'acknowledge-alert',
+    'record-decision',
+  ]),
   targetType: z.string().min(1),
   targetId: z.string().min(1),
   details: z.string().max(2000).optional().default(''),

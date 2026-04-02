@@ -1,0 +1,3047 @@
+{
+  "generator": "frontend",
+  "metadata": {
+    "created": "2026-04-01T15:00:00Z",
+    "version": 2,
+    "previous_version": 1,
+    "total_specs": 44,
+    "description": "Frontend specs for Jeju Air AI NOTAM Analysis System v2 — v1 base (38 specs) + 6 new specs for FR-020 TIFRS decision. 8 components marked v2_status:implemented for already-applied changes.",
+    "v2_delta_summary": "Added: 3 hooks (useDecisions, useNotamDecision, useRecordDecision), 1 shared component (DecisionTypeBadge), 4 feature components (DecisionTable, DecisionSplitPanelDetail, NotamDecisionSection), 1 page (DecisionListPage). Updated: AppShell side nav, NotamDetailPage children, AuditLogTable action mapping. 8 components marked implemented."
+  },
+  "generation_order": ["hooks", "contexts", "layout", "shared", "feature", "page"],
+  "hooks": [
+    {
+      "name": "useNotams",
+      "file_path": "src/hooks/useNotams.ts",
+      "api_endpoint": "GET /api/notams",
+      "query_params": [
+        "importance",
+        "status",
+        "airport",
+        "qCode",
+        "sortBy",
+        "order",
+        "page",
+        "pageSize",
+        "expiryStatus"
+      ],
+      "return_type": "{ data: { items: Notam[]; total: number; stats: NotamStats } | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/notam.ts"],
+      "requirements": ["FR-001", "FR-005", "FR-019"],
+      "use_client": true
+    },
+    {
+      "name": "useNotam",
+      "file_path": "src/hooks/useNotam.ts",
+      "api_endpoint": "GET /api/notams/[id]",
+      "query_params": [],
+      "return_type": "{ data: Notam | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/notam.ts"],
+      "requirements": ["FR-002", "FR-012"],
+      "use_client": true
+    },
+    {
+      "name": "useNotamAnalysis",
+      "file_path": "src/hooks/useNotamAnalysis.ts",
+      "api_endpoint": "POST /api/notams/analyze",
+      "query_params": [],
+      "return_type": "{ trigger: (notamId: string) => Promise<{ importanceScore: number; importanceLevel: ImportanceLevel; aiSummary: string; aiAnalysis: string }>; isMutating: boolean }",
+      "swr_config": {},
+      "dependencies": ["swr/mutation", "src/types/notam.ts"],
+      "requirements": ["FR-001", "FR-003"],
+      "use_client": true
+    },
+    {
+      "name": "useFlights",
+      "file_path": "src/hooks/useFlights.ts",
+      "api_endpoint": "GET /api/flights",
+      "query_params": [
+        "airport",
+        "route",
+        "date",
+        "impactStatus",
+        "sortBy",
+        "order",
+        "page",
+        "pageSize"
+      ],
+      "return_type": "{ data: { items: Flight[]; total: number } | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/flight.ts"],
+      "requirements": ["FR-004", "FR-013"],
+      "use_client": true
+    },
+    {
+      "name": "useFlight",
+      "file_path": "src/hooks/useFlight.ts",
+      "api_endpoint": "GET /api/flights/[id]",
+      "query_params": [],
+      "return_type": "{ data: (Flight & { route: Route; affectedNotams: Notam[] }) | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/flight.ts", "src/types/route.ts", "src/types/notam.ts"],
+      "requirements": ["FR-004", "FR-013"],
+      "use_client": true
+    },
+    {
+      "name": "useRoutes",
+      "file_path": "src/hooks/useRoutes.ts",
+      "api_endpoint": "GET /api/routes",
+      "query_params": ["status", "sortBy", "order", "page", "pageSize"],
+      "return_type": "{ data: { items: Route[]; total: number } | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/route.ts"],
+      "requirements": ["FR-006", "FR-010"],
+      "use_client": true
+    },
+    {
+      "name": "useRoute",
+      "file_path": "src/hooks/useRoute.ts",
+      "api_endpoint": "GET /api/routes/[id]",
+      "query_params": [],
+      "return_type": "{ data: (Route & { impacts: NotamRouteImpact[]; activeNotams: Notam[] }) | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/route.ts", "src/types/impact.ts", "src/types/notam.ts"],
+      "requirements": ["FR-009", "FR-010"],
+      "use_client": true
+    },
+    {
+      "name": "useRefBook",
+      "file_path": "src/hooks/useRefBook.ts",
+      "api_endpoint": "GET /api/ref-book",
+      "query_params": ["status", "sortBy", "order", "page", "pageSize"],
+      "return_type": "{ data: { items: RefBookEntry[]; total: number } | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/refBook.ts"],
+      "requirements": ["FR-011"],
+      "use_client": true
+    },
+    {
+      "name": "useBriefings",
+      "file_path": "src/hooks/useBriefings.ts",
+      "api_endpoint": "GET /api/briefings",
+      "query_params": ["flightId", "type", "status", "sortBy", "order", "page", "pageSize"],
+      "return_type": "{ data: { items: Briefing[]; total: number } | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/briefing.ts"],
+      "requirements": ["FR-007", "FR-008", "FR-014"],
+      "use_client": true
+    },
+    {
+      "name": "useBriefing",
+      "file_path": "src/hooks/useBriefing.ts",
+      "api_endpoint": "GET /api/briefings/[id]",
+      "query_params": [],
+      "return_type": "{ data: Briefing | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/briefing.ts"],
+      "requirements": ["FR-007", "FR-008"],
+      "use_client": true
+    },
+    {
+      "name": "useDashboard",
+      "file_path": "src/hooks/useDashboard.ts",
+      "api_endpoint": "GET /api/dashboard/route-impact",
+      "query_params": ["routeId"],
+      "return_type": "{ data: { summary: DashboardSummary; routeImpacts: RouteImpactMapData[]; criticalNotams: Notam[] } | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false, "refreshInterval": 30000 },
+      "dependencies": ["swr", "src/types/dashboard.ts", "src/types/notam.ts"],
+      "requirements": ["FR-006", "FR-005", "FR-016"],
+      "use_client": true
+    },
+    {
+      "name": "useAuditLog",
+      "file_path": "src/hooks/useAuditLog.ts",
+      "api_endpoint": "GET /api/audit-log",
+      "query_params": [
+        "userId",
+        "action",
+        "targetType",
+        "startDate",
+        "endDate",
+        "page",
+        "pageSize"
+      ],
+      "return_type": "{ data: { items: AuditLog[]; total: number } | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/auditLog.ts"],
+      "requirements": ["FR-017"],
+      "use_client": true
+    },
+    {
+      "name": "useGenerateBriefing",
+      "file_path": "src/hooks/useGenerateBriefing.ts",
+      "api_endpoint": "POST /api/briefings/generate",
+      "query_params": [],
+      "return_type": "{ trigger: (params: { flightId: string; type: BriefingType }) => Promise<Briefing>; isMutating: boolean }",
+      "swr_config": {},
+      "dependencies": ["swr/mutation", "src/types/briefing.ts"],
+      "requirements": ["FR-007"],
+      "use_client": true
+    },
+    {
+      "name": "useRouteAlternatives",
+      "file_path": "src/hooks/useRouteAlternatives.ts",
+      "api_endpoint": "POST /api/routes/[id]/alternatives",
+      "query_params": [],
+      "return_type": "{ trigger: (notamId: string) => Promise<{ alternatives: RouteAlternative[]; reasoning: string }>; isMutating: boolean }",
+      "swr_config": {},
+      "dependencies": ["swr/mutation", "src/types/route.ts"],
+      "requirements": ["FR-009"],
+      "use_client": true
+    },
+    {
+      "name": "useDecisions",
+      "file_path": "src/hooks/useDecisions.ts",
+      "api_endpoint": "GET /api/decisions",
+      "query_params": [
+        "decisionType",
+        "decidedBy",
+        "startDate",
+        "endDate",
+        "sortBy",
+        "order",
+        "page",
+        "pageSize"
+      ],
+      "return_type": "{ data: { items: DecisionRecord[]; total: number } | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/decision.ts"],
+      "requirements": ["FR-020"],
+      "use_client": true,
+      "v2_status": "new"
+    },
+    {
+      "name": "useNotamDecision",
+      "file_path": "src/hooks/useNotamDecision.ts",
+      "api_endpoint": "GET /api/notams/[id]/decision",
+      "query_params": [],
+      "return_type": "{ data: DecisionRecord | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/decision.ts"],
+      "requirements": ["FR-020"],
+      "use_client": true,
+      "v2_status": "new",
+      "note": "Conditional fetching — notamId가 없으면 요청하지 않음. 404 응답 시 data=undefined (에러가 아닌 빈 상태)"
+    },
+    {
+      "name": "useRecordDecision",
+      "file_path": "src/hooks/useRecordDecision.ts",
+      "api_endpoint": "POST /api/notams/[id]/decision",
+      "query_params": [],
+      "return_type": "{ trigger: (params: CreateDecisionRecordRequest) => Promise<DecisionRecord>; isMutating: boolean }",
+      "swr_config": {},
+      "dependencies": ["swr/mutation", "src/types/decision.ts"],
+      "requirements": ["FR-020"],
+      "use_client": true,
+      "v2_status": "new",
+      "note": "useSWRMutation 사용. 성공 시 useNotamDecision.mutate()와 useDecisions.mutate() 호출 필요."
+    }
+  ],
+  "contexts": [
+    {
+      "name": "NotificationContext",
+      "file_path": "src/contexts/NotificationContext.tsx",
+      "purpose": "Flashbar 알림 메시지 관리 — AppLayout notifications 슬롯에 표시",
+      "state": {
+        "notifications": "FlashbarProps.MessageDefinition[]"
+      },
+      "actions": {
+        "addNotification": "(notification: FlashbarProps.MessageDefinition) => void",
+        "removeNotification": "(id: string) => void",
+        "clearNotifications": "() => void"
+      },
+      "cloudscape_components": ["Flashbar"],
+      "use_client": true,
+      "requirements": []
+    },
+    {
+      "name": "AlertContext",
+      "file_path": "src/contexts/AlertContext.tsx",
+      "purpose": "Critical NOTAM 알림 배너 상태 관리 — 미확인 critical 알림 추적",
+      "state": {
+        "criticalAlerts": "Notam[]",
+        "acknowledgedIds": "Set<string>"
+      },
+      "actions": {
+        "setCriticalAlerts": "(alerts: Notam[]) => void",
+        "acknowledgeAlert": "(notamId: string) => void",
+        "getUnacknowledgedAlerts": "() => Notam[]"
+      },
+      "cloudscape_components": [],
+      "use_client": true,
+      "requirements": ["FR-016"]
+    },
+    {
+      "name": "AuthContext",
+      "file_path": "src/contexts/AuthContext.tsx",
+      "purpose": "Mock 인증 상태 관리 — 현재 로그인한 dispatcher 정보",
+      "state": {
+        "user": "Dispatcher | null",
+        "isAuthenticated": "boolean"
+      },
+      "actions": {
+        "login": "(username: string, password: string) => Promise<void>",
+        "logout": "() => void"
+      },
+      "cloudscape_components": [],
+      "use_client": true,
+      "requirements": []
+    }
+  ],
+  "layout": [
+    {
+      "name": "RootLayout",
+      "file_path": "src/app/layout.tsx",
+      "type": "layout",
+      "description": "Root layout with global styles, SWR config, context providers",
+      "cloudscape_components": [],
+      "imports": [
+        "@cloudscape-design/global-styles/index.css",
+        "src/contexts/NotificationContext.tsx",
+        "src/contexts/AlertContext.tsx",
+        "src/contexts/AuthContext.tsx",
+        "src/components/layout/AppShell.tsx"
+      ],
+      "use_client": false,
+      "requirements": []
+    },
+    {
+      "name": "AppShell",
+      "file_path": "src/components/layout/AppShell.tsx",
+      "type": "layout",
+      "description": "TopNavigation (AppLayout 외부) + AppLayout with SideNavigation, Breadcrumbs, Flashbar. v2: SideNavigation에 '의사결정 기록' 링크 추가.",
+      "cloudscape_components": [
+        {
+          "name": "TopNavigation",
+          "import_path": "@cloudscape-design/components/top-navigation",
+          "key_props": ["identity", "utilities"]
+        },
+        {
+          "name": "AppLayout",
+          "import_path": "@cloudscape-design/components/app-layout",
+          "key_props": [
+            "navigation",
+            "breadcrumbs",
+            "notifications",
+            "content",
+            "contentType",
+            "toolsHide"
+          ]
+        },
+        {
+          "name": "SideNavigation",
+          "import_path": "@cloudscape-design/components/side-navigation",
+          "key_props": ["header", "items", "activeHref"]
+        },
+        {
+          "name": "BreadcrumbGroup",
+          "import_path": "@cloudscape-design/components/breadcrumb-group",
+          "key_props": ["items"]
+        },
+        {
+          "name": "Flashbar",
+          "import_path": "@cloudscape-design/components/flashbar",
+          "key_props": ["items"]
+        }
+      ],
+      "top_navigation": {
+        "identity": { "title": "NOTAM 분석 시스템", "href": "/" },
+        "utilities": [
+          { "type": "button", "iconName": "notification", "title": "알림", "ariaLabel": "알림" },
+          { "type": "button", "text": "교대 근무: 주간", "iconName": "user-profile" },
+          {
+            "type": "menu-dropdown",
+            "text": "김운항관리사",
+            "items": [{ "id": "signout", "text": "로그아웃" }]
+          }
+        ]
+      },
+      "side_navigation": {
+        "header": { "text": "NOTAM 분석", "href": "/" },
+        "items": [
+          {
+            "type": "section",
+            "text": "운항 현황",
+            "items": [
+              { "type": "link", "text": "대시보드", "href": "/" },
+              { "type": "link", "text": "NOTAM 목록", "href": "/notams" },
+              { "type": "link", "text": "운항편", "href": "/flights" }
+            ]
+          },
+          {
+            "type": "section",
+            "text": "항로 관리",
+            "items": [{ "type": "link", "text": "항로 목록", "href": "/routes" }]
+          },
+          {
+            "type": "section",
+            "text": "문서 관리",
+            "items": [
+              { "type": "link", "text": "REF BOOK", "href": "/ref-book" },
+              { "type": "link", "text": "브리핑 문서", "href": "/briefings" }
+            ]
+          },
+          {
+            "type": "section",
+            "text": "관리",
+            "items": [
+              { "type": "link", "text": "의사결정 기록", "href": "/decisions" },
+              { "type": "link", "text": "감사 로그", "href": "/audit-log" }
+            ]
+          }
+        ],
+        "v2_change": "Added '의사결정 기록' (/decisions) link under 관리 section, above 감사 로그"
+      },
+      "use_client": true,
+      "requirements": []
+    }
+  ],
+  "shared": [
+    {
+      "component": "ImportanceBadge",
+      "file_path": "src/components/common/ImportanceBadge.tsx",
+      "type": "shared",
+      "requirements": ["FR-001"],
+      "description": "ImportanceLevel에 따라 색상 코딩된 Badge 컴포넌트. v2에서 색상 규칙 통일: red=critical, orange(red)=high, blue=medium/low/routine",
+      "props_interface": {
+        "level": "ImportanceLevel"
+      },
+      "cloudscape_components": [
+        {
+          "name": "Badge",
+          "import_path": "@cloudscape-design/components/badge",
+          "key_props": ["color"],
+          "event_handlers": []
+        }
+      ],
+      "color_mapping": {
+        "critical": "red",
+        "high": "red",
+        "medium": "blue",
+        "low": "grey",
+        "routine": "grey"
+      },
+      "label_mapping": {
+        "critical": "위험",
+        "high": "높음",
+        "medium": "보통",
+        "low": "낮음",
+        "routine": "일상"
+      },
+      "use_client": false,
+      "dependencies": ["src/types/notam.ts"]
+    },
+    {
+      "component": "NotamExpiryIndicator",
+      "file_path": "src/components/common/NotamExpiryIndicator.tsx",
+      "type": "shared",
+      "requirements": ["FR-019"],
+      "description": "NOTAM 만료까지 남은 시간 표시 — StatusIndicator 색상으로 긴급도 시각화",
+      "props_interface": {
+        "effectiveTo": "string",
+        "status": "NotamStatus"
+      },
+      "cloudscape_components": [
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant"],
+          "event_handlers": []
+        }
+      ],
+      "logic": "effectiveTo가 24시간 이내면 warning, 6시간 이내면 error, expired면 stopped, PERM이면 info",
+      "use_client": false,
+      "dependencies": ["src/types/notam.ts"]
+    },
+    {
+      "component": "ImportanceScoreBar",
+      "file_path": "src/components/common/ImportanceScoreBar.tsx",
+      "type": "shared",
+      "requirements": ["FR-001"],
+      "description": "중요도 점수(0.0~1.0)를 ProgressBar로 시각화",
+      "props_interface": {
+        "score": "number",
+        "showLabel": "boolean"
+      },
+      "cloudscape_components": [
+        {
+          "name": "ProgressBar",
+          "import_path": "@cloudscape-design/components/progress-bar",
+          "key_props": ["value", "status", "additionalInfo"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant"],
+          "event_handlers": []
+        }
+      ],
+      "logic": "score >= 0.8 error, >= 0.6 warning(in-progress), else success",
+      "use_client": false,
+      "dependencies": []
+    },
+    {
+      "component": "AirportLabel",
+      "file_path": "src/components/common/AirportLabel.tsx",
+      "type": "shared",
+      "requirements": [],
+      "description": "ICAO 코드 + 한국어 공항명 Popover 표시",
+      "props_interface": {
+        "icaoCode": "string",
+        "airportName": "string",
+        "airportNameKo": "string"
+      },
+      "cloudscape_components": [
+        {
+          "name": "Popover",
+          "import_path": "@cloudscape-design/components/popover",
+          "key_props": ["content", "triggerType"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["fontWeight"],
+          "event_handlers": []
+        }
+      ],
+      "use_client": false,
+      "dependencies": []
+    },
+    {
+      "component": "LeafletMapWrapper",
+      "file_path": "src/components/common/LeafletMapWrapper.tsx",
+      "type": "shared",
+      "requirements": ["FR-006"],
+      "description": "Leaflet 지도 래퍼 — dynamic import로 SSR 방지, Container 내부에 MapContainer 렌더링. v2: Leaflet CSS를 ES module import로 변경, position:relative wrapper div 추가.",
+      "props_interface": {
+        "center": "[number, number]",
+        "zoom": "number",
+        "height": "string",
+        "children": "React.ReactNode"
+      },
+      "external_libs": ["leaflet", "react-leaflet"],
+      "cloudscape_components": [],
+      "use_client": true,
+      "note": "next/dynamic으로 lazy load. leaflet CSS는 ES module import (import 'leaflet/dist/leaflet.css'). L.Icon.Default.mergeOptions()로 marker icon 설정. wrapper div에 position:relative 필수.",
+      "dependencies": ["leaflet", "react-leaflet"]
+    },
+    {
+      "component": "LoadingState",
+      "file_path": "src/components/common/LoadingState.tsx",
+      "type": "shared",
+      "requirements": [],
+      "description": "데이터 로딩 중 표시 컴포넌트",
+      "props_interface": {
+        "text": "string"
+      },
+      "cloudscape_components": [
+        {
+          "name": "Spinner",
+          "import_path": "@cloudscape-design/components/spinner",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["textAlign"],
+          "event_handlers": []
+        }
+      ],
+      "use_client": false,
+      "dependencies": []
+    },
+    {
+      "component": "ErrorState",
+      "file_path": "src/components/common/ErrorState.tsx",
+      "type": "shared",
+      "requirements": [],
+      "description": "에러 발생 시 Alert와 재시도 버튼 표시",
+      "props_interface": {
+        "error": "Error | string",
+        "onRetry": "(() => void) | undefined"
+      },
+      "cloudscape_components": [
+        {
+          "name": "Alert",
+          "import_path": "@cloudscape-design/components/alert",
+          "key_props": ["type", "header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Button",
+          "import_path": "@cloudscape-design/components/button",
+          "key_props": ["onClick"],
+          "event_handlers": ["onClick"]
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["padding"],
+          "event_handlers": []
+        }
+      ],
+      "use_client": true,
+      "dependencies": []
+    },
+    {
+      "component": "DecisionTypeBadge",
+      "file_path": "src/components/common/DecisionTypeBadge.tsx",
+      "type": "shared",
+      "requirements": ["FR-020"],
+      "description": "DecisionType에 따라 색상 코딩된 Badge 컴포넌트. TIFRS 의사결정 유형 시각화.",
+      "props_interface": {
+        "type": "DecisionType"
+      },
+      "cloudscape_components": [
+        {
+          "name": "Badge",
+          "import_path": "@cloudscape-design/components/badge",
+          "key_props": ["color"],
+          "event_handlers": []
+        }
+      ],
+      "color_mapping": {
+        "no-action": "green",
+        "monitor": "blue",
+        "route-change": "red",
+        "schedule-change": "red",
+        "cancel-flight": "red",
+        "divert": "red"
+      },
+      "label_mapping": {
+        "no-action": "조치 불요",
+        "monitor": "모니터링",
+        "route-change": "항로 변경",
+        "schedule-change": "스케줄 변경",
+        "cancel-flight": "운항 취소",
+        "divert": "회항"
+      },
+      "use_client": false,
+      "dependencies": ["src/types/decision.ts"],
+      "v2_status": "new"
+    }
+  ],
+  "specs": [
+    {
+      "component": "CriticalAlertBanner",
+      "file_path": "src/components/dashboard/CriticalAlertBanner.tsx",
+      "type": "feature",
+      "requirements": ["FR-016"],
+      "cloudscape_components": [
+        {
+          "name": "Flashbar",
+          "import_path": "@cloudscape-design/components/flashbar",
+          "key_props": ["items", "stackItems"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {},
+      "state": "context",
+      "context_used": ["AlertContext"],
+      "behavior": {
+        "mount": "AlertContext에서 미확인 critical 알림 목록을 가져와 Flashbar items로 변환",
+        "dismiss": "acknowledgeAlert(notamId) 호출하여 해당 알림 숨김",
+        "action": "각 알림에 '상세 보기' 버튼링크 -> /notams/{id}"
+      },
+      "use_client": true,
+      "dependencies": ["src/contexts/AlertContext.tsx", "src/types/notam.ts"]
+    },
+    {
+      "component": "DashboardSummaryCards",
+      "file_path": "src/components/dashboard/DashboardSummaryCards.tsx",
+      "type": "feature",
+      "requirements": ["FR-006", "FR-005"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "ColumnLayout",
+          "import_path": "@cloudscape-design/components/column-layout",
+          "key_props": ["columns", "variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant", "fontSize", "fontWeight", "color"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size", "direction"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "summary": "DashboardSummary"
+      },
+      "state": "local",
+      "cards": [
+        { "label": "활성 NOTAM", "value": "summary.totalActiveNotams", "icon": "status-info" },
+        {
+          "label": "위험 NOTAM",
+          "value": "summary.criticalCount",
+          "icon": "status-negative",
+          "highlight": true
+        },
+        { "label": "높은 중요도", "value": "summary.highCount", "icon": "status-warning" },
+        {
+          "label": "영향받는 항로",
+          "value": "summary.affectedRoutesCount",
+          "icon": "status-pending"
+        },
+        {
+          "label": "영향받는 운항편",
+          "value": "summary.affectedFlightsCount",
+          "icon": "status-pending"
+        },
+        { "label": "필터링 비율", "value": "summary.filteredVsTotalRatio", "format": "percentage" }
+      ],
+      "use_client": false,
+      "dependencies": ["src/types/dashboard.ts"]
+    },
+    {
+      "component": "RouteImpactMap",
+      "file_path": "src/components/dashboard/RouteImpactMap.tsx",
+      "type": "feature",
+      "requirements": ["FR-006"],
+      "v2_status": "implemented",
+      "v2_changes": [
+        "Added map legend (red=critical, orange=high, blue=other, route line color)",
+        "NOTAM circles are clickable with popup (summary + link to /notams/{id})",
+        "Header info popover explaining map elements",
+        "Route dropdown includes '전체' (All) option as default",
+        "Map shows ALL NOTAMs for selected routes (not just critical)",
+        "Wrapper div with position:relative for Grid sizing"
+      ],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "actions", "info"],
+          "event_handlers": []
+        },
+        {
+          "name": "Select",
+          "import_path": "@cloudscape-design/components/select",
+          "key_props": ["selectedOption", "options", "placeholder"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "Popover",
+          "import_path": "@cloudscape-design/components/popover",
+          "key_props": ["content", "triggerType"],
+          "event_handlers": []
+        },
+        {
+          "name": "Icon",
+          "import_path": "@cloudscape-design/components/icon",
+          "key_props": ["name"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "routeImpacts": "RouteImpactMapData[]",
+        "criticalNotams": "Notam[]"
+      },
+      "state": "local",
+      "local_state": {
+        "selectedRouteId": "string | null"
+      },
+      "map_features": {
+        "notam_circles": "Circle with importance-based color: critical=#d13212, high=#ff9900, other=#0073bb. Clickable with Popup.",
+        "route_polylines": "Polyline connecting waypoints. Default blue, selected thick.",
+        "airport_markers": "Marker at departure/arrival airports",
+        "intersection_highlight": "Red polyline overlay on affected segments",
+        "legend": "Map legend box showing color meanings"
+      },
+      "external_libs": ["leaflet", "react-leaflet"],
+      "use_client": true,
+      "dependencies": [
+        "src/components/common/LeafletMapWrapper.tsx",
+        "src/types/dashboard.ts",
+        "src/types/notam.ts",
+        "src/types/route.ts"
+      ]
+    },
+    {
+      "component": "RecentCriticalNotams",
+      "file_path": "src/components/dashboard/RecentCriticalNotams.tsx",
+      "type": "feature",
+      "requirements": ["FR-005", "FR-016"],
+      "v2_status": "implemented",
+      "v2_changes": ["Now shows critical AND high importance NOTAMs (was critical-only)"],
+      "cloudscape_components": [
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation", "variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "Badge",
+          "import_path": "@cloudscape-design/components/badge",
+          "key_props": ["color"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "criticalNotams": "Notam[]"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/notam.ts", "src/components/common/ImportanceBadge.tsx"]
+    },
+    {
+      "component": "AffectedFlightsSummary",
+      "file_path": "src/components/dashboard/AffectedFlightsSummary.tsx",
+      "type": "feature",
+      "requirements": ["FR-006"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter"],
+          "event_handlers": []
+        },
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "flights": "Flight[]"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/flight.ts", "src/components/common/ImportanceBadge.tsx"]
+    },
+    {
+      "component": "NotamTable",
+      "file_path": "src/components/notams/NotamTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-001", "FR-002", "FR-005", "FR-019"],
+      "cloudscape_components": [
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": [
+            "items",
+            "columnDefinitions",
+            "selectionType",
+            "selectedItems",
+            "enableKeyboardNavigation",
+            "loading",
+            "loadingText",
+            "empty",
+            "filter",
+            "header",
+            "pagination",
+            "preferences",
+            "variant",
+            "stickyHeader"
+          ],
+          "event_handlers": ["onSelectionChange", "onSortingChange"]
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter", "actions"],
+          "event_handlers": []
+        },
+        {
+          "name": "Pagination",
+          "import_path": "@cloudscape-design/components/pagination",
+          "key_props": ["currentPageIndex", "pagesCount"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "PropertyFilter",
+          "import_path": "@cloudscape-design/components/property-filter",
+          "key_props": ["query", "filteringProperties", "filteringOptions"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "CollectionPreferences",
+          "import_path": "@cloudscape-design/components/collection-preferences",
+          "key_props": ["preferences", "pageSizePreference", "visibleContentPreference"],
+          "event_handlers": ["onConfirm"]
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "Button",
+          "import_path": "@cloudscape-design/components/button",
+          "key_props": ["variant", "iconName"],
+          "event_handlers": ["onClick"]
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["textAlign"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "notams": "Notam[]",
+        "totalCount": "number",
+        "stats": "NotamStats | undefined",
+        "isLoading": "boolean",
+        "onSelectionChange": "(selectedNotam: Notam | null) => void"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "column_definitions": [
+        {
+          "id": "locationIndicator",
+          "header": "공항",
+          "sortingField": "locationIndicator",
+          "width": 80
+        },
+        { "id": "qCode", "header": "Q-Code", "sortingField": "qCode", "width": 100 },
+        {
+          "id": "importanceScore",
+          "header": "점수",
+          "sortingField": "importanceScore",
+          "width": 80,
+          "cell_component": "ImportanceScoreBar"
+        },
+        {
+          "id": "importanceLevel",
+          "header": "중요도",
+          "sortingField": "importanceLevel",
+          "width": 90,
+          "cell_component": "ImportanceBadge"
+        },
+        { "id": "body", "header": "내용", "width": 300, "maxWidth": 400 },
+        { "id": "type", "header": "유형", "width": 90 },
+        {
+          "id": "effectiveFrom",
+          "header": "시작일시",
+          "sortingField": "effectiveFrom",
+          "width": 140
+        },
+        {
+          "id": "effectiveTo",
+          "header": "종료일시",
+          "sortingField": "effectiveTo",
+          "width": 140,
+          "cell_component": "NotamExpiryIndicator"
+        },
+        { "id": "status", "header": "상태", "width": 100 },
+        { "id": "fir", "header": "FIR", "width": 70 }
+      ],
+      "use_client": true,
+      "dependencies": [
+        "@cloudscape-design/collection-hooks",
+        "src/types/notam.ts",
+        "src/components/common/ImportanceBadge.tsx",
+        "src/components/common/ImportanceScoreBar.tsx",
+        "src/components/common/NotamExpiryIndicator.tsx"
+      ]
+    },
+    {
+      "component": "NotamSplitPanelDetail",
+      "file_path": "src/components/notams/NotamSplitPanelDetail.tsx",
+      "type": "feature",
+      "requirements": ["FR-001", "FR-002"],
+      "cloudscape_components": [
+        {
+          "name": "SplitPanel",
+          "import_path": "@cloudscape-design/components/split-panel",
+          "key_props": ["header", "closeBehavior"],
+          "event_handlers": []
+        },
+        {
+          "name": "KeyValuePairs",
+          "import_path": "@cloudscape-design/components/key-value-pairs",
+          "key_props": ["items", "columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "notam": "Notam | null"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/notam.ts", "src/components/common/ImportanceBadge.tsx"]
+    },
+    {
+      "component": "NotamRawAndParsed",
+      "file_path": "src/components/notams/NotamRawAndParsed.tsx",
+      "type": "feature",
+      "requirements": ["FR-002", "FR-012"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "ColumnLayout",
+          "import_path": "@cloudscape-design/components/column-layout",
+          "key_props": ["columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "KeyValuePairs",
+          "import_path": "@cloudscape-design/components/key-value-pairs",
+          "key_props": ["items", "columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "CopyToClipboard",
+          "import_path": "@cloudscape-design/components/copy-to-clipboard",
+          "key_props": ["copyButtonAriaLabel", "copyText"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "notam": "Notam"
+      },
+      "use_client": false,
+      "dependencies": ["src/types/notam.ts"]
+    },
+    {
+      "component": "NotamAiAnalysis",
+      "file_path": "src/components/notams/NotamAiAnalysis.tsx",
+      "type": "feature",
+      "requirements": ["FR-001", "FR-003", "FR-015"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "actions"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "ExpandableSection",
+          "import_path": "@cloudscape-design/components/expandable-section",
+          "key_props": ["headerText", "defaultExpanded"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant", "padding"],
+          "event_handlers": []
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "Button",
+          "import_path": "@cloudscape-design/components/button",
+          "key_props": ["variant", "loading", "iconName"],
+          "event_handlers": ["onClick"]
+        }
+      ],
+      "props_interface": {
+        "notam": "Notam",
+        "onReanalyze": "() => void",
+        "isAnalyzing": "boolean"
+      },
+      "use_client": true,
+      "dependencies": [
+        "src/types/notam.ts",
+        "src/components/common/ImportanceBadge.tsx",
+        "src/components/common/ImportanceScoreBar.tsx"
+      ]
+    },
+    {
+      "component": "NotamImpactSection",
+      "file_path": "src/components/notams/NotamImpactSection.tsx",
+      "type": "feature",
+      "requirements": ["FR-003", "FR-004"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "Tabs",
+          "import_path": "@cloudscape-design/components/tabs",
+          "key_props": ["tabs", "activeTabId"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "notamId": "string",
+        "affectedRoutes": "NotamRouteImpact[]",
+        "affectedFlights": "NotamFlightImpact[]"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/impact.ts"]
+    },
+    {
+      "component": "NotamMiniMap",
+      "file_path": "src/components/notams/NotamMiniMap.tsx",
+      "type": "feature",
+      "requirements": ["FR-012"],
+      "v2_status": "implemented",
+      "v2_changes": [
+        "NOTAM circle uses importance-based color coding consistent with dashboard map"
+      ],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "latitude": "number",
+        "longitude": "number",
+        "radius": "number",
+        "locationIndicator": "string",
+        "importanceLevel": "ImportanceLevel"
+      },
+      "external_libs": ["leaflet", "react-leaflet"],
+      "use_client": true,
+      "dependencies": ["src/components/common/LeafletMapWrapper.tsx"]
+    },
+    {
+      "component": "NotamDiffView",
+      "file_path": "src/components/notams/NotamDiffView.tsx",
+      "type": "feature",
+      "requirements": ["FR-018"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "ColumnLayout",
+          "import_path": "@cloudscape-design/components/column-layout",
+          "key_props": ["columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant", "color"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "original": "Notam",
+        "replacement": "Notam",
+        "changes": "DiffChange[]"
+      },
+      "use_client": false,
+      "dependencies": ["src/types/notam.ts"]
+    },
+    {
+      "component": "NotamDecisionSection",
+      "file_path": "src/components/notams/NotamDecisionSection.tsx",
+      "type": "feature",
+      "requirements": ["FR-020"],
+      "v2_status": "new",
+      "v2_notes": "TIFRS decision recording form embedded in NOTAM detail page. Shows AI-suggested decision with editable TIFRS criteria fields. Supports record-decision action for audit trail.",
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "actions"],
+          "event_handlers": []
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "FormField",
+          "import_path": "@cloudscape-design/components/form-field",
+          "key_props": ["label", "description", "errorText"],
+          "event_handlers": []
+        },
+        {
+          "name": "Input",
+          "import_path": "@cloudscape-design/components/input",
+          "key_props": ["value", "placeholder"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "Textarea",
+          "import_path": "@cloudscape-design/components/textarea",
+          "key_props": ["value", "rows"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "Select",
+          "import_path": "@cloudscape-design/components/select",
+          "key_props": ["selectedOption", "options"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "Button",
+          "import_path": "@cloudscape-design/components/button",
+          "key_props": ["variant", "loading"],
+          "event_handlers": ["onClick"]
+        },
+        {
+          "name": "ColumnLayout",
+          "import_path": "@cloudscape-design/components/column-layout",
+          "key_props": ["columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Alert",
+          "import_path": "@cloudscape-design/components/alert",
+          "key_props": ["type", "header"],
+          "event_handlers": []
+        },
+        {
+          "name": "ExpandableSection",
+          "import_path": "@cloudscape-design/components/expandable-section",
+          "key_props": ["headerText", "defaultExpanded"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "notamId": "string",
+        "notam": "Notam"
+      },
+      "state": "local",
+      "local_state": {
+        "tifrsTime": "string",
+        "tifrsImpact": "string",
+        "tifrsFacilities": "string",
+        "tifrsRoute": "string",
+        "tifrsSchedule": "string",
+        "overallDecision": "DecisionType | null",
+        "rationale": "string",
+        "isEditing": "boolean"
+      },
+      "form_fields": [
+        {
+          "name": "tifrsTime",
+          "label": "시간 영향 (Time)",
+          "type": "Textarea",
+          "rows": 2,
+          "required": true,
+          "description": "NOTAM 유효 기간이 운항에 미치는 시간적 영향"
+        },
+        {
+          "name": "tifrsImpact",
+          "label": "운항 영향 (Impact)",
+          "type": "Textarea",
+          "rows": 2,
+          "required": true,
+          "description": "운항 안전/정상성에 미치는 영향 심각도"
+        },
+        {
+          "name": "tifrsFacilities",
+          "label": "시설 영향 (Facilities)",
+          "type": "Textarea",
+          "rows": 2,
+          "required": true,
+          "description": "영향받는 공항 시설, 항행 장비 등"
+        },
+        {
+          "name": "tifrsRoute",
+          "label": "항로 영향 (Route)",
+          "type": "Textarea",
+          "rows": 2,
+          "required": true,
+          "description": "영향받는 항로 구간 및 대체 항로 가용성"
+        },
+        {
+          "name": "tifrsSchedule",
+          "label": "스케줄 영향 (Schedule)",
+          "type": "Textarea",
+          "rows": 2,
+          "required": true,
+          "description": "운항 스케줄 변경 필요성 및 범위"
+        },
+        {
+          "name": "overallDecision",
+          "label": "종합 결정",
+          "type": "Select",
+          "options": "DecisionType values",
+          "required": true
+        },
+        {
+          "name": "rationale",
+          "label": "결정 근거",
+          "type": "Textarea",
+          "rows": 3,
+          "required": true
+        }
+      ],
+      "behavior": {
+        "mount": "useNotamDecision(notamId)로 기존 결정 로드. 있으면 읽기 전용 표시, 없으면 AI 사전 분석 결과로 폼 프리필",
+        "ai_prefill": "AI가 제안한 TIFRS 값은 Alert type='info'로 상단에 표시. 운항관리사가 수정 가능",
+        "submit": "useRecordDecision.trigger()로 POST. 성공 시 NotificationContext에 성공 알림 + useNotamDecision.mutate()",
+        "existing_decision": "이미 결정이 기록된 경우 KeyValuePairs로 읽기 전용 표시 + '수정' 버튼으로 편집 모드 전환",
+        "audit": "결정 기록 시 POST /api/audit-log (action: record-decision) 자동 호출"
+      },
+      "use_client": true,
+      "dependencies": [
+        "src/hooks/useNotamDecision.ts",
+        "src/hooks/useRecordDecision.ts",
+        "src/types/decision.ts",
+        "src/types/notam.ts",
+        "src/components/common/DecisionTypeBadge.tsx",
+        "src/contexts/NotificationContext.tsx"
+      ]
+    },
+    {
+      "component": "FlightTable",
+      "file_path": "src/components/flights/FlightTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-004", "FR-013"],
+      "v2_status": "implemented",
+      "v2_changes": [
+        "Status column header includes info popover explaining scheduled/dispatched/in-flight/arrived/cancelled/diverted status values"
+      ],
+      "cloudscape_components": [
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": [
+            "items",
+            "columnDefinitions",
+            "enableKeyboardNavigation",
+            "loading",
+            "loadingText",
+            "empty",
+            "filter",
+            "header",
+            "pagination",
+            "preferences",
+            "stickyHeader"
+          ],
+          "event_handlers": ["onSortingChange"]
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter"],
+          "event_handlers": []
+        },
+        {
+          "name": "Pagination",
+          "import_path": "@cloudscape-design/components/pagination",
+          "key_props": ["currentPageIndex", "pagesCount"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "PropertyFilter",
+          "import_path": "@cloudscape-design/components/property-filter",
+          "key_props": ["query", "filteringProperties"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "CollectionPreferences",
+          "import_path": "@cloudscape-design/components/collection-preferences",
+          "key_props": ["preferences"],
+          "event_handlers": ["onConfirm"]
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["textAlign"],
+          "event_handlers": []
+        },
+        {
+          "name": "Popover",
+          "import_path": "@cloudscape-design/components/popover",
+          "key_props": ["content", "triggerType"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "flights": "Flight[]",
+        "totalCount": "number",
+        "isLoading": "boolean"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "use_client": true,
+      "dependencies": [
+        "@cloudscape-design/collection-hooks",
+        "src/types/flight.ts",
+        "src/components/common/ImportanceBadge.tsx"
+      ]
+    },
+    {
+      "component": "FlightInfo",
+      "file_path": "src/components/flights/FlightInfo.tsx",
+      "type": "feature",
+      "requirements": ["FR-013"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "KeyValuePairs",
+          "import_path": "@cloudscape-design/components/key-value-pairs",
+          "key_props": ["items", "columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "ColumnLayout",
+          "import_path": "@cloudscape-design/components/column-layout",
+          "key_props": ["columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "flight": "Flight & { route: Route }"
+      },
+      "use_client": false,
+      "dependencies": ["src/types/flight.ts", "src/types/route.ts"]
+    },
+    {
+      "component": "FlightNotamImpact",
+      "file_path": "src/components/flights/FlightNotamImpact.tsx",
+      "type": "feature",
+      "requirements": ["FR-004"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter"],
+          "event_handlers": []
+        },
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "Badge",
+          "import_path": "@cloudscape-design/components/badge",
+          "key_props": ["color"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "affectedNotams": "Notam[]"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/notam.ts", "src/components/common/ImportanceBadge.tsx"]
+    },
+    {
+      "component": "FlightRouteMap",
+      "file_path": "src/components/flights/FlightRouteMap.tsx",
+      "type": "feature",
+      "requirements": ["FR-009"],
+      "v2_status": "implemented",
+      "v2_changes": [
+        "NOTAM circles use per-importance color coding (red=critical, orange=high, blue=other)",
+        "NOTAM circles are clickable with popup showing summary and link to detail page"
+      ],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "route": "Route",
+        "affectedNotams": "Notam[]",
+        "alternativeRoute": "Route | null"
+      },
+      "external_libs": ["leaflet", "react-leaflet"],
+      "use_client": true,
+      "dependencies": [
+        "src/components/common/LeafletMapWrapper.tsx",
+        "src/types/route.ts",
+        "src/types/notam.ts"
+      ]
+    },
+    {
+      "component": "FlightBriefingActions",
+      "file_path": "src/components/flights/FlightBriefingActions.tsx",
+      "type": "feature",
+      "requirements": ["FR-007", "FR-008"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "Button",
+          "import_path": "@cloudscape-design/components/button",
+          "key_props": ["variant", "loading", "iconName"],
+          "event_handlers": ["onClick"]
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size", "direction"],
+          "event_handlers": []
+        },
+        {
+          "name": "Select",
+          "import_path": "@cloudscape-design/components/select",
+          "key_props": ["selectedOption", "options", "placeholder"],
+          "event_handlers": ["onChange"]
+        }
+      ],
+      "props_interface": {
+        "flightId": "string",
+        "onBriefingGenerated": "(briefing: Briefing) => void"
+      },
+      "use_client": true,
+      "dependencies": [
+        "src/hooks/useGenerateBriefing.ts",
+        "src/contexts/NotificationContext.tsx",
+        "src/types/briefing.ts"
+      ]
+    },
+    {
+      "component": "RouteDeviationGuidance",
+      "file_path": "src/components/flights/RouteDeviationGuidance.tsx",
+      "type": "feature",
+      "requirements": ["FR-009"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "actions"],
+          "event_handlers": []
+        },
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Alert",
+          "import_path": "@cloudscape-design/components/alert",
+          "key_props": ["type", "header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "routeId": "string",
+        "affectedNotams": "Notam[]"
+      },
+      "use_client": true,
+      "dependencies": [
+        "src/hooks/useRouteAlternatives.ts",
+        "src/types/route.ts",
+        "src/types/notam.ts"
+      ]
+    },
+    {
+      "component": "RouteTable",
+      "file_path": "src/components/routes/RouteTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-010", "FR-006"],
+      "v2_status": "implemented",
+      "v2_changes": [
+        "Status column header includes info popover explaining active/suspended/alternate status values"
+      ],
+      "cloudscape_components": [
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": [
+            "items",
+            "columnDefinitions",
+            "enableKeyboardNavigation",
+            "loading",
+            "loadingText",
+            "empty",
+            "filter",
+            "header",
+            "pagination",
+            "preferences",
+            "stickyHeader"
+          ],
+          "event_handlers": ["onSortingChange"]
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter"],
+          "event_handlers": []
+        },
+        {
+          "name": "Pagination",
+          "import_path": "@cloudscape-design/components/pagination",
+          "key_props": ["currentPageIndex", "pagesCount"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "PropertyFilter",
+          "import_path": "@cloudscape-design/components/property-filter",
+          "key_props": ["query", "filteringProperties"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "CollectionPreferences",
+          "import_path": "@cloudscape-design/components/collection-preferences",
+          "key_props": ["preferences"],
+          "event_handlers": ["onConfirm"]
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["textAlign"],
+          "event_handlers": []
+        },
+        {
+          "name": "Popover",
+          "import_path": "@cloudscape-design/components/popover",
+          "key_props": ["content", "triggerType"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "routes": "Route[]",
+        "totalCount": "number",
+        "isLoading": "boolean"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "use_client": true,
+      "dependencies": ["@cloudscape-design/collection-hooks", "src/types/route.ts"]
+    },
+    {
+      "component": "RouteInfo",
+      "file_path": "src/components/routes/RouteInfo.tsx",
+      "type": "feature",
+      "requirements": ["FR-010"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "KeyValuePairs",
+          "import_path": "@cloudscape-design/components/key-value-pairs",
+          "key_props": ["items", "columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "ColumnLayout",
+          "import_path": "@cloudscape-design/components/column-layout",
+          "key_props": ["columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "route": "Route"
+      },
+      "use_client": false,
+      "dependencies": ["src/types/route.ts"]
+    },
+    {
+      "component": "RouteMapVisualization",
+      "file_path": "src/components/routes/RouteMapVisualization.tsx",
+      "type": "feature",
+      "requirements": ["FR-006", "FR-010"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "route": "Route",
+        "impacts": "NotamRouteImpact[]",
+        "activeNotams": "Notam[]"
+      },
+      "external_libs": ["leaflet", "react-leaflet"],
+      "use_client": true,
+      "dependencies": [
+        "src/components/common/LeafletMapWrapper.tsx",
+        "src/types/route.ts",
+        "src/types/impact.ts",
+        "src/types/notam.ts"
+      ]
+    },
+    {
+      "component": "RouteNotamImpacts",
+      "file_path": "src/components/routes/RouteNotamImpacts.tsx",
+      "type": "feature",
+      "requirements": ["FR-010"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter"],
+          "event_handlers": []
+        },
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "Badge",
+          "import_path": "@cloudscape-design/components/badge",
+          "key_props": ["color"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "impacts": "NotamRouteImpact[]",
+        "notams": "Notam[]"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/impact.ts", "src/types/notam.ts"]
+    },
+    {
+      "component": "RouteAlternatives",
+      "file_path": "src/components/routes/RouteAlternatives.tsx",
+      "type": "feature",
+      "requirements": ["FR-009"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "actions"],
+          "event_handlers": []
+        },
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "routeId": "string",
+        "alternatives": "RouteAlternative[]",
+        "reasoning": "string"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/route.ts"]
+    },
+    {
+      "component": "RefBookTable",
+      "file_path": "src/components/ref-book/RefBookTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-011"],
+      "cloudscape_components": [
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": [
+            "items",
+            "columnDefinitions",
+            "enableKeyboardNavigation",
+            "loading",
+            "loadingText",
+            "empty",
+            "filter",
+            "header",
+            "pagination",
+            "preferences",
+            "stickyHeader"
+          ],
+          "event_handlers": ["onSortingChange"]
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter", "actions"],
+          "event_handlers": []
+        },
+        {
+          "name": "Pagination",
+          "import_path": "@cloudscape-design/components/pagination",
+          "key_props": ["currentPageIndex", "pagesCount"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "PropertyFilter",
+          "import_path": "@cloudscape-design/components/property-filter",
+          "key_props": ["query", "filteringProperties"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "CollectionPreferences",
+          "import_path": "@cloudscape-design/components/collection-preferences",
+          "key_props": ["preferences"],
+          "event_handlers": ["onConfirm"]
+        },
+        {
+          "name": "Button",
+          "import_path": "@cloudscape-design/components/button",
+          "key_props": ["variant"],
+          "event_handlers": ["onClick"]
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["textAlign"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "entries": "RefBookEntry[]",
+        "totalCount": "number",
+        "isLoading": "boolean",
+        "onRegisterNew": "() => void",
+        "onDelete": "(id: string) => void"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "use_client": true,
+      "dependencies": [
+        "@cloudscape-design/collection-hooks",
+        "src/types/refBook.ts",
+        "src/components/common/ImportanceBadge.tsx"
+      ]
+    },
+    {
+      "component": "RefBookRegistrationModal",
+      "file_path": "src/components/ref-book/RefBookRegistrationModal.tsx",
+      "type": "feature",
+      "requirements": ["FR-011"],
+      "cloudscape_components": [
+        {
+          "name": "Modal",
+          "import_path": "@cloudscape-design/components/modal",
+          "key_props": ["visible", "header", "footer", "size"],
+          "event_handlers": ["onDismiss"]
+        },
+        {
+          "name": "Form",
+          "import_path": "@cloudscape-design/components/form",
+          "key_props": ["actions"],
+          "event_handlers": []
+        },
+        {
+          "name": "FormField",
+          "import_path": "@cloudscape-design/components/form-field",
+          "key_props": ["label", "description", "errorText"],
+          "event_handlers": []
+        },
+        {
+          "name": "Input",
+          "import_path": "@cloudscape-design/components/input",
+          "key_props": ["value", "placeholder"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "Textarea",
+          "import_path": "@cloudscape-design/components/textarea",
+          "key_props": ["value", "rows"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "Select",
+          "import_path": "@cloudscape-design/components/select",
+          "key_props": ["selectedOption", "options"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "Button",
+          "import_path": "@cloudscape-design/components/button",
+          "key_props": ["variant", "loading"],
+          "event_handlers": ["onClick"]
+        }
+      ],
+      "props_interface": {
+        "visible": "boolean",
+        "onDismiss": "() => void",
+        "onSubmit": "(data: CreateRefBookEntryRequest) => Promise<void>",
+        "prefilledNotamId": "string | null",
+        "isSubmitting": "boolean"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/refBook.ts", "src/types/notam.ts"]
+    },
+    {
+      "component": "BriefingTable",
+      "file_path": "src/components/briefings/BriefingTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-007", "FR-008", "FR-014"],
+      "cloudscape_components": [
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": [
+            "items",
+            "columnDefinitions",
+            "enableKeyboardNavigation",
+            "loading",
+            "loadingText",
+            "empty",
+            "filter",
+            "header",
+            "pagination",
+            "preferences",
+            "stickyHeader"
+          ],
+          "event_handlers": ["onSortingChange"]
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter", "actions"],
+          "event_handlers": []
+        },
+        {
+          "name": "Pagination",
+          "import_path": "@cloudscape-design/components/pagination",
+          "key_props": ["currentPageIndex", "pagesCount"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "PropertyFilter",
+          "import_path": "@cloudscape-design/components/property-filter",
+          "key_props": ["query", "filteringProperties"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "CollectionPreferences",
+          "import_path": "@cloudscape-design/components/collection-preferences",
+          "key_props": ["preferences"],
+          "event_handlers": ["onConfirm"]
+        },
+        {
+          "name": "Button",
+          "import_path": "@cloudscape-design/components/button",
+          "key_props": ["variant"],
+          "event_handlers": ["onClick"]
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["textAlign"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Badge",
+          "import_path": "@cloudscape-design/components/badge",
+          "key_props": ["color"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "briefings": "Briefing[]",
+        "totalCount": "number",
+        "isLoading": "boolean"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "use_client": true,
+      "dependencies": ["@cloudscape-design/collection-hooks", "src/types/briefing.ts"]
+    },
+    {
+      "component": "BriefingInfo",
+      "file_path": "src/components/briefings/BriefingInfo.tsx",
+      "type": "feature",
+      "requirements": ["FR-007"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "KeyValuePairs",
+          "import_path": "@cloudscape-design/components/key-value-pairs",
+          "key_props": ["items", "columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "ColumnLayout",
+          "import_path": "@cloudscape-design/components/column-layout",
+          "key_props": ["columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Badge",
+          "import_path": "@cloudscape-design/components/badge",
+          "key_props": ["color"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "briefing": "Briefing"
+      },
+      "use_client": false,
+      "dependencies": ["src/types/briefing.ts"]
+    },
+    {
+      "component": "BriefingContentPreview",
+      "file_path": "src/components/briefings/BriefingContentPreview.tsx",
+      "type": "feature",
+      "requirements": ["FR-007", "FR-008"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "Tabs",
+          "import_path": "@cloudscape-design/components/tabs",
+          "key_props": ["tabs", "activeTabId"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant", "padding"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "briefing": "Briefing",
+        "crewPackage": "{ dispComment: string; companyNotam: string; crewBriefing: string } | null"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/briefing.ts"]
+    },
+    {
+      "component": "BriefingApprovalActions",
+      "file_path": "src/components/briefings/BriefingApprovalActions.tsx",
+      "type": "feature",
+      "requirements": ["FR-007"],
+      "cloudscape_components": [
+        {
+          "name": "Container",
+          "import_path": "@cloudscape-design/components/container",
+          "key_props": ["header"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "Button",
+          "import_path": "@cloudscape-design/components/button",
+          "key_props": ["variant", "loading"],
+          "event_handlers": ["onClick"]
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "Alert",
+          "import_path": "@cloudscape-design/components/alert",
+          "key_props": ["type"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "briefing": "Briefing",
+        "onApprove": "() => Promise<void>",
+        "onReject": "() => Promise<void>",
+        "isProcessing": "boolean"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/briefing.ts", "src/contexts/AuthContext.tsx"]
+    },
+    {
+      "component": "AuditLogTable",
+      "file_path": "src/components/audit-log/AuditLogTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-017"],
+      "v2_change": "action 칼럼 한국어 매핑에 'record-decision=의사결정 기록' 추가",
+      "cloudscape_components": [
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": [
+            "items",
+            "columnDefinitions",
+            "enableKeyboardNavigation",
+            "loading",
+            "loadingText",
+            "empty",
+            "filter",
+            "header",
+            "pagination",
+            "preferences",
+            "stickyHeader"
+          ],
+          "event_handlers": ["onSortingChange"]
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter"],
+          "event_handlers": []
+        },
+        {
+          "name": "Pagination",
+          "import_path": "@cloudscape-design/components/pagination",
+          "key_props": ["currentPageIndex", "pagesCount"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "PropertyFilter",
+          "import_path": "@cloudscape-design/components/property-filter",
+          "key_props": ["query", "filteringProperties"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "CollectionPreferences",
+          "import_path": "@cloudscape-design/components/collection-preferences",
+          "key_props": ["preferences"],
+          "event_handlers": ["onConfirm"]
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["textAlign"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "logs": "AuditLog[]",
+        "totalCount": "number",
+        "isLoading": "boolean"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "action_label_mapping": {
+        "view": "조회",
+        "analyze": "분석",
+        "approve": "승인",
+        "reject": "반려",
+        "register-ref-book": "REF BOOK 등록",
+        "generate-briefing": "브리핑 생성",
+        "acknowledge-alert": "알림 확인",
+        "record-decision": "의사결정 기록"
+      },
+      "use_client": true,
+      "dependencies": ["@cloudscape-design/collection-hooks", "src/types/auditLog.ts"]
+    },
+    {
+      "component": "DecisionTable",
+      "file_path": "src/components/decisions/DecisionTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-020"],
+      "v2_status": "new",
+      "cloudscape_components": [
+        {
+          "name": "Table",
+          "import_path": "@cloudscape-design/components/table",
+          "key_props": [
+            "items",
+            "columnDefinitions",
+            "selectionType",
+            "selectedItems",
+            "enableKeyboardNavigation",
+            "loading",
+            "loadingText",
+            "empty",
+            "filter",
+            "header",
+            "pagination",
+            "preferences",
+            "stickyHeader"
+          ],
+          "event_handlers": ["onSelectionChange", "onSortingChange"]
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter"],
+          "event_handlers": []
+        },
+        {
+          "name": "Pagination",
+          "import_path": "@cloudscape-design/components/pagination",
+          "key_props": ["currentPageIndex", "pagesCount"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "PropertyFilter",
+          "import_path": "@cloudscape-design/components/property-filter",
+          "key_props": ["query", "filteringProperties", "filteringOptions"],
+          "event_handlers": ["onChange"]
+        },
+        {
+          "name": "CollectionPreferences",
+          "import_path": "@cloudscape-design/components/collection-preferences",
+          "key_props": ["preferences", "pageSizePreference", "visibleContentPreference"],
+          "event_handlers": ["onConfirm"]
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["textAlign"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "decisions": "DecisionRecord[]",
+        "totalCount": "number",
+        "isLoading": "boolean",
+        "onSelectionChange": "(selected: DecisionRecord | null) => void"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 },
+        "selection": { "trackBy": "id" }
+      },
+      "column_definitions": [
+        { "id": "notamId", "header": "NOTAM", "width": 120, "cell": "Link -> /notams/{notamId}" },
+        {
+          "id": "overallDecision",
+          "header": "결정",
+          "width": 120,
+          "cell_component": "DecisionTypeBadge"
+        },
+        { "id": "decidedBy", "header": "결정자", "width": 120 },
+        { "id": "decidedAt", "header": "결정일시", "sortingField": "decidedAt", "width": 160 },
+        { "id": "tifrsTime", "header": "시간 영향", "width": 200 },
+        { "id": "tifrsImpact", "header": "운항 영향", "width": 200 },
+        { "id": "rationale", "header": "결정 근거", "width": 300 }
+      ],
+      "filtering_properties": [
+        {
+          "key": "overallDecision",
+          "operators": ["=", "!="],
+          "propertyLabel": "결정 유형",
+          "groupValuesLabel": "결정 유형 값"
+        },
+        {
+          "key": "decidedBy",
+          "operators": ["=", ":"],
+          "propertyLabel": "결정자",
+          "groupValuesLabel": "결정자 값"
+        }
+      ],
+      "use_client": true,
+      "dependencies": [
+        "@cloudscape-design/collection-hooks",
+        "src/types/decision.ts",
+        "src/components/common/DecisionTypeBadge.tsx"
+      ]
+    },
+    {
+      "component": "DecisionSplitPanelDetail",
+      "file_path": "src/components/decisions/DecisionSplitPanelDetail.tsx",
+      "type": "feature",
+      "requirements": ["FR-020"],
+      "v2_status": "new",
+      "cloudscape_components": [
+        {
+          "name": "SplitPanel",
+          "import_path": "@cloudscape-design/components/split-panel",
+          "key_props": ["header", "closeBehavior"],
+          "event_handlers": []
+        },
+        {
+          "name": "KeyValuePairs",
+          "import_path": "@cloudscape-design/components/key-value-pairs",
+          "key_props": ["items", "columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "StatusIndicator",
+          "import_path": "@cloudscape-design/components/status-indicator",
+          "key_props": ["type"],
+          "event_handlers": []
+        },
+        {
+          "name": "Box",
+          "import_path": "@cloudscape-design/components/box",
+          "key_props": ["variant"],
+          "event_handlers": []
+        },
+        {
+          "name": "Link",
+          "import_path": "@cloudscape-design/components/link",
+          "key_props": ["href"],
+          "event_handlers": []
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"],
+          "event_handlers": []
+        },
+        {
+          "name": "ColumnLayout",
+          "import_path": "@cloudscape-design/components/column-layout",
+          "key_props": ["columns"],
+          "event_handlers": []
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"],
+          "event_handlers": []
+        }
+      ],
+      "props_interface": {
+        "decision": "DecisionRecord | null"
+      },
+      "key_value_pairs": [
+        { "label": "NOTAM", "value": "Link to /notams/{notamId}" },
+        { "label": "결정 유형", "value": "DecisionTypeBadge" },
+        { "label": "결정자", "value": "decision.decidedBy" },
+        { "label": "결정일시", "value": "formatDate(decision.decidedAt)" },
+        { "label": "시간 영향 (T)", "value": "decision.tifrsTime" },
+        { "label": "운항 영향 (I)", "value": "decision.tifrsImpact" },
+        { "label": "시설 영향 (F)", "value": "decision.tifrsFacilities" },
+        { "label": "항로 영향 (R)", "value": "decision.tifrsRoute" },
+        { "label": "스케줄 영향 (S)", "value": "decision.tifrsSchedule" },
+        { "label": "결정 근거", "value": "decision.rationale" },
+        { "label": "AI 제안 결정", "value": "DecisionTypeBadge(decision.aiSuggestedDecision)" },
+        { "label": "AI 근거", "value": "decision.aiRationale" }
+      ],
+      "use_client": true,
+      "dependencies": ["src/types/decision.ts", "src/components/common/DecisionTypeBadge.tsx"]
+    }
+  ],
+  "pages": [
+    {
+      "component": "DashboardPage",
+      "file_path": "src/app/page.tsx",
+      "type": "page",
+      "route": "/",
+      "requirements": ["FR-006", "FR-005", "FR-016"],
+      "cloudscape_components": [
+        {
+          "name": "ContentLayout",
+          "import_path": "@cloudscape-design/components/content-layout",
+          "key_props": ["header"]
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"]
+        },
+        {
+          "name": "Grid",
+          "import_path": "@cloudscape-design/components/grid",
+          "key_props": ["gridDefinition"]
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"]
+        }
+      ],
+      "hook_used": "useDashboard",
+      "children": [
+        "CriticalAlertBanner",
+        "DashboardSummaryCards",
+        "RouteImpactMap",
+        "RecentCriticalNotams",
+        "AffectedFlightsSummary"
+      ],
+      "grid_layout": [
+        { "colspan": 12, "component": "CriticalAlertBanner" },
+        { "colspan": 12, "component": "DashboardSummaryCards" },
+        { "colspan": 8, "component": "RouteImpactMap" },
+        { "colspan": 4, "component": "RecentCriticalNotams" },
+        { "colspan": 12, "component": "AffectedFlightsSummary" }
+      ],
+      "content_type": "dashboard",
+      "use_client": true,
+      "dependencies": ["src/hooks/useDashboard.ts", "src/contexts/AlertContext.tsx"]
+    },
+    {
+      "component": "NotamListPage",
+      "file_path": "src/app/notams/page.tsx",
+      "type": "page",
+      "route": "/notams",
+      "requirements": ["FR-001", "FR-002", "FR-005", "FR-019"],
+      "hook_used": "useNotams",
+      "children": ["NotamTable", "NotamSplitPanelDetail"],
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useNotams.ts"]
+    },
+    {
+      "component": "NotamDetailPage",
+      "file_path": "src/app/notams/[id]/page.tsx",
+      "type": "page",
+      "route": "/notams/[id]",
+      "requirements": ["FR-002", "FR-003", "FR-012", "FR-015", "FR-018", "FR-020"],
+      "v2_change": "Added NotamDecisionSection child and FR-020 requirement",
+      "cloudscape_components": [
+        {
+          "name": "ContentLayout",
+          "import_path": "@cloudscape-design/components/content-layout",
+          "key_props": ["header"]
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant"]
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"]
+        }
+      ],
+      "hook_used": "useNotam",
+      "children": [
+        "NotamRawAndParsed",
+        "NotamAiAnalysis",
+        "NotamImpactSection",
+        "NotamMiniMap",
+        "NotamDiffView",
+        "NotamDecisionSection"
+      ],
+      "behavior": {
+        "load": "useNotam(id)로 NOTAM 데이터 로드",
+        "diff": "notam.type === 'NOTAMR' && notam.replacesNotamId가 있으면 GET /api/notams/{id}/diff 호출하여 NotamDiffView 렌더링",
+        "impact": "GET /api/notams/{id}/affected-routes, GET /api/notams/{id}/affected-flights로 영향 데이터 로드",
+        "reanalyze": "useNotamAnalysis trigger로 재분석 요청",
+        "decision": "NotamDecisionSection에 notamId와 notam 전달 — TIFRS 의사결정 기록/조회"
+      },
+      "content_type": "default",
+      "use_client": true,
+      "dependencies": [
+        "src/hooks/useNotam.ts",
+        "src/hooks/useNotamAnalysis.ts",
+        "src/hooks/useNotamDecision.ts",
+        "src/hooks/useRecordDecision.ts"
+      ]
+    },
+    {
+      "component": "FlightListPage",
+      "file_path": "src/app/flights/page.tsx",
+      "type": "page",
+      "route": "/flights",
+      "requirements": ["FR-004", "FR-013"],
+      "hook_used": "useFlights",
+      "children": ["FlightTable"],
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useFlights.ts"]
+    },
+    {
+      "component": "FlightDetailPage",
+      "file_path": "src/app/flights/[id]/page.tsx",
+      "type": "page",
+      "route": "/flights/[id]",
+      "requirements": ["FR-004", "FR-009", "FR-013"],
+      "hook_used": "useFlight",
+      "children": [
+        "FlightInfo",
+        "FlightNotamImpact",
+        "FlightRouteMap",
+        "FlightBriefingActions",
+        "RouteDeviationGuidance"
+      ],
+      "content_type": "default",
+      "use_client": true,
+      "dependencies": [
+        "src/hooks/useFlight.ts",
+        "src/hooks/useGenerateBriefing.ts",
+        "src/hooks/useRouteAlternatives.ts"
+      ]
+    },
+    {
+      "component": "RouteListPage",
+      "file_path": "src/app/routes/page.tsx",
+      "type": "page",
+      "route": "/routes",
+      "requirements": ["FR-010", "FR-006"],
+      "hook_used": "useRoutes",
+      "children": ["RouteTable"],
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useRoutes.ts"]
+    },
+    {
+      "component": "RouteDetailPage",
+      "file_path": "src/app/routes/[id]/page.tsx",
+      "type": "page",
+      "route": "/routes/[id]",
+      "requirements": ["FR-009", "FR-010"],
+      "hook_used": "useRoute",
+      "children": ["RouteInfo", "RouteMapVisualization", "RouteNotamImpacts", "RouteAlternatives"],
+      "content_type": "default",
+      "use_client": true,
+      "dependencies": ["src/hooks/useRoute.ts", "src/hooks/useRouteAlternatives.ts"]
+    },
+    {
+      "component": "RefBookPage",
+      "file_path": "src/app/ref-book/page.tsx",
+      "type": "page",
+      "route": "/ref-book",
+      "requirements": ["FR-011"],
+      "hook_used": "useRefBook",
+      "children": ["RefBookTable", "RefBookRegistrationModal"],
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useRefBook.ts"]
+    },
+    {
+      "component": "BriefingListPage",
+      "file_path": "src/app/briefings/page.tsx",
+      "type": "page",
+      "route": "/briefings",
+      "requirements": ["FR-007", "FR-008", "FR-014"],
+      "hook_used": "useBriefings",
+      "children": ["BriefingTable"],
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useBriefings.ts"]
+    },
+    {
+      "component": "BriefingDetailPage",
+      "file_path": "src/app/briefings/[id]/page.tsx",
+      "type": "page",
+      "route": "/briefings/[id]",
+      "requirements": ["FR-007", "FR-008"],
+      "hook_used": "useBriefing",
+      "children": ["BriefingInfo", "BriefingContentPreview", "BriefingApprovalActions"],
+      "content_type": "default",
+      "use_client": true,
+      "dependencies": ["src/hooks/useBriefing.ts"]
+    },
+    {
+      "component": "AuditLogPage",
+      "file_path": "src/app/audit-log/page.tsx",
+      "type": "page",
+      "route": "/audit-log",
+      "requirements": ["FR-017"],
+      "hook_used": "useAuditLog",
+      "children": ["AuditLogTable"],
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useAuditLog.ts"]
+    },
+    {
+      "component": "DecisionListPage",
+      "file_path": "src/app/decisions/page.tsx",
+      "type": "page",
+      "route": "/decisions",
+      "requirements": ["FR-020"],
+      "v2_status": "new",
+      "cloudscape_components": [
+        {
+          "name": "ContentLayout",
+          "import_path": "@cloudscape-design/components/content-layout",
+          "key_props": ["header"]
+        },
+        {
+          "name": "Header",
+          "import_path": "@cloudscape-design/components/header",
+          "key_props": ["variant", "counter"]
+        },
+        {
+          "name": "SpaceBetween",
+          "import_path": "@cloudscape-design/components/space-between",
+          "key_props": ["size"]
+        }
+      ],
+      "hook_used": "useDecisions",
+      "children": ["DecisionTable", "DecisionSplitPanelDetail"],
+      "behavior": {
+        "split_panel": "DecisionTable에서 행 선택 시 DecisionSplitPanelDetail에 해당 DecisionRecord 표시. AppLayout splitPanel prop 사용.",
+        "load": "useDecisions()로 전체 의사결정 기록 목록 로드"
+      },
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useDecisions.ts"]
+    }
+  ]
+}

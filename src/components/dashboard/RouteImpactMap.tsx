@@ -38,7 +38,10 @@ const DEFAULT_ZOOM = 6;
  * @param props.criticalNotams - 긴급 NOTAM 목록
  * @returns 지도 컨테이너
  */
-export default function RouteImpactMap({ routeImpacts, criticalNotams }: RouteImpactMapProps) {
+export default function RouteImpactMap({
+  routeImpacts,
+  criticalNotams: _criticalNotams,
+}: RouteImpactMapProps) {
   const ALL_OPTION: SelectProps.Option = { label: '전체', value: '__all__' };
   const [selectedOption, setSelectedOption] = useState<SelectProps.Option>(ALL_OPTION);
 
@@ -87,18 +90,15 @@ export default function RouteImpactMap({ routeImpacts, criticalNotams }: RouteIm
                     <strong>파란색 선</strong> — 등록된 항로의 경유지(waypoint)를 연결한 경로입니다.
                   </Box>
                   <Box variant="p">
-                    <strong>원형 영역</strong> — NOTAM의 적용 범위(반경)를 나타냅니다. 색상은 중요도를 의미합니다:
+                    <strong>원형 영역</strong> — NOTAM의 적용 범위(반경)를 나타냅니다. 색상은
+                    중요도를 의미합니다:
                   </Box>
                   <Box variant="small">
                     • <strong style={{ color: '#d13212' }}>빨간색</strong> — Critical (긴급)
-                    <br />
-                    • <strong style={{ color: '#ff9900' }}>주황색</strong> — High (높음)
-                    <br />
-                    • <strong style={{ color: '#0972d3' }}>파란색</strong> — 기타
+                    <br />• <strong style={{ color: '#ff9900' }}>주황색</strong> — High (높음)
+                    <br />• <strong style={{ color: '#0972d3' }}>파란색</strong> — 기타
                   </Box>
-                  <Box variant="p">
-                    항로 선택 드롭다운으로 특정 항로만 필터링할 수 있습니다.
-                  </Box>
+                  <Box variant="p">항로 선택 드롭다운으로 특정 항로만 필터링할 수 있습니다.</Box>
                 </SpaceBetween>
               }
               triggerType="custom"
@@ -204,6 +204,12 @@ function MapLegend() {
   );
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.impacts
+ * @param root0.mapNotams
+ */
 function RouteImpactMapLayers({
   impacts,
   mapNotams,
@@ -222,7 +228,10 @@ function RouteImpactMapLayers({
       eventHandlers?: Record<string, () => void>;
       children?: React.ReactNode;
     }>;
-    Polyline: React.ComponentType<{ positions: [number, number][]; pathOptions: Record<string, unknown> }>;
+    Polyline: React.ComponentType<{
+      positions: [number, number][];
+      pathOptions: Record<string, unknown>;
+    }>;
     Popup: React.ComponentType<{ children?: React.ReactNode }>;
   };
 
@@ -244,7 +253,11 @@ function RouteImpactMapLayers({
               ? '#ff9900'
               : '#0972d3';
         const fillOpacity =
-          notam.importanceLevel === 'critical' ? 0.3 : notam.importanceLevel === 'high' ? 0.25 : 0.2;
+          notam.importanceLevel === 'critical'
+            ? 0.3
+            : notam.importanceLevel === 'high'
+              ? 0.25
+              : 0.2;
 
         return (
           <rl.Circle
@@ -259,7 +272,10 @@ function RouteImpactMapLayers({
                   {notam.locationIndicator} — {notam.qCode}
                 </div>
                 <div style={{ marginBottom: 4, color: '#555' }}>
-                  중요도: <span style={{ color, fontWeight: 600 }}>{importanceLabel[notam.importanceLevel] ?? notam.importanceLevel}</span>
+                  중요도:{' '}
+                  <span style={{ color, fontWeight: 600 }}>
+                    {importanceLabel[notam.importanceLevel] ?? notam.importanceLevel}
+                  </span>
                   {' · '}반경 {notam.radius} NM
                 </div>
                 <div style={{ marginBottom: 6, fontSize: 12, lineHeight: '1.4' }}>
@@ -268,7 +284,12 @@ function RouteImpactMapLayers({
                 </div>
                 <a
                   href={`/notams/${notam.id}`}
-                  style={{ color: '#0972d3', textDecoration: 'none', fontWeight: 600, fontSize: 12 }}
+                  style={{
+                    color: '#0972d3',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    fontSize: 12,
+                  }}
                 >
                   상세 보기 →
                 </a>

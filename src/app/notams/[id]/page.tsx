@@ -17,6 +17,7 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import ErrorState from '@/components/common/ErrorState';
 import LoadingState from '@/components/common/LoadingState';
 import NotamAiAnalysis from '@/components/notams/NotamAiAnalysis';
+import NotamDecisionSection from '@/components/notams/NotamDecisionSection';
 import NotamDiffView from '@/components/notams/NotamDiffView';
 import NotamImpactSection from '@/components/notams/NotamImpactSection';
 import NotamMiniMap from '@/components/notams/NotamMiniMap';
@@ -101,6 +102,7 @@ export default function NotamDetailPage() {
           affectedRoutes={affectedRoutes}
           affectedFlights={affectedFlights}
         />
+        <NotamDecisionSection notam={notam} />
         {diffData && (
           <NotamDiffView
             original={diffData.original}

@@ -1,0 +1,249 @@
+{
+  "verdict": "PASS",
+  "iteration": 1,
+  "return_to": null,
+  "build": {
+    "success": true,
+    "lint_errors": 0,
+    "lint_warnings": 0,
+    "type_errors": 0
+  },
+  "scores": {
+    "cloudscape_compliance": {
+      "pass": true,
+      "checked_files": 49,
+      "evidence": "0 barrel imports, 223 individual path imports across 49 files. useCollection on all 12 Table components. TopNavigation outside AppLayout in AppShell.tsx. All events use ({ detail }) destructuring (20 occurrences). StatusIndicator in 14 files, Header in 34 files, no raw h1-h6 tags."
+    },
+    "nextjs_conventions": {
+      "pass": true,
+      "checked_files": 45,
+      "evidence": "All 12 pages use App Router conventions. layout.tsx exports metadata. Pages Router patterns (getServerSideProps etc.) absent. Next.js 15 async params pattern used in API routes. use client on files with hooks/events only."
+    },
+    "typescript_quality": {
+      "pass": true,
+      "checked_files": 121,
+      "evidence": "0 any types, 0 ts-ignore/ts-nocheck. 13 type definition files in src/types/. v2 adds decision.ts with DecisionRecord, CreateDecisionRecordRequest, DecisionType. Strict mode compatible with optional chaining and null guards."
+    },
+    "accessibility": {
+      "pass": true,
+      "checked_files": 14,
+      "evidence": "enableKeyboardNavigation on all 14 Table components. FormField wraps all form inputs in NotamDecisionSection (7 fields) and RefBookRegistrationModal. ariaLabel on TopNavigation notification button and RefBookTable delete button. Cloudscape provides built-in WCAG 2.1 AA."
+    },
+    "requirements_coverage": {
+      "pass": true,
+      "coverage": "20/20 FRs covered",
+      "evidence": "FR-001~FR-019 carried from v1. FR-020 (TIFRS decision) fully implemented: types, repository, API (GET/POST), validation (zod), AI (bedrock.service.analyzeTifrsDecision), components (NotamDecisionSection form+display, DecisionTable, DecisionSplitPanelDetail), hooks (useNotamDecision, useRecordDecision, useDecisions), seed data (5 records), /decisions page, audit log integration."
+    },
+    "backend_quality": {
+      "pass": true,
+      "checked_files": 44,
+      "evidence": "33 API routes with proper HTTP methods. zod safeParse on all POST/PUT routes (9 validation files). Proper HTTP codes: 400 validation, 404 not found, 201 created. Repository pattern in 11 files abstracts all data access. Business logic delegated to services (bedrock, matching, qCode, notamDiff)."
+    },
+    "code_organization": {
+      "pass": true,
+      "checked_files": 121,
+      "evidence": "Directory convention matches CLAUDE.md exactly. PascalCase components, camelCase hooks/utils, kebab-case API dirs. 0 barrel exports (index.ts). No circular dependencies. v2 files correctly placed: decisions/ components, decision.repository.ts, decision.validation.ts."
+    },
+    "comment_language": {
+      "pass": true,
+      "checked_files": 121,
+      "evidence": "All files have Korean JSDoc file headers. Export function JSDoc descriptions in Korean. JSDoc tag names in English. Inline comments in Korean where intent clarification needed."
+    },
+    "seed_data_consistency": {
+      "pass": true,
+      "checked_files": 12,
+      "evidence": "All FK references valid: decisions.notamId (5/5 exist in notams), refBookEntries.notamId (8/8), routeImpacts.notamId (11/11), routeImpacts.routeId (10/10), flightImpacts.flightId (14/14), flights.routeId (9/9). Volume meets NFR-007: 50 NOTAMs, 12 routes, 30 flights, 15 airports, 5 decisions. All enum values within defined ranges."
+    }
+  },
+  "test": {
+    "total": 63,
+    "passed": 63,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 35,
+    "coverage": {
+      "frs_with_tests": 15,
+      "frs_total": 20,
+      "coverage_percent": 75
+    },
+    "files": [
+      {
+        "file": "e2e/api.spec.ts",
+        "tests": 11,
+        "passed": 11,
+        "failed": 0,
+        "frs": [
+          "FR-001",
+          "FR-002",
+          "FR-003",
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007",
+          "FR-010",
+          "FR-013",
+          "FR-017"
+        ]
+      },
+      { "file": "e2e/audit-log.spec.ts", "tests": 2, "passed": 2, "failed": 0, "frs": ["FR-017"] },
+      { "file": "e2e/briefings.spec.ts", "tests": 3, "passed": 3, "failed": 0, "frs": ["FR-007"] },
+      {
+        "file": "e2e/dashboard.spec.ts",
+        "tests": 6,
+        "passed": 6,
+        "failed": 0,
+        "frs": ["FR-006", "FR-016"]
+      },
+      {
+        "file": "e2e/decisions-api.spec.ts",
+        "tests": 3,
+        "passed": 3,
+        "failed": 0,
+        "frs": ["FR-020"]
+      },
+      { "file": "e2e/decisions.spec.ts", "tests": 4, "passed": 4, "failed": 0, "frs": ["FR-020"] },
+      {
+        "file": "e2e/flights.spec.ts",
+        "tests": 5,
+        "passed": 5,
+        "failed": 0,
+        "frs": ["FR-004", "FR-013"]
+      },
+      { "file": "e2e/navigation.spec.ts", "tests": 9, "passed": 9, "failed": 0, "frs": ["all"] },
+      {
+        "file": "e2e/notam-decision.spec.ts",
+        "tests": 3,
+        "passed": 3,
+        "failed": 0,
+        "frs": ["FR-020"]
+      },
+      {
+        "file": "e2e/notam-detail.spec.ts",
+        "tests": 5,
+        "passed": 5,
+        "failed": 0,
+        "frs": ["FR-002", "FR-003", "FR-012"]
+      },
+      {
+        "file": "e2e/notams.spec.ts",
+        "tests": 5,
+        "passed": 5,
+        "failed": 0,
+        "frs": ["FR-001", "FR-005", "FR-019"]
+      },
+      { "file": "e2e/ref-book.spec.ts", "tests": 3, "passed": 3, "failed": 0, "frs": ["FR-011"] },
+      {
+        "file": "e2e/routes.spec.ts",
+        "tests": 4,
+        "passed": 4,
+        "failed": 0,
+        "frs": ["FR-009", "FR-010"]
+      }
+    ],
+    "iterations": [
+      {
+        "iteration": 1,
+        "total": 63,
+        "passed": 59,
+        "failed": 4,
+        "fixes_applied": []
+      },
+      {
+        "iteration": 2,
+        "total": 63,
+        "passed": 60,
+        "failed": 3,
+        "fixes_applied": [
+          "Changed dashboard Select selector to getByRole('combobox')",
+          "Changed DecisionTable row selection to getByRole('radio')",
+          "Updated TIFRS label regexes and added scrollIntoViewIfNeeded",
+          "Changed form selectors to Cloudscape-compatible getByRole patterns"
+        ]
+      },
+      {
+        "iteration": 3,
+        "total": 63,
+        "passed": 62,
+        "failed": 1,
+        "fixes_applied": [
+          "Added scrollIntoViewIfNeeded for AI analysis heading",
+          "Added scrollIntoViewIfNeeded for TIFRS heading",
+          "Added existing decision display check"
+        ]
+      },
+      {
+        "iteration": 4,
+        "total": 63,
+        "passed": 63,
+        "failed": 0,
+        "fixes_applied": [
+          "Added loading state wait for decision fetch",
+          "Added per-label scrollIntoViewIfNeeded for TIFRS fields"
+        ]
+      }
+    ]
+  },
+  "issues": [
+    {
+      "severity": "minor",
+      "id": "MINOR-001",
+      "category": "accessibility",
+      "file": "multiple components",
+      "description": "Explicit ariaLabel missing on some interactive elements (Select, TextFilter). Cloudscape provides internal aria mapping from placeholder/label, so functionally acceptable.",
+      "recommendation": "Add explicit ariaLabel for enhanced screen reader support during handover."
+    },
+    {
+      "severity": "minor",
+      "id": "MINOR-002",
+      "category": "cloudscape_compliance",
+      "file": "src/app/decisions/page.tsx:44",
+      "description": "DecisionSplitPanelDetail rendered inside ContentLayout instead of via AppLayout splitPanel prop. Works visually but misses AppLayout integration benefits.",
+      "recommendation": "Refactor to use AppLayout splitPanel prop for better Cloudscape UX pattern compliance."
+    }
+  ],
+  "v2_delta": {
+    "new_files": [
+      "src/types/decision.ts",
+      "src/lib/db/decision.repository.ts",
+      "src/lib/validation/decision.validation.ts",
+      "src/app/api/notams/[id]/decision/route.ts",
+      "src/app/api/decisions/route.ts",
+      "src/components/notams/NotamDecisionSection.tsx",
+      "src/components/decisions/DecisionTable.tsx",
+      "src/components/decisions/DecisionSplitPanelDetail.tsx",
+      "src/components/common/DecisionTypeBadge.tsx",
+      "src/hooks/useNotamDecision.ts",
+      "src/hooks/useRecordDecision.ts",
+      "src/hooks/useDecisions.ts",
+      "src/data/decisions.ts",
+      "src/app/decisions/page.tsx",
+      "e2e/decisions-api.spec.ts",
+      "e2e/decisions.spec.ts",
+      "e2e/notam-decision.spec.ts"
+    ],
+    "updated_files": [
+      "src/components/dashboard/RouteImpactMap.tsx",
+      "src/components/dashboard/RecentCriticalNotams.tsx",
+      "src/components/flights/FlightRouteMap.tsx",
+      "src/components/common/LeafletMapInner.tsx",
+      "src/components/routes/RouteTable.tsx",
+      "src/components/flights/FlightTable.tsx",
+      "src/lib/db/store.ts",
+      "src/lib/services/bedrock.service.ts",
+      "src/components/layout/AppShell.tsx",
+      "e2e/navigation.spec.ts"
+    ],
+    "fr_added": ["FR-020"],
+    "demo_feedback_applied": [
+      "FB-UX-001: Map legend added to RouteImpactMap",
+      "FB-UX-002: NOTAM circles clickable with popup on maps",
+      "FB-UX-003: Map header info popover added",
+      "FB-UX-004: Route dropdown '전체' default option",
+      "FB-UX-005: Map shows all importance levels (not just critical)",
+      "FB-UX-006: Consistent importance color coding (red/orange/blue)",
+      "FB-UX-007: Route/Flight table status info popovers",
+      "FB-UX-008: Dashboard important NOTAM includes critical+high",
+      "FB-BUG-001~003: Leaflet CSS/marker/wrapper fixes (NFR-008)"
+    ]
+  }
+}

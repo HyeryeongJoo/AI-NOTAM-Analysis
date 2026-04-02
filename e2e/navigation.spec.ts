@@ -13,6 +13,7 @@ test.describe('Navigation: All routes accessible', () => {
     { path: '/ref-book', name: 'REF BOOK' },
     { path: '/briefings', name: 'Briefing Documents' },
     { path: '/audit-log', name: 'Audit Log' },
+    { path: '/decisions', name: 'Decision Records' },
   ];
 
   for (const route of routes) {

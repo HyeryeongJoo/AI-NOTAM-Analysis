@@ -96,17 +96,20 @@ test.describe('FR-003: Spatial and schedule-based analysis', () => {
       // 페이지 렌더링 대기
       await expect(page.getByRole('heading').first()).toBeVisible();
 
-      // 스크린샷 확인: "AI 분석" 헤딩 + "재분석" 버튼 + "▶ 영향 분석" 확장 섹션
+      // AI 분석 섹션으로 스크롤하여 확인
+      const aiAnalysisHeading = page.getByRole('heading', { name: /AI 분석/i });
+      await aiAnalysisHeading.scrollIntoViewIfNeeded();
+      await expect(aiAnalysisHeading).toBeVisible();
+
+      // 재분석 버튼 또는 영향 분석 섹션이 존재해야 한다
       const reanalysisButton = page.getByRole('button', { name: /재분석|reanalyze/i }).first();
-      const aiAnalysisHeading = page.getByText(/AI 분석/).first();
-      const impactSection = page.getByText(/영향 분석/).first();
+      const impactSection = page.getByRole('button', { name: /영향 분석/i }).first();
 
       const hasReanalysis = await reanalysisButton.isVisible({ timeout: 5000 }).catch(() => false);
-      const hasAiHeading = await aiAnalysisHeading.isVisible({ timeout: 5000 }).catch(() => false);
       const hasImpact = await impactSection.isVisible({ timeout: 5000 }).catch(() => false);
 
       // AI 분석 관련 요소 중 하나는 존재해야 한다
-      expect(hasReanalysis || hasAiHeading || hasImpact).toBeTruthy();
+      expect(hasReanalysis || hasImpact).toBeTruthy();
 
       // 영향 분석 섹션을 클릭하여 펼치기 (인터랙션)
       if (hasImpact) {

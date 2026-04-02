@@ -47,9 +47,9 @@ test.describe('FR-006: Route impact analysis dashboard', () => {
   // FR-006 AC-6: 항로 선택 시 해당 항로와 관련 NOTAM만 필터링 (P0 - 인터랙션 테스트)
   test('route selection should filter map display', async ({ page }) => {
     // 항로 선택 드롭다운/셀렉트가 존재해야 한다
-    // 스크린샷에서 확인: "항로 선택 ▼" 버튼 존재
-    const routeSelect = page.locator('[class*="select"], [class*="Select"]').first();
-    const routeButton = page.getByText(/항로 선택/).first();
+    // v2: "전체" 기본 선택값을 가진 Cloudscape Select 컴포넌트
+    const routeSelect = page.getByRole('combobox').first();
+    const routeButton = page.getByText(/전체|항로 선택/).first();
 
     const hasSelect = await routeSelect.isVisible().catch(() => false);
     const hasButton = await routeButton.isVisible().catch(() => false);
@@ -67,7 +67,11 @@ test.describe('FR-016: Critical NOTAM alert banner', () => {
   test('critical alert banner should be visible on dashboard', async ({ page }) => {
     // 스크린샷에서 확인: 빨간 배너에 "[위험] RKRR - QWMLW" 표시
     // Cloudscape Flashbar 또는 커스텀 알림 배너
-    const alertBanner = page.locator('[class*="flashbar"], [class*="alert"], [class*="Alert"], [class*="banner"], [class*="Banner"]').first();
+    const alertBanner = page
+      .locator(
+        '[class*="flashbar"], [class*="alert"], [class*="Alert"], [class*="banner"], [class*="Banner"]',
+      )
+      .first();
     const alertText = page.getByText(/위험/).first();
 
     const hasBanner = await alertBanner.isVisible().catch(() => false);

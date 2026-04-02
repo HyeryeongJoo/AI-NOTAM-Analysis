@@ -2,8 +2,8 @@
 
 ## Customer Name: 제주항공 (Jeju Air)
 ## Industry: 항공 (Aviation / Low-Cost Carrier)
-## Date: 2026-03-30
-## Source: requirements-doc (JejuAir-AI-Powered-NOTAM-Analysis-System-Requirements.pdf)
+## Date: 2026-04-01
+## Source: requirements-doc (JejuAir-AI-Powered-NOTAM-Analysis-System-Requirements.pdf), workflow-diagram (항공정보분석workflow.png), demo-feedback (v1 데모 세션)
 
 ## Pain Points:
 1. 항공고정통신망(AFTN)을 통해 하루 수천 건의 NOTAM 전문이 실시간 수신되지만, 담당자 3명이 24시간 교대 근무로 수동 모니터링해야 함
@@ -58,6 +58,48 @@
 - A5. 중요도 점수화는 확률값(0~1)으로 표현하며, 임계치 기반 필터링 적용
 - A6. 대시보드는 지도 기반 시각화를 포함 (항로 위의 NOTAM 영향 영역 표시)
 
+## Workflow (항공정보분석workflow.png 기반):
+워크플로우 다이어그램에서 파악한 현행(As-Is) NOTAM 분석 프로세스:
+
+1. **NOTAM 수신**: AFTN(항공고정통신망)을 통해 NOTAM 전문 수신
+2. **분석자 파싱 및 해석**: 운항관리사가 J-FOS에서 수동으로 NOTAM 전문을 파싱하고 해석
+3. **중요도 분류**: Q-code 기반 1차 분류 후 자동분류 기반 운항 영향 분석 수행
+4. **Reference Book 등재**: 중요 NOTAM을 J-FOS의 Reference Book에 수기 등재
+5. **운항 영향 분석**: 등재된 NOTAM에 대해 자사 운항편/항로와의 영향도를 분석
+6. **의사결정**: 항로 변경, 스케줄 조정 등 운항 의사결정 수행
+7. **브리핑 자료 작성**: 승무원 브리핑 자료(DISP COMMENT, COMPANY NOTAM 등) 작성
+8. **의사결정 자료 작성**: TIFRS단 판단 근거를 포함한 의사결정 지원 자료 작성
+
+이 워크플로우에서 확인된 추가 인사이트:
+- 중요도 분류와 운항 영향 분석이 **별도 단계**로 분리되어 있음 (시스템에서도 이를 반영해야 함)
+- Reference Book 등재가 운항 영향 분석의 **전제 조건**으로 작동 (등재 후 영향 분석)
+- **TIFRS단 판단 근거**가 의사결정 자료에 포함되어야 함 (v1에서 미반영)
+- 브리핑 자료와 의사결정 자료가 **별도 산출물**로 생성됨
+
+## Demo Feedback (v1 데모 세션 피드백 — v2 반영 대상):
+v1 데모 세션에서 수집된 UX 개선 피드백 13건을 아래와 같이 정리한다.
+
+### 지도 시각화 개선
+- **FB-UX-001**: 지도에 범례(legend)를 추가하여 마커/원형의 색상 의미를 설명해야 함 (Critical=빨강, High=주황, Other=파랑, 항로 선)
+- **FB-UX-002**: NOTAM 원형(circle)을 클릭하면 상세 정보 팝업이 표시되고 상세 페이지로 이동하는 링크가 포함되어야 함
+- **FB-UX-003**: 지도 헤더에 설명 팝오버(info popover)를 추가하여 지도 요소의 의미를 안내해야 함
+- **FB-UX-004**: NOTAM 중요도별 색상을 일관되게 적용해야 함 (빨강=Critical, 주황=High, 파랑=기타) — 대시보드 지도와 운항편 지도 모두 동일
+
+### 데이터 필터링 변경
+- **FB-UX-005**: 항로 선택 드롭다운에 "전체" (All) 옵션을 추가하여 모든 항로의 NOTAM을 동시에 볼 수 있어야 함
+- **FB-UX-006**: "중요 NOTAM" 목록에 Critical뿐만 아니라 High 중요도 NOTAM도 포함해야 함 (critical + high)
+- **FB-UX-007**: 지도에 Critical NOTAM만이 아닌, 해당 항로에 영향을 미치는 **모든** NOTAM을 표시해야 함
+
+### 상태 정보 접근성
+- **FB-UX-008**: 항로 테이블의 "상태" 컬럼 헤더에 info 팝오버를 추가하여 active/suspended/alternate 각 상태값의 의미를 설명해야 함
+- **FB-UX-009**: 운항편 테이블의 "상태" 컬럼 헤더에도 동일하게 상태값 설명 팝오버를 추가해야 함
+
+### 지도 인프라 버그 수정
+- **FB-BUG-001**: Leaflet CSS가 CDN 링크 방식에서 모듈 import 방식으로 변경되어야 함
+- **FB-BUG-002**: Leaflet 마커 아이콘의 webpack 호환성 문제 수정 필요
+- **FB-BUG-003**: 지도 래퍼 div에 position:relative 추가 필요 (Grid 레이아웃 내 사이징 문제)
+
 ## Conflicts:
 - 소스가 단일 문서이므로 소스 간 모순은 없음
 - PDF에서 "AI 활용 과제 제안서_통제센터팀_NOTAM.xlsx"가 첨부로 언급되나 해당 파일이 제공되지 않아 상세 데이터 구조 확인 불가
+- 워크플로우 다이어그램에서 "TIFRS단 판단 근거"가 의사결정 자료의 구성요소로 언급되나, 요구사항 정의서 PDF에는 TIFRS에 대한 구체적 언급이 없음 — 고객 확인 필요

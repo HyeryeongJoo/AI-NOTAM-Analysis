@@ -10,6 +10,7 @@
 import { SEED_AIRPORTS } from '@/data/airports';
 import { SEED_AUDIT_LOGS } from '@/data/auditLogs';
 import { SEED_BRIEFINGS } from '@/data/briefings';
+import { SEED_DECISIONS } from '@/data/decisions';
 import { SEED_DISPATCHERS } from '@/data/dispatchers';
 import { SEED_FLIGHT_IMPACTS } from '@/data/flightImpacts';
 import { SEED_FLIGHTS } from '@/data/flights';
@@ -22,6 +23,7 @@ import type { Airport } from '@/types/airport';
 import type { AuditLog } from '@/types/auditLog';
 import type { Dispatcher } from '@/types/auth';
 import type { Briefing } from '@/types/briefing';
+import type { DecisionRecord } from '@/types/decision';
 import type { Flight } from '@/types/flight';
 import type { NotamFlightImpact, NotamRouteImpact } from '@/types/impact';
 import type { Notam } from '@/types/notam';
@@ -42,6 +44,7 @@ export interface Store {
   routeImpacts: NotamRouteImpact[];
   flightImpacts: NotamFlightImpact[];
   dispatchers: Map<string, Dispatcher>;
+  decisions: Map<string, DecisionRecord>;
 }
 
 /** 모듈 레벨 싱글턴 인스턴스 */
@@ -77,6 +80,9 @@ function initializeStore(): Store {
   const dispatchers = new Map<string, Dispatcher>();
   SEED_DISPATCHERS.forEach((d) => dispatchers.set(d.id, d));
 
+  const decisions = new Map<string, DecisionRecord>();
+  SEED_DECISIONS.forEach((dec) => decisions.set(dec.id, dec));
+
   return {
     notams,
     refBookEntries,
@@ -89,6 +95,7 @@ function initializeStore(): Store {
     routeImpacts: [...SEED_ROUTE_IMPACTS],
     flightImpacts: [...SEED_FLIGHT_IMPACTS],
     dispatchers,
+    decisions,
   };
 }
 
