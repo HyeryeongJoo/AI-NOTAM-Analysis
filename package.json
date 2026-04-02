@@ -24,30 +24,36 @@
     ]
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1020.0",
     "@cloudscape-design/board-components": "^3.0.159",
     "@cloudscape-design/chat-components": "^1.0.107",
     "@cloudscape-design/collection-hooks": "^1.0.87",
     "@cloudscape-design/components": "^3.0.1253",
     "@cloudscape-design/global-styles": "^1.0.54",
+    "leaflet": "^1.9.4",
     "next": "16.2.1",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-leaflet": "^5.0.0",
+    "swr": "^2.4.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52",
     "@tailwindcss/postcss": "^4",
+    "@types/leaflet": "^1.9.21",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2",
+    "eslint-plugin-jsdoc": "^50",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.1",
     "tailwindcss": "^4",
-    "@playwright/test": "^1.52",
-    "eslint-plugin-jsdoc": "^50",
-    "eslint-plugin-import": "^2",
     "typescript": "^5"
   }
 }

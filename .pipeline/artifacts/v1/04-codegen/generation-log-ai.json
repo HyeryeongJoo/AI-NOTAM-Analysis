@@ -1,0 +1,99 @@
+{
+  "metadata": {
+    "created": "2026-03-30T14:00:00Z",
+    "version": 1,
+    "generator": "ai"
+  },
+  "ai_architecture": {
+    "pattern": "ai-assisted-workflow",
+    "pattern_rationale": "Autonomy score <=5: deterministic pipeline controls all flow; AI is invoked at specific steps for scoring, summarization, analysis, and generation. No autonomous agent loop or dynamic tool selection needed.",
+    "model": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+    "sdk": "@aws-sdk/client-bedrock-runtime",
+    "strands_pattern": "none",
+    "strands_rationale": "Direct Bedrock API calls are appropriate for structured input/output LLM tasks within a deterministic pipeline. Strands SDK adds unnecessary complexity when there is no agent loop, tool selection, or multi-turn conversation.",
+    "tools": [],
+    "has_rag": false,
+    "has_streaming": false,
+    "has_memory": false,
+    "prompt_engineering": {
+      "technique": "XML-tagged structured prompts",
+      "output_format": "JSON structured output with regex extraction + validation",
+      "fallback_strategy": "Q-Code rule-based classification on parse failure",
+      "domain_optimization": "Aviation NOTAM domain: ICAO terminology, Jeju Air route network context, REF BOOK registration patterns"
+    }
+  },
+  "three_axis_assessment": {
+    "tool_complexity": { "score": 0, "rationale": "No tools. Direct LLM calls with structured I/O." },
+    "role_separation": { "score": 0, "rationale": "No conflicting roles. Each function is a single-purpose LLM call." },
+    "flow_complexity": { "score": 0, "rationale": "Linear pipeline. No branching, loops, or dynamic routing." },
+    "total": 0,
+    "verdict": "Single agent (direct LLM calls)"
+  },
+  "ai_functions": [
+    {
+      "id": "FR-001",
+      "function": "analyzeNotamImportance",
+      "description": "NOTAM importance scoring with structured JSON output",
+      "prompt_type": "structured-output",
+      "temperature": 0.1
+    },
+    {
+      "id": "FR-015",
+      "function": "generateKoreanSummary",
+      "description": "NOTAM plain-language Korean summary",
+      "prompt_type": "generation",
+      "temperature": 0.3
+    },
+    {
+      "id": "FR-003",
+      "function": "generateImpactAnalysis",
+      "description": "Spatial/schedule-based comprehensive NOTAM impact analysis",
+      "prompt_type": "analysis",
+      "temperature": 0.3
+    },
+    {
+      "id": "FR-007",
+      "function": "generateBriefingContent",
+      "description": "Dispatcher briefing document (4 types)",
+      "prompt_type": "generation",
+      "temperature": 0.4
+    },
+    {
+      "id": "FR-008",
+      "function": "generateCrewPackage",
+      "description": "Crew briefing package (DISP Comment + Company NOTAM + Crew Briefing)",
+      "prompt_type": "structured-output",
+      "temperature": 0.3
+    },
+    {
+      "id": "FR-014",
+      "function": "generateShiftHandoverReport",
+      "description": "Shift handover report generation",
+      "prompt_type": "generation",
+      "temperature": 0.3
+    },
+    {
+      "id": "FR-009",
+      "function": "suggestRouteAlternatives",
+      "description": "Route deviation decision guidance with structured comparison",
+      "prompt_type": "structured-output",
+      "temperature": 0.2
+    }
+  ],
+  "files_created": [
+    { "path": "src/lib/ai/types.ts", "lines": 52, "status": "created", "description": "AI type definitions" },
+    { "path": "src/lib/ai/prompts/system.ts", "lines": 257, "status": "created", "description": "XML-structured system prompts" },
+    { "path": "src/lib/ai/prompts/templates.ts", "lines": 236, "status": "created", "description": "User message templates" },
+    { "path": "src/lib/ai/parsers.ts", "lines": 161, "status": "created", "description": "Response parsing utilities" },
+    { "path": "src/lib/services/bedrock.service.ts", "lines": 279, "status": "refactored", "description": "Bedrock service refactored to use AI module" },
+    { "path": ".env.local.example", "lines": 14, "status": "created", "description": "Bedrock environment configuration" }
+  ],
+  "dependencies_installed": [],
+  "dependencies_existing": ["@aws-sdk/client-bedrock-runtime"],
+  "build_result": {
+    "success": true,
+    "attempts": 1,
+    "errors": [],
+    "warnings": []
+  }
+}

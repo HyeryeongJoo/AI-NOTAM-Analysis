@@ -1,0 +1,1620 @@
+{
+  "generator": "backend",
+  "metadata": {
+    "created": "2026-03-30T12:00:00Z",
+    "version": 1,
+    "total_specs": 42,
+    "description": "Backend specs for Jeju Air AI NOTAM Analysis System"
+  },
+  "generation_order": ["types", "validation", "data", "db", "services", "api", "middleware"],
+  "types": [
+    {
+      "name": "NotamType",
+      "file_path": "src/types/notam.ts",
+      "kind": "enum",
+      "values": ["NOTAMN", "NOTAMR", "NOTAMC"]
+    },
+    {
+      "name": "NotamStatus",
+      "file_path": "src/types/notam.ts",
+      "kind": "enum",
+      "values": ["new", "active", "analyzed", "ref-book-registered", "expired", "cancelled", "replaced"]
+    },
+    {
+      "name": "ImportanceLevel",
+      "file_path": "src/types/notam.ts",
+      "kind": "enum",
+      "values": ["critical", "high", "medium", "low", "routine"]
+    },
+    {
+      "name": "Notam",
+      "file_path": "src/types/notam.ts",
+      "kind": "interface",
+      "fields": {
+        "id": "string",
+        "series": "string",
+        "number": "number",
+        "year": "number",
+        "type": "NotamType",
+        "qCode": "string",
+        "qCodeSubject": "string",
+        "qCodeCondition": "string",
+        "fir": "string",
+        "trafficType": "string",
+        "purpose": "string",
+        "scope": "string",
+        "lowerLimit": "string",
+        "upperLimit": "string",
+        "latitude": "number",
+        "longitude": "number",
+        "radius": "number",
+        "locationIndicator": "string",
+        "effectiveFrom": "string",
+        "effectiveTo": "string",
+        "schedule": "string | null",
+        "body": "string",
+        "rawText": "string",
+        "importanceScore": "number",
+        "importanceLevel": "ImportanceLevel",
+        "aiSummary": "string | null",
+        "aiAnalysis": "string | null",
+        "status": "NotamStatus",
+        "replacesNotamId": "string | null",
+        "createdAt": "string"
+      }
+    },
+    {
+      "name": "NotamStats",
+      "file_path": "src/types/notam.ts",
+      "kind": "interface",
+      "fields": {
+        "total": "number",
+        "bySeverity": "Record<ImportanceLevel, number>",
+        "byStatus": "Record<NotamStatus, number>",
+        "expiringSoon": "number"
+      }
+    },
+    {
+      "name": "DiffChange",
+      "file_path": "src/types/notam.ts",
+      "kind": "interface",
+      "fields": {
+        "field": "string",
+        "oldValue": "string",
+        "newValue": "string"
+      }
+    },
+    {
+      "name": "RefBookStatus",
+      "file_path": "src/types/refBook.ts",
+      "kind": "enum",
+      "values": ["active", "expired", "superseded"]
+    },
+    {
+      "name": "RefBookEntry",
+      "file_path": "src/types/refBook.ts",
+      "kind": "interface",
+      "fields": {
+        "id": "string",
+        "notamId": "string",
+        "registeredBy": "string",
+        "registeredAt": "string",
+        "summary": "string",
+        "impactLevel": "ImportanceLevel",
+        "affectedAirports": "string[]",
+        "affectedRoutes": "string[]",
+        "remarks": "string",
+        "status": "RefBookStatus",
+        "expiresAt": "string"
+      }
+    },
+    {
+      "name": "FlightStatus",
+      "file_path": "src/types/flight.ts",
+      "kind": "enum",
+      "values": ["scheduled", "dispatched", "in-flight", "arrived", "cancelled", "diverted"]
+    },
+    {
+      "name": "Flight",
+      "file_path": "src/types/flight.ts",
+      "kind": "interface",
+      "fields": {
+        "id": "string",
+        "flightNumber": "string",
+        "departureAirport": "string",
+        "arrivalAirport": "string",
+        "scheduledDeparture": "string",
+        "scheduledArrival": "string",
+        "routeId": "string",
+        "aircraftType": "string",
+        "status": "FlightStatus",
+        "notamImpactCount": "number",
+        "notamMaxSeverity": "ImportanceLevel"
+      }
+    },
+    {
+      "name": "RouteStatus",
+      "file_path": "src/types/route.ts",
+      "kind": "enum",
+      "values": ["active", "suspended", "alternate"]
+    },
+    {
+      "name": "Waypoint",
+      "file_path": "src/types/route.ts",
+      "kind": "interface",
+      "fields": {
+        "id": "string",
+        "name": "string",
+        "latitude": "number",
+        "longitude": "number",
+        "sequenceOrder": "number"
+      }
+    },
+    {
+      "name": "Route",
+      "file_path": "src/types/route.ts",
+      "kind": "interface",
+      "fields": {
+        "id": "string",
+        "routeName": "string",
+        "departureAirport": "string",
+        "arrivalAirport": "string",
+        "waypoints": "Waypoint[]",
+        "airways": "string[]",
+        "distance": "number",
+        "flightLevel": "string",
+        "status": "RouteStatus",
+        "alternateRouteIds": "string[]"
+      }
+    },
+    {
+      "name": "RouteAlternative",
+      "file_path": "src/types/route.ts",
+      "kind": "interface",
+      "fields": {
+        "route": "Route",
+        "reason": "string",
+        "distanceDifference": "number",
+        "timeDifference": "number",
+        "avoidedNotams": "string[]"
+      }
+    },
+    {
+      "name": "Airport",
+      "file_path": "src/types/airport.ts",
+      "kind": "interface",
+      "fields": {
+        "icaoCode": "string",
+        "iataCode": "string",
+        "name": "string",
+        "nameKo": "string",
+        "latitude": "number",
+        "longitude": "number",
+        "runwayCount": "number",
+        "fir": "string",
+        "country": "string",
+        "timezone": "string"
+      }
+    },
+    {
+      "name": "BriefingType",
+      "file_path": "src/types/briefing.ts",
+      "kind": "enum",
+      "values": ["dispatcher-summary", "company-notam", "disp-comment", "crew-briefing"]
+    },
+    {
+      "name": "BriefingStatus",
+      "file_path": "src/types/briefing.ts",
+      "kind": "enum",
+      "values": ["draft", "pending-review", "approved", "distributed"]
+    },
+    {
+      "name": "Briefing",
+      "file_path": "src/types/briefing.ts",
+      "kind": "interface",
+      "fields": {
+        "id": "string",
+        "type": "BriefingType",
+        "flightId": "string",
+        "generatedAt": "string",
+        "content": "string",
+        "notamIds": "string[]",
+        "status": "BriefingStatus",
+        "approvedBy": "string | null",
+        "approvedAt": "string | null"
+      }
+    },
+    {
+      "name": "AuditAction",
+      "file_path": "src/types/auditLog.ts",
+      "kind": "enum",
+      "values": ["view", "analyze", "approve", "reject", "register-ref-book", "generate-briefing", "acknowledge-alert"]
+    },
+    {
+      "name": "AuditLog",
+      "file_path": "src/types/auditLog.ts",
+      "kind": "interface",
+      "fields": {
+        "id": "string",
+        "userId": "string",
+        "action": "AuditAction",
+        "targetType": "string",
+        "targetId": "string",
+        "details": "string",
+        "timestamp": "string"
+      }
+    },
+    {
+      "name": "QCode",
+      "file_path": "src/types/qCode.ts",
+      "kind": "interface",
+      "fields": {
+        "code": "string",
+        "subject": "string",
+        "condition": "string",
+        "description": "string",
+        "descriptionKo": "string",
+        "defaultImportance": "ImportanceLevel"
+      }
+    },
+    {
+      "name": "NotamRouteImpact",
+      "file_path": "src/types/impact.ts",
+      "kind": "interface",
+      "fields": {
+        "id": "string",
+        "notamId": "string",
+        "routeId": "string",
+        "overlapType": "string",
+        "affectedSegment": "string",
+        "distanceThroughArea": "number",
+        "altitudeConflict": "boolean"
+      }
+    },
+    {
+      "name": "NotamFlightImpact",
+      "file_path": "src/types/impact.ts",
+      "kind": "interface",
+      "fields": {
+        "id": "string",
+        "notamId": "string",
+        "flightId": "string",
+        "routeId": "string",
+        "temporalOverlap": "boolean",
+        "spatialOverlap": "boolean",
+        "impactSummary": "string"
+      }
+    },
+    {
+      "name": "Dispatcher",
+      "file_path": "src/types/auth.ts",
+      "kind": "interface",
+      "fields": {
+        "id": "string",
+        "name": "string",
+        "employeeId": "string",
+        "role": "string"
+      }
+    },
+    {
+      "name": "DashboardSummary",
+      "file_path": "src/types/dashboard.ts",
+      "kind": "interface",
+      "fields": {
+        "totalActiveNotams": "number",
+        "criticalCount": "number",
+        "highCount": "number",
+        "affectedRoutesCount": "number",
+        "affectedFlightsCount": "number",
+        "filteredVsTotalRatio": "number"
+      }
+    },
+    {
+      "name": "RouteImpactMapData",
+      "file_path": "src/types/dashboard.ts",
+      "kind": "interface",
+      "fields": {
+        "route": "Route",
+        "impacts": "NotamRouteImpact[]",
+        "notams": "Notam[]"
+      }
+    },
+    {
+      "name": "CreateRefBookEntryRequest",
+      "file_path": "src/types/refBook.ts",
+      "kind": "interface",
+      "fields": {
+        "notamId": "string",
+        "summary": "string",
+        "impactLevel": "ImportanceLevel",
+        "affectedAirports": "string[]",
+        "affectedRoutes": "string[]",
+        "remarks": "string",
+        "expiresAt": "string"
+      }
+    },
+    {
+      "name": "UpdateRefBookEntryRequest",
+      "file_path": "src/types/refBook.ts",
+      "kind": "interface",
+      "fields": {
+        "summary": "string | undefined",
+        "impactLevel": "ImportanceLevel | undefined",
+        "affectedAirports": "string[] | undefined",
+        "affectedRoutes": "string[] | undefined",
+        "remarks": "string | undefined",
+        "status": "RefBookStatus | undefined",
+        "expiresAt": "string | undefined"
+      }
+    },
+    {
+      "name": "UpdateBriefingRequest",
+      "file_path": "src/types/briefing.ts",
+      "kind": "interface",
+      "fields": {
+        "content": "string | undefined",
+        "status": "BriefingStatus | undefined",
+        "approvedBy": "string | undefined"
+      }
+    },
+    {
+      "name": "CreateAuditLogRequest",
+      "file_path": "src/types/auditLog.ts",
+      "kind": "interface",
+      "fields": {
+        "userId": "string",
+        "action": "AuditAction",
+        "targetType": "string",
+        "targetId": "string",
+        "details": "string"
+      }
+    },
+    {
+      "name": "PaginatedResponse<T>",
+      "file_path": "src/types/common.ts",
+      "kind": "interface",
+      "fields": {
+        "items": "T[]",
+        "total": "number"
+      }
+    },
+    {
+      "name": "ApiErrorResponse",
+      "file_path": "src/types/common.ts",
+      "kind": "interface",
+      "fields": {
+        "error": "string",
+        "message": "string",
+        "statusCode": "number"
+      }
+    }
+  ],
+  "validation": [
+    {
+      "name": "analyzeNotamSchema",
+      "file_path": "src/lib/validation/notam.validation.ts",
+      "schema": {
+        "notamId": "z.string().uuid()"
+      },
+      "used_by": ["POST /api/notams/analyze"]
+    },
+    {
+      "name": "notamQuerySchema",
+      "file_path": "src/lib/validation/notam.validation.ts",
+      "schema": {
+        "importance": "z.enum(['critical','high','medium','low','routine']).optional()",
+        "status": "z.enum(['new','active','analyzed','ref-book-registered','expired','cancelled','replaced']).optional()",
+        "airport": "z.string().length(4).optional()",
+        "qCode": "z.string().optional()",
+        "expiryStatus": "z.enum(['expiring-soon','expired','active']).optional()",
+        "sortBy": "z.enum(['importanceScore','effectiveFrom','effectiveTo','locationIndicator','createdAt']).optional()",
+        "order": "z.enum(['asc','desc']).optional()",
+        "page": "z.coerce.number().int().positive().optional().default(1)",
+        "pageSize": "z.coerce.number().int().positive().max(100).optional().default(20)"
+      },
+      "used_by": ["GET /api/notams"]
+    },
+    {
+      "name": "createRefBookEntrySchema",
+      "file_path": "src/lib/validation/refBook.validation.ts",
+      "schema": {
+        "notamId": "z.string().uuid()",
+        "summary": "z.string().min(1).max(2000)",
+        "impactLevel": "z.enum(['critical','high','medium','low','routine'])",
+        "affectedAirports": "z.array(z.string().length(4)).min(1)",
+        "affectedRoutes": "z.array(z.string()).optional().default([])",
+        "remarks": "z.string().max(1000).optional().default('')",
+        "expiresAt": "z.string().datetime()"
+      },
+      "used_by": ["POST /api/ref-book"]
+    },
+    {
+      "name": "updateRefBookEntrySchema",
+      "file_path": "src/lib/validation/refBook.validation.ts",
+      "schema": {
+        "summary": "z.string().min(1).max(2000).optional()",
+        "impactLevel": "z.enum(['critical','high','medium','low','routine']).optional()",
+        "affectedAirports": "z.array(z.string().length(4)).optional()",
+        "affectedRoutes": "z.array(z.string()).optional()",
+        "remarks": "z.string().max(1000).optional()",
+        "status": "z.enum(['active','expired','superseded']).optional()",
+        "expiresAt": "z.string().datetime().optional()"
+      },
+      "used_by": ["PUT /api/ref-book/[id]"]
+    },
+    {
+      "name": "generateBriefingSchema",
+      "file_path": "src/lib/validation/briefing.validation.ts",
+      "schema": {
+        "flightId": "z.string().uuid()",
+        "type": "z.enum(['dispatcher-summary','company-notam','disp-comment','crew-briefing'])"
+      },
+      "used_by": ["POST /api/briefings/generate"]
+    },
+    {
+      "name": "generateCrewBriefingSchema",
+      "file_path": "src/lib/validation/briefing.validation.ts",
+      "schema": {
+        "flightId": "z.string().uuid()"
+      },
+      "used_by": ["POST /api/briefings/generate-crew"]
+    },
+    {
+      "name": "updateBriefingSchema",
+      "file_path": "src/lib/validation/briefing.validation.ts",
+      "schema": {
+        "content": "z.string().min(1).optional()",
+        "status": "z.enum(['draft','pending-review','approved','distributed']).optional()",
+        "approvedBy": "z.string().optional()"
+      },
+      "used_by": ["PUT /api/briefings/[id]"]
+    },
+    {
+      "name": "shiftHandoverSchema",
+      "file_path": "src/lib/validation/briefing.validation.ts",
+      "schema": {
+        "shiftStartTime": "z.string().datetime()",
+        "shiftEndTime": "z.string().datetime()"
+      },
+      "used_by": ["POST /api/reports/shift-handover"]
+    },
+    {
+      "name": "routeAlternativesSchema",
+      "file_path": "src/lib/validation/route.validation.ts",
+      "schema": {
+        "notamId": "z.string().uuid()"
+      },
+      "used_by": ["POST /api/routes/[id]/alternatives"]
+    },
+    {
+      "name": "matchingCalculateSchema",
+      "file_path": "src/lib/validation/matching.validation.ts",
+      "schema": {
+        "notamId": "z.string().uuid().optional()"
+      },
+      "used_by": ["POST /api/matching/calculate"]
+    },
+    {
+      "name": "flightQuerySchema",
+      "file_path": "src/lib/validation/flight.validation.ts",
+      "schema": {
+        "airport": "z.string().length(4).optional()",
+        "route": "z.string().optional()",
+        "date": "z.string().optional()",
+        "impactStatus": "z.enum(['affected','clear','all']).optional()",
+        "sortBy": "z.enum(['flightNumber','scheduledDeparture','departureAirport','notamImpactCount']).optional()",
+        "order": "z.enum(['asc','desc']).optional()",
+        "page": "z.coerce.number().int().positive().optional().default(1)",
+        "pageSize": "z.coerce.number().int().positive().max(100).optional().default(20)"
+      },
+      "used_by": ["GET /api/flights"]
+    },
+    {
+      "name": "routeQuerySchema",
+      "file_path": "src/lib/validation/route.validation.ts",
+      "schema": {
+        "status": "z.enum(['active','suspended','alternate']).optional()",
+        "sortBy": "z.enum(['routeName','departureAirport','distance']).optional()",
+        "order": "z.enum(['asc','desc']).optional()",
+        "page": "z.coerce.number().int().positive().optional().default(1)",
+        "pageSize": "z.coerce.number().int().positive().max(100).optional().default(20)"
+      },
+      "used_by": ["GET /api/routes"]
+    },
+    {
+      "name": "auditLogQuerySchema",
+      "file_path": "src/lib/validation/auditLog.validation.ts",
+      "schema": {
+        "userId": "z.string().optional()",
+        "action": "z.enum(['view','analyze','approve','reject','register-ref-book','generate-briefing','acknowledge-alert']).optional()",
+        "targetType": "z.string().optional()",
+        "startDate": "z.string().datetime().optional()",
+        "endDate": "z.string().datetime().optional()",
+        "page": "z.coerce.number().int().positive().optional().default(1)",
+        "pageSize": "z.coerce.number().int().positive().max(100).optional().default(20)"
+      },
+      "used_by": ["GET /api/audit-log"]
+    },
+    {
+      "name": "createAuditLogSchema",
+      "file_path": "src/lib/validation/auditLog.validation.ts",
+      "schema": {
+        "userId": "z.string().min(1)",
+        "action": "z.enum(['view','analyze','approve','reject','register-ref-book','generate-briefing','acknowledge-alert'])",
+        "targetType": "z.string().min(1)",
+        "targetId": "z.string().min(1)",
+        "details": "z.string().max(2000).optional().default('')"
+      },
+      "used_by": ["POST /api/audit-log"]
+    },
+    {
+      "name": "loginSchema",
+      "file_path": "src/lib/validation/auth.validation.ts",
+      "schema": {
+        "username": "z.string().min(1)",
+        "password": "z.string().min(1)"
+      },
+      "used_by": ["POST /api/auth/login"]
+    }
+  ],
+  "seed_data": [
+    {
+      "file_path": "src/data/airports.ts",
+      "export_name": "SEED_AIRPORTS",
+      "type": "Airport",
+      "count": 15,
+      "description": "Korean and major Asian airports in Jeju Air network: RKSI(ICN), RKSS(GMP), RKPC(CJU), RKPK(PUS), RKTN(TAE), RKJJ(KWJ), RKJY(RSU), RJTT(NRT/HND), RJAA(NRT), RJBB(KIX), RJFF(FUK), VVNB(HAN), VTBS(BKK), RPLL(MNL), ZSSS(SHA)"
+    },
+    {
+      "file_path": "src/data/routes.ts",
+      "export_name": "SEED_ROUTES",
+      "type": "Route",
+      "count": 12,
+      "description": "Jeju Air major routes: ICN-CJU, ICN-PUS, ICN-NRT, ICN-KIX, ICN-BKK, ICN-HAN, CJU-NRT, CJU-KIX, PUS-NRT, GMP-CJU, ICN-MNL, ICN-SHA. Each with realistic waypoints on ICAO airways."
+    },
+    {
+      "file_path": "src/data/flights.ts",
+      "export_name": "SEED_FLIGHTS",
+      "type": "Flight",
+      "count": 30,
+      "description": "30 flights across routes with realistic 7C-prefixed flight numbers (e.g., 7C101, 7C201). Mix of scheduled, dispatched, in-flight, arrived statuses. B737-800 aircraft."
+    },
+    {
+      "file_path": "src/data/notams.ts",
+      "export_name": "SEED_NOTAMS",
+      "type": "Notam",
+      "count": 50,
+      "description": "50 realistic ICAO-format NOTAMs. Mix: runway closures (QMRLC), navaid outages (QNVAS), airspace restrictions (QFALC), aerodrome changes (QMAXX), taxiway closures (QMXLC). Various FIRs: RKRR, RJJJ, VTBB, VVHN. Pre-scored with importanceScore and importanceLevel."
+    },
+    {
+      "file_path": "src/data/qCodes.ts",
+      "export_name": "SEED_Q_CODES",
+      "type": "QCode",
+      "count": 25,
+      "description": "25 common Q-Codes with Korean descriptions and default importance levels. Covers runway, taxiway, aerodrome, navaid, airspace, lighting, ILS, SID/STAR categories."
+    },
+    {
+      "file_path": "src/data/refBookEntries.ts",
+      "export_name": "SEED_REF_BOOK_ENTRIES",
+      "type": "RefBookEntry",
+      "count": 8,
+      "description": "8 REF BOOK entries linked to high/critical NOTAMs. Registered by dispatcher Kim."
+    },
+    {
+      "file_path": "src/data/briefings.ts",
+      "export_name": "SEED_BRIEFINGS",
+      "type": "Briefing",
+      "count": 5,
+      "description": "5 briefings: 2 dispatcher-summary, 1 company-notam, 1 disp-comment, 1 crew-briefing. Mix of draft, approved statuses."
+    },
+    {
+      "file_path": "src/data/auditLogs.ts",
+      "export_name": "SEED_AUDIT_LOGS",
+      "type": "AuditLog",
+      "count": 15,
+      "description": "15 audit log entries covering view, analyze, approve, register-ref-book, generate-briefing actions."
+    },
+    {
+      "file_path": "src/data/routeImpacts.ts",
+      "export_name": "SEED_ROUTE_IMPACTS",
+      "type": "NotamRouteImpact",
+      "count": 20,
+      "description": "20 pre-calculated NOTAM-route impact records linking NOTAMs to affected routes with overlap details."
+    },
+    {
+      "file_path": "src/data/flightImpacts.ts",
+      "export_name": "SEED_FLIGHT_IMPACTS",
+      "type": "NotamFlightImpact",
+      "count": 25,
+      "description": "25 pre-calculated NOTAM-flight impact records with temporal and spatial overlap flags."
+    },
+    {
+      "file_path": "src/data/dispatchers.ts",
+      "export_name": "SEED_DISPATCHERS",
+      "type": "Dispatcher",
+      "count": 3,
+      "description": "3 dispatchers: Kim Dispatcher (morning), Lee Dispatcher (afternoon), Park Dispatcher (night)."
+    }
+  ],
+  "db": [
+    {
+      "name": "InMemoryStore",
+      "file_path": "src/lib/db/store.ts",
+      "description": "Central in-memory store. Initializes from seed data on first access. Singleton pattern via module-level variable.",
+      "exports": [
+        {
+          "name": "getStore",
+          "signature": "() => Store",
+          "description": "Returns singleton store instance, initializing from seed data if needed"
+        }
+      ],
+      "store_shape": {
+        "notams": "Map<string, Notam>",
+        "refBookEntries": "Map<string, RefBookEntry>",
+        "flights": "Map<string, Flight>",
+        "routes": "Map<string, Route>",
+        "airports": "Map<string, Airport>",
+        "qCodes": "Map<string, QCode>",
+        "briefings": "Map<string, Briefing>",
+        "auditLogs": "AuditLog[]",
+        "routeImpacts": "NotamRouteImpact[]",
+        "flightImpacts": "NotamFlightImpact[]",
+        "dispatchers": "Map<string, Dispatcher>"
+      }
+    },
+    {
+      "name": "NotamRepository",
+      "file_path": "src/lib/db/notam.repository.ts",
+      "description": "NOTAM data access layer with filtering, sorting, pagination, and stats aggregation.",
+      "exports": [
+        {
+          "name": "findAll",
+          "signature": "(params: { importance?: ImportanceLevel; status?: NotamStatus; airport?: string; qCode?: string; expiryStatus?: string; sortBy?: string; order?: string; page: number; pageSize: number }) => { items: Notam[]; total: number; stats: NotamStats }",
+          "description": "Filtered, sorted, paginated NOTAM list with stats"
+        },
+        {
+          "name": "findById",
+          "signature": "(id: string) => Notam | undefined",
+          "description": "Single NOTAM by ID"
+        },
+        {
+          "name": "update",
+          "signature": "(id: string, data: Partial<Notam>) => Notam | undefined",
+          "description": "Update NOTAM fields (e.g., after AI analysis)"
+        },
+        {
+          "name": "findAlerts",
+          "signature": "() => Notam[]",
+          "description": "Critical NOTAMs in new/active status"
+        },
+        {
+          "name": "getStats",
+          "signature": "() => NotamStats",
+          "description": "Aggregate statistics across all NOTAMs"
+        },
+        {
+          "name": "findByReplacesId",
+          "signature": "(replacesNotamId: string) => Notam | undefined",
+          "description": "Find replacement NOTAM for diff view"
+        }
+      ],
+      "dependencies": ["src/lib/db/store.ts", "src/types/notam.ts"]
+    },
+    {
+      "name": "FlightRepository",
+      "file_path": "src/lib/db/flight.repository.ts",
+      "description": "Flight data access with schedule filtering and NOTAM impact status.",
+      "exports": [
+        {
+          "name": "findAll",
+          "signature": "(params: { airport?: string; route?: string; date?: string; impactStatus?: string; sortBy?: string; order?: string; page: number; pageSize: number }) => { items: Flight[]; total: number }",
+          "description": "Filtered, sorted, paginated flight list"
+        },
+        {
+          "name": "findById",
+          "signature": "(id: string) => Flight | undefined",
+          "description": "Single flight by ID"
+        }
+      ],
+      "dependencies": ["src/lib/db/store.ts", "src/types/flight.ts"]
+    },
+    {
+      "name": "RouteRepository",
+      "file_path": "src/lib/db/route.repository.ts",
+      "description": "Route data access with waypoint data and status filtering.",
+      "exports": [
+        {
+          "name": "findAll",
+          "signature": "(params: { status?: RouteStatus; sortBy?: string; order?: string; page: number; pageSize: number }) => { items: Route[]; total: number }",
+          "description": "Filtered, sorted, paginated route list"
+        },
+        {
+          "name": "findById",
+          "signature": "(id: string) => Route | undefined",
+          "description": "Single route by ID with waypoints"
+        },
+        {
+          "name": "findAlternates",
+          "signature": "(routeId: string) => Route[]",
+          "description": "Find alternate routes by alternateRouteIds"
+        }
+      ],
+      "dependencies": ["src/lib/db/store.ts", "src/types/route.ts"]
+    },
+    {
+      "name": "AirportRepository",
+      "file_path": "src/lib/db/airport.repository.ts",
+      "description": "Airport data access by ICAO code.",
+      "exports": [
+        {
+          "name": "findByIcao",
+          "signature": "(icaoCode: string) => Airport | undefined",
+          "description": "Single airport by ICAO code"
+        },
+        {
+          "name": "findAll",
+          "signature": "() => Airport[]",
+          "description": "All airports"
+        }
+      ],
+      "dependencies": ["src/lib/db/store.ts", "src/types/airport.ts"]
+    },
+    {
+      "name": "QCodeRepository",
+      "file_path": "src/lib/db/qCode.repository.ts",
+      "description": "Q-Code lookup table access.",
+      "exports": [
+        {
+          "name": "findAll",
+          "signature": "() => QCode[]",
+          "description": "All Q-Codes"
+        },
+        {
+          "name": "findByCode",
+          "signature": "(code: string) => QCode | undefined",
+          "description": "Single Q-Code by code string"
+        }
+      ],
+      "dependencies": ["src/lib/db/store.ts", "src/types/qCode.ts"]
+    },
+    {
+      "name": "RefBookRepository",
+      "file_path": "src/lib/db/refBook.repository.ts",
+      "description": "REF BOOK entry CRUD operations.",
+      "exports": [
+        {
+          "name": "findAll",
+          "signature": "(params: { status?: RefBookStatus; sortBy?: string; order?: string; page: number; pageSize: number }) => { items: RefBookEntry[]; total: number }",
+          "description": "Filtered, sorted, paginated REF BOOK entries"
+        },
+        {
+          "name": "findById",
+          "signature": "(id: string) => RefBookEntry | undefined",
+          "description": "Single entry by ID"
+        },
+        {
+          "name": "create",
+          "signature": "(data: CreateRefBookEntryRequest & { registeredBy: string }) => RefBookEntry",
+          "description": "Create new REF BOOK entry"
+        },
+        {
+          "name": "update",
+          "signature": "(id: string, data: UpdateRefBookEntryRequest) => RefBookEntry | undefined",
+          "description": "Update existing entry"
+        },
+        {
+          "name": "remove",
+          "signature": "(id: string) => boolean",
+          "description": "Delete entry"
+        }
+      ],
+      "dependencies": ["src/lib/db/store.ts", "src/types/refBook.ts"]
+    },
+    {
+      "name": "BriefingRepository",
+      "file_path": "src/lib/db/briefing.repository.ts",
+      "description": "Briefing document CRUD operations.",
+      "exports": [
+        {
+          "name": "findAll",
+          "signature": "(params: { flightId?: string; type?: BriefingType; status?: BriefingStatus; sortBy?: string; order?: string; page: number; pageSize: number }) => { items: Briefing[]; total: number }",
+          "description": "Filtered, sorted, paginated briefing list"
+        },
+        {
+          "name": "findById",
+          "signature": "(id: string) => Briefing | undefined",
+          "description": "Single briefing by ID"
+        },
+        {
+          "name": "create",
+          "signature": "(data: Omit<Briefing, 'id'>) => Briefing",
+          "description": "Create new briefing"
+        },
+        {
+          "name": "update",
+          "signature": "(id: string, data: UpdateBriefingRequest) => Briefing | undefined",
+          "description": "Update briefing"
+        }
+      ],
+      "dependencies": ["src/lib/db/store.ts", "src/types/briefing.ts"]
+    },
+    {
+      "name": "AuditLogRepository",
+      "file_path": "src/lib/db/auditLog.repository.ts",
+      "description": "Append-only audit log access.",
+      "exports": [
+        {
+          "name": "findAll",
+          "signature": "(params: { userId?: string; action?: AuditAction; targetType?: string; startDate?: string; endDate?: string; page: number; pageSize: number }) => { items: AuditLog[]; total: number }",
+          "description": "Filtered, paginated audit logs"
+        },
+        {
+          "name": "create",
+          "signature": "(data: CreateAuditLogRequest) => AuditLog",
+          "description": "Append new audit log entry"
+        }
+      ],
+      "dependencies": ["src/lib/db/store.ts", "src/types/auditLog.ts"]
+    },
+    {
+      "name": "ImpactRepository",
+      "file_path": "src/lib/db/impact.repository.ts",
+      "description": "NOTAM-route and NOTAM-flight impact record access.",
+      "exports": [
+        {
+          "name": "findRouteImpactsByNotam",
+          "signature": "(notamId: string) => NotamRouteImpact[]",
+          "description": "Route impacts for a specific NOTAM"
+        },
+        {
+          "name": "findFlightImpactsByNotam",
+          "signature": "(notamId: string) => NotamFlightImpact[]",
+          "description": "Flight impacts for a specific NOTAM"
+        },
+        {
+          "name": "findRouteImpactsByRoute",
+          "signature": "(routeId: string) => NotamRouteImpact[]",
+          "description": "All NOTAM impacts on a specific route"
+        },
+        {
+          "name": "findFlightImpactsByFlight",
+          "signature": "(flightId: string) => NotamFlightImpact[]",
+          "description": "All NOTAM impacts on a specific flight"
+        },
+        {
+          "name": "createRouteImpact",
+          "signature": "(data: Omit<NotamRouteImpact, 'id'>) => NotamRouteImpact",
+          "description": "Create route impact record"
+        },
+        {
+          "name": "createFlightImpact",
+          "signature": "(data: Omit<NotamFlightImpact, 'id'>) => NotamFlightImpact",
+          "description": "Create flight impact record"
+        },
+        {
+          "name": "findAll",
+          "signature": "(params: { notamId?: string; routeId?: string; flightId?: string }) => { routeImpacts: NotamRouteImpact[]; flightImpacts: NotamFlightImpact[] }",
+          "description": "Query impacts by any combination of filters"
+        }
+      ],
+      "dependencies": ["src/lib/db/store.ts", "src/types/impact.ts"]
+    }
+  ],
+  "services": [
+    {
+      "name": "BedrockService",
+      "file_path": "src/lib/services/bedrock.service.ts",
+      "description": "Amazon Bedrock Claude integration for all AI features. Uses @aws-sdk/client-bedrock-runtime with InvokeModel. Real LLM calls, no mocking.",
+      "exports": [
+        {
+          "name": "analyzeNotamImportance",
+          "signature": "(notam: Notam, qCode: QCode | undefined, airport: Airport | undefined) => Promise<{ importanceScore: number; importanceLevel: ImportanceLevel; aiSummary: string; aiAnalysis: string }>",
+          "description": "LLM scores NOTAM importance (0-1) considering Q-Code, location context, and historical patterns. Returns score, level, Korean summary, and impact analysis text."
+        },
+        {
+          "name": "generateKoreanSummary",
+          "signature": "(notam: Notam) => Promise<string>",
+          "description": "LLM translates cryptic NOTAM text to plain Korean. Output is a human-readable operational summary."
+        },
+        {
+          "name": "generateImpactAnalysis",
+          "signature": "(notam: Notam, affectedRoutes: NotamRouteImpact[], affectedFlights: NotamFlightImpact[], airport: Airport | undefined) => Promise<string>",
+          "description": "LLM generates comprehensive impact analysis considering spatial context (runway count, location) and flight schedule."
+        },
+        {
+          "name": "generateBriefingContent",
+          "signature": "(flight: Flight, notams: Notam[], briefingType: BriefingType) => Promise<string>",
+          "description": "LLM generates briefing document content. Type determines format: dispatcher-summary, company-notam, disp-comment, or crew-briefing."
+        },
+        {
+          "name": "generateCrewPackage",
+          "signature": "(flight: Flight, notams: Notam[]) => Promise<{ dispComment: string; companyNotam: string; crewBriefing: string }>",
+          "description": "LLM generates complete crew briefing package with all three document types."
+        },
+        {
+          "name": "generateShiftHandoverReport",
+          "signature": "(notams: Notam[], shiftStartTime: string, shiftEndTime: string) => Promise<string>",
+          "description": "LLM generates shift handover report summarizing new/changed/critical NOTAMs within the shift window."
+        },
+        {
+          "name": "suggestRouteAlternatives",
+          "signature": "(route: Route, notam: Notam, alternateRoutes: Route[]) => Promise<{ alternatives: RouteAlternative[]; reasoning: string }>",
+          "description": "LLM suggests alternative routes when a NOTAM significantly impacts an active route. Compares distance and time."
+        }
+      ],
+      "dependencies": ["@aws-sdk/client-bedrock-runtime", "src/types/notam.ts", "src/types/route.ts", "src/types/flight.ts", "src/types/briefing.ts", "src/types/airport.ts"],
+      "config": {
+        "modelId": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "region": "us-west-2",
+        "maxTokens": 4096,
+        "temperature": 0.3
+      }
+    },
+    {
+      "name": "MatchingService",
+      "file_path": "src/lib/services/matching.service.ts",
+      "description": "Spatial-temporal matching algorithm. Calculates intersection between NOTAM circles and route polylines, considering altitude and time windows.",
+      "exports": [
+        {
+          "name": "calculateSpatialOverlap",
+          "signature": "(notam: Notam, route: Route) => { overlaps: boolean; overlapType: string; affectedSegment: string; distanceThroughArea: number; altitudeConflict: boolean }",
+          "description": "Checks if a route polyline (waypoint-to-waypoint segments) passes through a NOTAM's circular area. Uses great-circle distance. Checks altitude range overlap."
+        },
+        {
+          "name": "calculateTemporalOverlap",
+          "signature": "(notam: Notam, flight: Flight) => boolean",
+          "description": "Checks if NOTAM validity period overlaps with flight schedule window."
+        },
+        {
+          "name": "calculateAllImpacts",
+          "signature": "(notamId?: string) => { routeImpacts: NotamRouteImpact[]; flightImpacts: NotamFlightImpact[] }",
+          "description": "Runs full matching for a specific NOTAM or all active NOTAMs against all routes and flights. Stores results in ImpactRepository."
+        },
+        {
+          "name": "pointToSegmentDistance",
+          "signature": "(point: { lat: number; lng: number }, segStart: { lat: number; lng: number }, segEnd: { lat: number; lng: number }) => number",
+          "description": "Great-circle minimum distance from a point to a line segment (nautical miles). Core geometry function."
+        },
+        {
+          "name": "haversineDistance",
+          "signature": "(lat1: number, lng1: number, lat2: number, lng2: number) => number",
+          "description": "Haversine formula for great-circle distance between two points in nautical miles."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts", "src/lib/db/route.repository.ts", "src/lib/db/flight.repository.ts", "src/lib/db/impact.repository.ts", "src/types/impact.ts"]
+    },
+    {
+      "name": "QCodeService",
+      "file_path": "src/lib/services/qCode.service.ts",
+      "description": "Q-Code parsing and rule-based initial classification before LLM scoring.",
+      "exports": [
+        {
+          "name": "parseQLine",
+          "signature": "(qLine: string) => { fir: string; qCode: string; subject: string; condition: string; trafficType: string; purpose: string; scope: string; lowerLimit: string; upperLimit: string; coordinates: { latitude: number; longitude: number }; radius: number }",
+          "description": "Parses Q-line string into structured fields per ICAO format."
+        },
+        {
+          "name": "classifyByQCode",
+          "signature": "(qCode: string) => { subject: string; condition: string; defaultImportance: ImportanceLevel; description: string; descriptionKo: string }",
+          "description": "Looks up Q-Code in reference table and returns rule-based classification."
+        }
+      ],
+      "dependencies": ["src/lib/db/qCode.repository.ts", "src/types/qCode.ts"]
+    },
+    {
+      "name": "NotamDiffService",
+      "file_path": "src/lib/services/notamDiff.service.ts",
+      "description": "Computes diff between original and replacement NOTAM.",
+      "exports": [
+        {
+          "name": "calculateDiff",
+          "signature": "(original: Notam, replacement: Notam) => DiffChange[]",
+          "description": "Compares field-by-field and returns list of changes. Compares body, effectiveFrom, effectiveTo, lowerLimit, upperLimit, coordinates, radius."
+        }
+      ],
+      "dependencies": ["src/types/notam.ts"]
+    }
+  ],
+  "api": [
+    {
+      "component": "NotamListAPI",
+      "file_path": "src/app/api/notams/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-001", "FR-005", "FR-019"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/notams",
+          "query_params": ["importance", "status", "airport", "qCode", "sortBy", "order", "page", "pageSize", "expiryStatus"],
+          "response_type": "{ items: Notam[]; total: number; stats: NotamStats }",
+          "validation": "notamQuerySchema",
+          "logic": "1. Parse and validate query params. 2. Call NotamRepository.findAll() with filters. 3. Return paginated results with stats."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts", "src/lib/validation/notam.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "NotamDetailAPI",
+      "file_path": "src/app/api/notams/[id]/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-002", "FR-012"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/notams/[id]",
+          "response_type": "Notam",
+          "logic": "1. Extract id from params. 2. Call NotamRepository.findById(). 3. Return 404 if not found."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "NotamAnalyzeAPI",
+      "file_path": "src/app/api/notams/analyze/route.ts",
+      "type": "api-route",
+      "methods": ["POST"],
+      "requirements": ["FR-001", "FR-003"],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/notams/analyze",
+          "request_schema": "analyzeNotamSchema",
+          "response_type": "{ importanceScore: number; importanceLevel: ImportanceLevel; aiSummary: string; aiAnalysis: string }",
+          "logic": "1. Validate request body. 2. Find NOTAM by ID. 3. Lookup Q-Code via QCodeService. 4. Lookup Airport via AirportRepository. 5. Call BedrockService.analyzeNotamImportance(). 6. Update NOTAM record with results. 7. Return analysis result."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts", "src/lib/db/airport.repository.ts", "src/lib/services/bedrock.service.ts", "src/lib/services/qCode.service.ts", "src/lib/validation/notam.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "NotamSummarizeAPI",
+      "file_path": "src/app/api/notams/[id]/summarize/route.ts",
+      "type": "api-route",
+      "methods": ["POST"],
+      "requirements": ["FR-015"],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/notams/[id]/summarize",
+          "response_type": "{ summary: string }",
+          "logic": "1. Find NOTAM by ID. 2. Call BedrockService.generateKoreanSummary(). 3. Update NOTAM.aiSummary. 4. Return summary."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts", "src/lib/services/bedrock.service.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "NotamImpactAnalysisAPI",
+      "file_path": "src/app/api/notams/[id]/impact-analysis/route.ts",
+      "type": "api-route",
+      "methods": ["POST"],
+      "requirements": ["FR-003"],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/notams/[id]/impact-analysis",
+          "response_type": "{ affectedRoutes: NotamRouteImpact[]; affectedFlights: NotamFlightImpact[]; contextualSeverity: string }",
+          "logic": "1. Find NOTAM. 2. Get route/flight impacts from ImpactRepository. 3. If no impacts, run MatchingService.calculateAllImpacts(notamId). 4. Get airport context. 5. Call BedrockService.generateImpactAnalysis(). 6. Return impacts + AI severity analysis."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts", "src/lib/db/impact.repository.ts", "src/lib/db/airport.repository.ts", "src/lib/services/bedrock.service.ts", "src/lib/services/matching.service.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "NotamAffectedFlightsAPI",
+      "file_path": "src/app/api/notams/[id]/affected-flights/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-004"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/notams/[id]/affected-flights",
+          "response_type": "NotamFlightImpact[]",
+          "logic": "1. Find NOTAM. 2. Call ImpactRepository.findFlightImpactsByNotam(). 3. Return impacts."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts", "src/lib/db/impact.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "NotamAffectedRoutesAPI",
+      "file_path": "src/app/api/notams/[id]/affected-routes/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-004"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/notams/[id]/affected-routes",
+          "response_type": "NotamRouteImpact[]",
+          "logic": "1. Find NOTAM. 2. Call ImpactRepository.findRouteImpactsByNotam(). 3. Return impacts."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts", "src/lib/db/impact.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "NotamDiffAPI",
+      "file_path": "src/app/api/notams/[id]/diff/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-018"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/notams/[id]/diff",
+          "response_type": "{ original: Notam; replacement: Notam; changes: DiffChange[] }",
+          "logic": "1. Find NOTAM (replacement). 2. Find original via replacesNotamId. 3. If no replacesNotamId, find replacement via findByReplacesId. 4. Call NotamDiffService.calculateDiff(). 5. Return both NOTAMs and diff."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts", "src/lib/services/notamDiff.service.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "NotamAlertsAPI",
+      "file_path": "src/app/api/notams/alerts/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-016"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/notams/alerts",
+          "response_type": "Notam[]",
+          "logic": "1. Call NotamRepository.findAlerts() (critical NOTAMs in new/active status). 2. Return sorted by createdAt desc."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "NotamStatsAPI",
+      "file_path": "src/app/api/notams/stats/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-005"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/notams/stats",
+          "response_type": "NotamStats",
+          "logic": "1. Call NotamRepository.getStats(). 2. Return aggregated stats."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "QCodeListAPI",
+      "file_path": "src/app/api/q-codes/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-002"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/q-codes",
+          "response_type": "QCode[]",
+          "logic": "1. Call QCodeRepository.findAll(). 2. Return all Q-Codes."
+        }
+      ],
+      "dependencies": ["src/lib/db/qCode.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "FlightListAPI",
+      "file_path": "src/app/api/flights/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-013"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/flights",
+          "query_params": ["airport", "route", "date", "impactStatus", "sortBy", "order", "page", "pageSize"],
+          "response_type": "{ items: Flight[]; total: number }",
+          "validation": "flightQuerySchema",
+          "logic": "1. Parse and validate query params. 2. Call FlightRepository.findAll(). 3. Return paginated results."
+        }
+      ],
+      "dependencies": ["src/lib/db/flight.repository.ts", "src/lib/validation/flight.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "FlightDetailAPI",
+      "file_path": "src/app/api/flights/[id]/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-004", "FR-013"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/flights/[id]",
+          "response_type": "Flight & { route: Route; affectedNotams: Notam[] }",
+          "logic": "1. Find flight. 2. Find route by routeId. 3. Find flight impacts. 4. Resolve affected NOTAM details. 5. Return enriched flight object."
+        }
+      ],
+      "dependencies": ["src/lib/db/flight.repository.ts", "src/lib/db/route.repository.ts", "src/lib/db/impact.repository.ts", "src/lib/db/notam.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "RouteListAPI",
+      "file_path": "src/app/api/routes/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-006", "FR-010"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/routes",
+          "query_params": ["status", "sortBy", "order", "page", "pageSize"],
+          "response_type": "{ items: Route[]; total: number }",
+          "validation": "routeQuerySchema",
+          "logic": "1. Parse and validate query params. 2. Call RouteRepository.findAll(). 3. Return paginated results."
+        }
+      ],
+      "dependencies": ["src/lib/db/route.repository.ts", "src/lib/validation/route.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "RouteDetailAPI",
+      "file_path": "src/app/api/routes/[id]/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-010"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/routes/[id]",
+          "response_type": "Route & { impacts: NotamRouteImpact[]; activeNotams: Notam[] }",
+          "logic": "1. Find route. 2. Find route impacts. 3. Resolve NOTAM details for each impact. 4. Return enriched route."
+        }
+      ],
+      "dependencies": ["src/lib/db/route.repository.ts", "src/lib/db/impact.repository.ts", "src/lib/db/notam.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "RouteAlternativesAPI",
+      "file_path": "src/app/api/routes/[id]/alternatives/route.ts",
+      "type": "api-route",
+      "methods": ["POST"],
+      "requirements": ["FR-009"],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/routes/[id]/alternatives",
+          "request_schema": "routeAlternativesSchema",
+          "response_type": "{ alternatives: RouteAlternative[]; reasoning: string }",
+          "logic": "1. Validate request. 2. Find route and NOTAM. 3. Find alternate routes. 4. Call BedrockService.suggestRouteAlternatives(). 5. Return alternatives with AI reasoning."
+        }
+      ],
+      "dependencies": ["src/lib/db/route.repository.ts", "src/lib/db/notam.repository.ts", "src/lib/services/bedrock.service.ts", "src/lib/validation/route.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "RouteImpactAPI",
+      "file_path": "src/app/api/routes/[id]/impact/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-010"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/routes/[id]/impact",
+          "response_type": "{ notamImpacts: NotamRouteImpact[]; summary: string }",
+          "logic": "1. Find route. 2. Get impacts from ImpactRepository. 3. Generate summary string with count and severity info. 4. Return impacts and summary."
+        }
+      ],
+      "dependencies": ["src/lib/db/route.repository.ts", "src/lib/db/impact.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "MatchingCalculateAPI",
+      "file_path": "src/app/api/matching/calculate/route.ts",
+      "type": "api-route",
+      "methods": ["POST"],
+      "requirements": ["FR-010"],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/matching/calculate",
+          "request_schema": "matchingCalculateSchema",
+          "response_type": "{ routeImpacts: NotamRouteImpact[]; flightImpacts: NotamFlightImpact[] }",
+          "logic": "1. Validate request. 2. Call MatchingService.calculateAllImpacts(notamId). 3. Return newly calculated impacts."
+        }
+      ],
+      "dependencies": ["src/lib/services/matching.service.ts", "src/lib/validation/matching.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "MatchingResultsAPI",
+      "file_path": "src/app/api/matching/results/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-010"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/matching/results",
+          "query_params": ["notamId", "routeId", "flightId"],
+          "response_type": "{ routeImpacts: NotamRouteImpact[]; flightImpacts: NotamFlightImpact[] }",
+          "logic": "1. Parse query params. 2. Call ImpactRepository.findAll() with filters. 3. Return matching results."
+        }
+      ],
+      "dependencies": ["src/lib/db/impact.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "RefBookAPI",
+      "file_path": "src/app/api/ref-book/route.ts",
+      "type": "api-route",
+      "methods": ["GET", "POST"],
+      "requirements": ["FR-011"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/ref-book",
+          "query_params": ["status", "sortBy", "order", "page", "pageSize"],
+          "response_type": "{ items: RefBookEntry[]; total: number }",
+          "logic": "1. Parse query params. 2. Call RefBookRepository.findAll(). 3. Return paginated results."
+        },
+        {
+          "method": "POST",
+          "path": "/api/ref-book",
+          "request_schema": "createRefBookEntrySchema",
+          "response_type": "RefBookEntry",
+          "logic": "1. Validate request body. 2. Call RefBookRepository.create() with registeredBy from auth context. 3. Update linked NOTAM status to 'ref-book-registered'. 4. Log to audit trail. 5. Return created entry."
+        }
+      ],
+      "dependencies": ["src/lib/db/refBook.repository.ts", "src/lib/db/notam.repository.ts", "src/lib/db/auditLog.repository.ts", "src/lib/validation/refBook.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "RefBookDetailAPI",
+      "file_path": "src/app/api/ref-book/[id]/route.ts",
+      "type": "api-route",
+      "methods": ["PUT", "DELETE"],
+      "requirements": ["FR-011"],
+      "endpoints": [
+        {
+          "method": "PUT",
+          "path": "/api/ref-book/[id]",
+          "request_schema": "updateRefBookEntrySchema",
+          "response_type": "RefBookEntry",
+          "logic": "1. Validate request body. 2. Call RefBookRepository.update(). 3. Return 404 if not found. 4. Return updated entry."
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/ref-book/[id]",
+          "response_type": "{ success: boolean }",
+          "logic": "1. Call RefBookRepository.remove(). 2. Return 404 if not found. 3. Return success."
+        }
+      ],
+      "dependencies": ["src/lib/db/refBook.repository.ts", "src/lib/validation/refBook.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "BriefingListAPI",
+      "file_path": "src/app/api/briefings/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-007", "FR-008"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/briefings",
+          "query_params": ["flightId", "type", "status", "sortBy", "order", "page", "pageSize"],
+          "response_type": "{ items: Briefing[]; total: number }",
+          "logic": "1. Parse query params. 2. Call BriefingRepository.findAll(). 3. Return paginated results."
+        }
+      ],
+      "dependencies": ["src/lib/db/briefing.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "BriefingGenerateAPI",
+      "file_path": "src/app/api/briefings/generate/route.ts",
+      "type": "api-route",
+      "methods": ["POST"],
+      "requirements": ["FR-007"],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/briefings/generate",
+          "request_schema": "generateBriefingSchema",
+          "response_type": "Briefing",
+          "logic": "1. Validate request. 2. Find flight. 3. Find relevant NOTAMs via impacts. 4. Call BedrockService.generateBriefingContent(). 5. Create briefing record. 6. Log to audit trail. 7. Return briefing."
+        }
+      ],
+      "dependencies": ["src/lib/db/flight.repository.ts", "src/lib/db/notam.repository.ts", "src/lib/db/impact.repository.ts", "src/lib/db/briefing.repository.ts", "src/lib/db/auditLog.repository.ts", "src/lib/services/bedrock.service.ts", "src/lib/validation/briefing.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "BriefingGenerateCrewAPI",
+      "file_path": "src/app/api/briefings/generate-crew/route.ts",
+      "type": "api-route",
+      "methods": ["POST"],
+      "requirements": ["FR-008"],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/briefings/generate-crew",
+          "request_schema": "generateCrewBriefingSchema",
+          "response_type": "Briefing",
+          "logic": "1. Validate request. 2. Find flight and relevant NOTAMs. 3. Call BedrockService.generateCrewPackage(). 4. Create briefing record with crew-briefing type. 5. Return briefing."
+        }
+      ],
+      "dependencies": ["src/lib/db/flight.repository.ts", "src/lib/db/notam.repository.ts", "src/lib/db/impact.repository.ts", "src/lib/db/briefing.repository.ts", "src/lib/services/bedrock.service.ts", "src/lib/validation/briefing.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "BriefingDetailAPI",
+      "file_path": "src/app/api/briefings/[id]/route.ts",
+      "type": "api-route",
+      "methods": ["GET", "PUT"],
+      "requirements": ["FR-007", "FR-008"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/briefings/[id]",
+          "response_type": "Briefing",
+          "logic": "1. Find briefing by ID. 2. Return 404 if not found."
+        },
+        {
+          "method": "PUT",
+          "path": "/api/briefings/[id]",
+          "request_schema": "updateBriefingSchema",
+          "response_type": "Briefing",
+          "logic": "1. Validate request. 2. Update briefing. 3. If status changes to approved, set approvedBy and approvedAt. 4. Return updated briefing."
+        }
+      ],
+      "dependencies": ["src/lib/db/briefing.repository.ts", "src/lib/validation/briefing.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "BriefingCrewPackageAPI",
+      "file_path": "src/app/api/briefings/[id]/crew-package/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-008"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/briefings/[id]/crew-package",
+          "response_type": "{ dispComment: string; companyNotam: string; crewBriefing: string }",
+          "logic": "1. Find briefing. 2. Parse content sections (content stored as JSON with keys dispComment, companyNotam, crewBriefing). 3. Return package."
+        }
+      ],
+      "dependencies": ["src/lib/db/briefing.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "ShiftHandoverAPI",
+      "file_path": "src/app/api/reports/shift-handover/route.ts",
+      "type": "api-route",
+      "methods": ["POST"],
+      "requirements": ["FR-014"],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/reports/shift-handover",
+          "request_schema": "shiftHandoverSchema",
+          "response_type": "Briefing",
+          "logic": "1. Validate request. 2. Query NOTAMs created/changed within shift window. 3. Call BedrockService.generateShiftHandoverReport(). 4. Create briefing record with dispatcher-summary type. 5. Return briefing."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts", "src/lib/db/briefing.repository.ts", "src/lib/services/bedrock.service.ts", "src/lib/validation/briefing.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "ShiftHandoverDetailAPI",
+      "file_path": "src/app/api/reports/shift-handover/[id]/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-014"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/reports/shift-handover/[id]",
+          "response_type": "Briefing",
+          "logic": "1. Find briefing by ID. 2. Return 404 if not found."
+        }
+      ],
+      "dependencies": ["src/lib/db/briefing.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "DashboardRouteImpactAPI",
+      "file_path": "src/app/api/dashboard/route-impact/route.ts",
+      "type": "api-route",
+      "methods": ["GET"],
+      "requirements": ["FR-006"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/dashboard/route-impact",
+          "query_params": ["routeId"],
+          "response_type": "{ summary: DashboardSummary; routeImpacts: RouteImpactMapData[]; criticalNotams: Notam[] }",
+          "logic": "1. Calculate DashboardSummary from NOTAM stats and impact counts. 2. Build RouteImpactMapData[] by joining routes, impacts, and NOTAMs. 3. If routeId specified, filter to that route. 4. Get critical NOTAMs. 5. Return dashboard data."
+        }
+      ],
+      "dependencies": ["src/lib/db/notam.repository.ts", "src/lib/db/route.repository.ts", "src/lib/db/flight.repository.ts", "src/lib/db/impact.repository.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "AuditLogAPI",
+      "file_path": "src/app/api/audit-log/route.ts",
+      "type": "api-route",
+      "methods": ["GET", "POST"],
+      "requirements": ["FR-017"],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/audit-log",
+          "query_params": ["userId", "action", "targetType", "startDate", "endDate", "page", "pageSize"],
+          "response_type": "{ items: AuditLog[]; total: number }",
+          "validation": "auditLogQuerySchema",
+          "logic": "1. Parse and validate query params. 2. Call AuditLogRepository.findAll(). 3. Return paginated results."
+        },
+        {
+          "method": "POST",
+          "path": "/api/audit-log",
+          "request_schema": "createAuditLogSchema",
+          "response_type": "AuditLog",
+          "logic": "1. Validate request body. 2. Call AuditLogRepository.create(). 3. Return created entry."
+        }
+      ],
+      "dependencies": ["src/lib/db/auditLog.repository.ts", "src/lib/validation/auditLog.validation.ts"],
+      "imports": ["next/server"]
+    },
+    {
+      "component": "AuthLoginAPI",
+      "file_path": "src/app/api/auth/login/route.ts",
+      "type": "api-route",
+      "methods": ["POST"],
+      "requirements": [],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request_schema": "loginSchema",
+          "response_type": "{ token: string; user: Dispatcher }",
+          "logic": "1. Validate request body. 2. Lookup dispatcher by username from seed data. 3. Verify password (mock: any non-empty password accepted). 4. Generate mock JWT token (base64 encoded JSON). 5. Return token and user info."
+        }
+      ],
+      "dependencies": ["src/lib/db/store.ts", "src/lib/validation/auth.validation.ts"],
+      "imports": ["next/server"]
+    }
+  ],
+  "middleware": {
+    "file_path": "src/middleware.ts",
+    "description": "Next.js middleware for security headers on all routes.",
+    "headers": {
+      "X-Frame-Options": "DENY",
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "1; mode=block",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+      "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src 'self'; font-src 'self'"
+    },
+    "matcher": "/((?!_next/static|_next/image|favicon.ico).*)",
+    "exports": [
+      {
+        "name": "middleware",
+        "signature": "(request: NextRequest) => NextResponse",
+        "description": "Adds security headers to all matched requests."
+      },
+      {
+        "name": "config",
+        "signature": "{ matcher: string }",
+        "description": "Middleware route matcher config."
+      }
+    ],
+    "dependencies": ["next/server"]
+  }
+}

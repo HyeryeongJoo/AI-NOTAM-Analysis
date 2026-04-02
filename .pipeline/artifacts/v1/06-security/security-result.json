@@ -1,0 +1,80 @@
+{
+  "verdict": "PASS",
+  "return_to": null,
+  "findings": [
+    {
+      "severity": "medium",
+      "cwe": "CWE-20",
+      "file": "src/app/api/ref-book/route.ts",
+      "line": 21,
+      "description": "REF BOOK GET route parses sortBy, order, page, pageSize without zod validation (all other GET routes use zod schemas)",
+      "remediation": "Add refBookQuerySchema to refBook.validation.ts and apply safeParse in GET handler"
+    },
+    {
+      "severity": "medium",
+      "cwe": "CWE-79",
+      "file": "src/middleware.ts",
+      "line": 29,
+      "description": "CSP script-src includes 'unsafe-eval' which allows eval() execution",
+      "remediation": "Remove 'unsafe-eval' in production build and use nonce-based CSP"
+    },
+    {
+      "severity": "medium",
+      "cwe": "CWE-942",
+      "file": "src/middleware.ts",
+      "line": 34,
+      "description": "CORS Access-Control-Allow-Origin set to '*' allowing all origins",
+      "remediation": "Restrict to specific allowed origins via environment variable whitelist"
+    },
+    {
+      "severity": "low",
+      "cwe": "CWE-312",
+      "file": "src/app/api/auth/login/route.ts",
+      "line": 41,
+      "description": "Mock JWT token is unsigned base64-encoded JSON (no cryptographic signature)",
+      "remediation": "Replace with Amazon Cognito or signed JWT (RS256/HS256) for production"
+    },
+    {
+      "severity": "low",
+      "cwe": "CWE-922",
+      "file": "src/contexts/AuthContext.tsx",
+      "line": 48,
+      "description": "User auth info stored in localStorage (accessible via XSS)",
+      "remediation": "Switch to httpOnly cookie-based sessions for production"
+    },
+    {
+      "severity": "low",
+      "cwe": "CWE-209",
+      "file": "src/app/api/notams/analyze/route.ts",
+      "line": 67,
+      "description": "console.error logs full error objects from Bedrock API (7 API routes). Client responses use generic messages.",
+      "remediation": "Use structured logger (Winston/Pino) with sensitive field filtering in production"
+    },
+    {
+      "severity": "low",
+      "cwe": "CWE-319",
+      "file": "src/middleware.ts",
+      "line": 0,
+      "description": "Strict-Transport-Security (HSTS) header not set",
+      "remediation": "Add HSTS header for production HTTPS deployment"
+    }
+  ],
+  "npm_audit": {
+    "critical": 0,
+    "high": 0,
+    "moderate": 0,
+    "low": 0
+  },
+  "production_notes": [
+    "Implement real authentication (Amazon Cognito or OIDC) before production",
+    "Restrict CORS Access-Control-Allow-Origin to specific domains",
+    "Remove 'unsafe-eval' from CSP and switch to nonce-based policy",
+    "Add Strict-Transport-Security header for HTTPS deployment",
+    "Replace console.error with structured logger (Winston/Pino)",
+    "Add rate limiting to API routes (especially Bedrock-calling endpoints)",
+    "Switch localStorage auth to httpOnly cookie sessions",
+    "Add zod validation to REF BOOK GET query parameters",
+    "Add prompt injection defense if user NOTAM input is introduced",
+    "Use parameterized queries when migrating from in-memory store to database"
+  ]
+}

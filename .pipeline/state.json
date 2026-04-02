@@ -1,0 +1,186 @@
+{
+  "current_version": 1,
+  "versions": {
+    "1": {
+      "status": "completed",
+      "started_at": "2026-03-30T00:00:00Z",
+      "completed_at": "2026-03-30T23:59:00Z",
+      "trigger": "pipeline",
+      "current_stage": "completed",
+      "stages": [
+        {
+          "stage": "domain-researcher",
+          "status": "completed",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "00-domain/domain-context.json exists", "passed": true },
+              { "check": "00-domain/domain-context.md exists", "passed": true }
+            ],
+            "retries": 0
+          }
+        },
+        {
+          "stage": "requirements-analyst",
+          "status": "completed",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "01-requirements/requirements.json exists", "passed": true },
+              { "check": "01-requirements/requirements.md exists", "passed": true },
+              { "check": "At least 1 FR with acceptance criteria", "passed": true },
+              { "check": "Every FR has unique sequential ID", "passed": true },
+              { "check": "Every FR has priority classification", "passed": true },
+              { "check": "At least 1 persona defined", "passed": true },
+              { "check": "Auth NFR exists", "passed": true },
+              { "check": "JSON is valid and parseable", "passed": true }
+            ],
+            "retries": 0
+          }
+        },
+        {
+          "stage": "architect",
+          "status": "completed",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "02-architecture/architecture.json exists", "passed": true },
+              { "check": "02-architecture/architecture.md exists", "passed": true },
+              { "check": "Every FR mapped in requirements_coverage", "passed": true },
+              { "check": "Every route has valid Cloudscape pattern", "passed": true },
+              { "check": "TopNavigation outside AppLayout", "passed": true },
+              { "check": "TypeScript types defined for all entities", "passed": true },
+              { "check": "Routes under 20", "passed": true },
+              { "check": "No orphan components", "passed": true }
+            ],
+            "retries": 0
+          }
+        },
+        {
+          "stage": "spec-writer",
+          "status": "completed",
+          "notes": "Backend spec (42 specs) + Frontend spec (38 specs) = 80 total. All 19 FRs covered.",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "03-specs/backend-spec.json exists", "passed": true },
+              { "check": "03-specs/backend-spec.md exists", "passed": true },
+              { "check": "03-specs/frontend-spec.json exists", "passed": true },
+              { "check": "03-specs/frontend-spec.md exists", "passed": true },
+              { "check": "03-specs/specs-summary.md exists", "passed": true },
+              { "check": "03-specs/_manifest.json exists", "passed": true },
+              { "check": "All 19 FRs covered in requirements_coverage", "passed": true },
+              { "check": "No uncovered requirements", "passed": true },
+              { "check": "Generation order respects dependency graph", "passed": true }
+            ],
+            "retries": 0
+          }
+        },
+        {
+          "stage": "code-gen-backend",
+          "status": "completed",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "npm run build passes", "passed": true },
+              { "check": "All API routes created", "passed": true },
+              { "check": "Types, repositories, services, validation created", "passed": true },
+              { "check": "Seed data (50 NOTAMs, 10 routes, 30 flights, 15 airports)", "passed": true }
+            ],
+            "retries": 0
+          }
+        },
+        {
+          "stage": "code-gen-ai",
+          "status": "completed",
+          "notes": "AI-Assisted Workflow pattern (autonomy <=5). Direct Bedrock API calls with XML-structured prompts. No Strands SDK needed. 7 AI functions covering FR-001/003/007/008/009/014/015. Prompts optimized for NOTAM domain with few-shot-ready templates.",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "npm run build passes", "passed": true },
+              { "check": "eslint passes on AI files", "passed": true },
+              { "check": "System prompts use XML tags", "passed": true },
+              { "check": "All 7 AI functions have structured prompts", "passed": true },
+              { "check": "JSON parse fallback for all structured outputs", "passed": true },
+              { "check": ".env.local.example documents Bedrock config", "passed": true },
+              { "check": "No mocking of AI features", "passed": true }
+            ],
+            "retries": 0
+          }
+        },
+        {
+          "stage": "code-gen-frontend",
+          "status": "completed",
+          "notes": "71 frontend files generated: 16 hooks, 3 contexts, 2 layout components, 8 shared components, 23 feature components, 11 page routes, 1 fetcher, 1 providers wrapper, plus eslint config update. Zero build errors, zero lint errors (8 jsdoc/require-returns warnings non-blocking).",
+          "checkpoint": {
+            "passed": true,
+            "items": [
+              { "check": "npm run build passes", "passed": true },
+              { "check": "eslint produces zero errors", "passed": true },
+              { "check": "All 11 page routes created", "passed": true },
+              { "check": "All hooks use SWR (no raw fetch in components)", "passed": true },
+              { "check": "TopNavigation outside AppLayout", "passed": true },
+              { "check": "No any types", "passed": true },
+              { "check": "All Cloudscape imports from individual paths", "passed": true },
+              { "check": "Leaflet SSR prevention via dynamic import", "passed": true },
+              { "check": "generation-log-frontend.json created", "passed": true }
+            ],
+            "retries": 0
+          }
+        }
+      ],
+      "feedback_loops": [],
+      "test_iterations": 3,
+      "review_iterations": 1,
+      "reviewer": {
+        "status": "completed",
+        "verdict": "PASS",
+        "iteration": 1,
+        "categories_pass": 9,
+        "categories_fail": 0,
+        "critical_issues": 0,
+        "minor_issues": 2,
+        "artifacts": [
+          ".pipeline/artifacts/v1/05-review/review-report.md",
+          ".pipeline/artifacts/v1/05-review/review-result.json"
+        ]
+      },
+      "security_auditor": {
+        "status": "completed",
+        "verdict": "PASS",
+        "findings": {
+          "critical": 0,
+          "high": 0,
+          "medium": 3,
+          "low": 4
+        },
+        "npm_audit": {
+          "critical": 0,
+          "high": 0,
+          "moderate": 0,
+          "low": 0
+        },
+        "checks_performed": 8,
+        "artifacts": [
+          ".pipeline/artifacts/v1/06-security/security-audit.md",
+          ".pipeline/artifacts/v1/06-security/security-result.json"
+        ]
+      },
+      "qa_engineer": {
+        "status": "completed",
+        "total_tests": 52,
+        "passed": 52,
+        "failed": 0,
+        "iterations": 3,
+        "infrastructure_fixes": 16,
+        "functional_feedbacks": 0,
+        "p0_coverage": "7/7 (100%)",
+        "artifacts": [
+          "e2e/ (10 test files)",
+          ".pipeline/artifacts/v1/05-review/test-result.json",
+          ".pipeline/artifacts/v1/05-review/test-report.md"
+        ]
+      }
+    }
+  }
+}

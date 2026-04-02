@@ -1,0 +1,351 @@
+{
+  "from_version": 1,
+  "to_version": 2,
+  "analyzed_at": "2026-04-01T00:00:00Z",
+  "trigger": "iterate",
+  "input_changes": [
+    {
+      "file": "JejuAir-AI-Powered-NOTAM-Analysis-System-Requirements.pdf",
+      "action": "unchanged",
+      "type": "requirements-doc"
+    },
+    {
+      "file": "항공정보분석workflow.png",
+      "action": "added",
+      "type": "workflow-diagram",
+      "size": 274397,
+      "note": "Aviation information analysis workflow diagram — new input not in v1 manifest. File could not be visually inspected due to filename encoding issue, but described as workflow diagram by user."
+    }
+  ],
+  "code_changes": [
+    {
+      "id": "CC-001",
+      "type": "bug_fix",
+      "description": "Leaflet CSS changed from CDN link in layout.tsx to import in LeafletMapInner.tsx",
+      "affects_components": ["LeafletMapInner"],
+      "affects_files": ["src/app/layout.tsx", "src/components/common/LeafletMapInner.tsx"],
+      "affects_fr": ["FR-006", "FR-012", "FR-009"],
+      "category": "map-infrastructure"
+    },
+    {
+      "id": "CC-002",
+      "type": "bug_fix",
+      "description": "Leaflet marker icon fix with L.Icon.Default.mergeOptions() for webpack compatibility",
+      "affects_components": ["LeafletMapInner"],
+      "affects_files": ["src/components/common/LeafletMapInner.tsx"],
+      "affects_fr": ["FR-006", "FR-012"],
+      "category": "map-infrastructure"
+    },
+    {
+      "id": "CC-003",
+      "type": "ui_fix",
+      "description": "Map wrapper div added position:relative for proper sizing in Grid layout",
+      "affects_components": ["RouteImpactMap", "LeafletMapWrapper"],
+      "affects_files": ["src/components/dashboard/RouteImpactMap.tsx"],
+      "affects_fr": ["FR-006"],
+      "category": "map-infrastructure"
+    },
+    {
+      "id": "CC-004",
+      "type": "feature_enhancement",
+      "description": "Map legend added showing Critical/High/Other NOTAM colors + route line",
+      "affects_components": ["RouteImpactMap"],
+      "affects_files": ["src/components/dashboard/RouteImpactMap.tsx"],
+      "affects_fr": ["FR-006"],
+      "category": "map-ux"
+    },
+    {
+      "id": "CC-005",
+      "type": "feature_enhancement",
+      "description": "NOTAM circle popup on dashboard map — click circle shows NOTAM details + link to detail page",
+      "affects_components": ["RouteImpactMap"],
+      "affects_files": ["src/components/dashboard/RouteImpactMap.tsx"],
+      "affects_fr": ["FR-006"],
+      "category": "map-interactivity"
+    },
+    {
+      "id": "CC-006",
+      "type": "feature_enhancement",
+      "description": "NOTAM circle popup on flight detail map — same popup pattern as dashboard",
+      "affects_components": ["FlightRouteMap"],
+      "affects_files": ["src/components/flights/FlightRouteMap.tsx"],
+      "affects_fr": ["FR-009"],
+      "category": "map-interactivity"
+    },
+    {
+      "id": "CC-007",
+      "type": "feature_enhancement",
+      "description": "Route dropdown '전체' (All) option added as default in dashboard route selector",
+      "affects_components": ["RouteImpactMap"],
+      "affects_files": ["src/components/dashboard/RouteImpactMap.tsx"],
+      "affects_fr": ["FR-006"],
+      "category": "map-ux"
+    },
+    {
+      "id": "CC-008",
+      "type": "requirement_modify",
+      "description": "Dashboard criticalNotams API changed from critical-only to critical+high filter",
+      "affects_components": ["RecentCriticalNotams"],
+      "affects_files": ["src/app/api/dashboard/route-impact/route.ts", "src/components/dashboard/RecentCriticalNotams.tsx"],
+      "affects_fr": ["FR-005", "FR-006"],
+      "category": "data-filtering"
+    },
+    {
+      "id": "CC-009",
+      "type": "requirement_modify",
+      "description": "Map NOTAM source changed from criticalNotams prop to extracting all NOTAMs from routeImpacts.notams",
+      "affects_components": ["RouteImpactMap"],
+      "affects_files": ["src/components/dashboard/RouteImpactMap.tsx"],
+      "affects_fr": ["FR-006"],
+      "category": "data-source"
+    },
+    {
+      "id": "CC-010",
+      "type": "feature_enhancement",
+      "description": "Route status info popover on RouteTable '상태' column header explaining active/suspended/alternate",
+      "affects_components": ["RouteTable"],
+      "affects_files": ["src/components/routes/RouteTable.tsx"],
+      "affects_fr": ["FR-010"],
+      "category": "ux-discoverability"
+    },
+    {
+      "id": "CC-011",
+      "type": "feature_enhancement",
+      "description": "Flight status info popover on FlightTable '상태' column header explaining status values",
+      "affects_components": ["FlightTable"],
+      "affects_files": ["src/components/flights/FlightTable.tsx"],
+      "affects_fr": ["FR-013"],
+      "category": "ux-discoverability"
+    },
+    {
+      "id": "CC-012",
+      "type": "feature_enhancement",
+      "description": "Dashboard map info popover on '항로 NOTAM 영향 지도' header explaining map elements",
+      "affects_components": ["RouteImpactMap"],
+      "affects_files": ["src/components/dashboard/RouteImpactMap.tsx"],
+      "affects_fr": ["FR-006"],
+      "category": "ux-discoverability"
+    },
+    {
+      "id": "CC-013",
+      "type": "feature_enhancement",
+      "description": "NOTAM importance colors on flight map — per-importance colors instead of all-red",
+      "affects_components": ["FlightRouteMap"],
+      "affects_files": ["src/components/flights/FlightRouteMap.tsx"],
+      "affects_fr": ["FR-009"],
+      "category": "map-ux"
+    }
+  ],
+  "feedback_items": [
+    {
+      "id": "FB-001",
+      "source": "항공정보분석workflow.png",
+      "type": "new_input",
+      "description": "Aviation information analysis workflow diagram added — may contain new workflow requirements or process clarifications not captured in v1",
+      "affects_fr": null,
+      "confidence": "medium",
+      "note": "Image file could not be visually inspected; content analysis deferred to requirements-analyst stage"
+    },
+    {
+      "id": "FB-002",
+      "source": "direct-code-change",
+      "type": "bug_fix",
+      "description": "Leaflet map rendering fixes (CSS import, marker icons, wrapper sizing) — CC-001, CC-002, CC-003",
+      "affects_fr": ["FR-006", "FR-012", "FR-009"],
+      "confidence": "high"
+    },
+    {
+      "id": "FB-003",
+      "source": "direct-code-change",
+      "type": "ux_enhancement",
+      "description": "Map interactivity improvements — legend, popups, route dropdown, importance colors — CC-004, CC-005, CC-006, CC-007, CC-012, CC-013",
+      "affects_fr": ["FR-006", "FR-009"],
+      "confidence": "high"
+    },
+    {
+      "id": "FB-004",
+      "source": "direct-code-change",
+      "type": "requirement_modify",
+      "description": "Dashboard data filtering changed — critical+high instead of critical-only for NOTAMs, map uses all route NOTAMs instead of critical-only — CC-008, CC-009",
+      "affects_fr": ["FR-005", "FR-006"],
+      "confidence": "high"
+    },
+    {
+      "id": "FB-005",
+      "source": "direct-code-change",
+      "type": "ux_enhancement",
+      "description": "Status column info popovers added to RouteTable and FlightTable — CC-010, CC-011",
+      "affects_fr": ["FR-010", "FR-013"],
+      "confidence": "high"
+    }
+  ],
+  "impact": {
+    "requirements": {
+      "added": [],
+      "modified": [
+        {
+          "id": "FR-005",
+          "field": "acceptance_criteria",
+          "reason": "FB-004: Dashboard 'critical NOTAMs' widget now includes high-importance NOTAMs, not just critical. Acceptance criteria 'Default view shows only critical and high importance NOTAMs' wording aligns but implementation detail changed.",
+          "action": "update-acceptance-criteria"
+        },
+        {
+          "id": "FR-006",
+          "field": "acceptance_criteria",
+          "reason": "FB-003, FB-004: Map now shows all route-relevant NOTAMs (not just critical), has legend, popups, route '전체' option, and info popover. Multiple new acceptance criteria needed.",
+          "action": "add-acceptance-criteria"
+        }
+      ],
+      "removed": [],
+      "potentially_added": [
+        {
+          "note": "항공정보분석workflow.png may introduce new requirements pending visual inspection at requirements-analyst stage"
+        }
+      ]
+    },
+    "architecture": {
+      "added": [],
+      "modified": [
+        {
+          "component": "RouteImpactMap",
+          "path": "src/components/dashboard/RouteImpactMap.tsx",
+          "reason": "CC-003/004/005/007/009/012: Added legend component, popup on circle click, '전체' route option, info popover, changed data source from criticalNotams to routeImpacts.notams",
+          "cloudscape_additions": ["Popover"]
+        },
+        {
+          "component": "FlightRouteMap",
+          "path": "src/components/flights/FlightRouteMap.tsx",
+          "reason": "CC-006/013: Added popup on circle click, per-importance color coding"
+        },
+        {
+          "component": "LeafletMapInner",
+          "path": "src/components/common/LeafletMapInner.tsx",
+          "reason": "CC-001/002: Leaflet CSS import moved here, marker icon fix added"
+        },
+        {
+          "component": "RouteTable",
+          "path": "src/components/routes/RouteTable.tsx",
+          "reason": "CC-010: Added Popover on status column header",
+          "cloudscape_additions": ["Popover"]
+        },
+        {
+          "component": "FlightTable",
+          "path": "src/components/flights/FlightTable.tsx",
+          "reason": "CC-011: Added Popover on status column header",
+          "cloudscape_additions": ["Popover"]
+        },
+        {
+          "component": "RecentCriticalNotams",
+          "path": "src/components/dashboard/RecentCriticalNotams.tsx",
+          "reason": "CC-008: Now shows critical+high NOTAMs"
+        }
+      ],
+      "removed": []
+    },
+    "specs": {
+      "added": [],
+      "modified": [
+        {
+          "spec": "frontend-spec.json",
+          "components_affected": ["RouteImpactMap", "FlightRouteMap", "LeafletMapInner", "RouteTable", "FlightTable", "RecentCriticalNotams"],
+          "reason": "6 components modified with new sub-components, props, and behavior"
+        },
+        {
+          "spec": "backend-spec.json",
+          "components_affected": ["dashboard-route-impact-api"],
+          "reason": "CC-008: API filter changed to include high-importance NOTAMs"
+        }
+      ],
+      "removed": []
+    },
+    "code": {
+      "added": [],
+      "modified": [
+        {
+          "file": "src/components/common/LeafletMapInner.tsx",
+          "generator": "frontend",
+          "reason": "CC-001/002: CSS import + marker icon fix",
+          "status": "already-modified"
+        },
+        {
+          "file": "src/app/layout.tsx",
+          "generator": "frontend",
+          "reason": "CC-001: Removed CDN link for leaflet CSS",
+          "status": "already-modified"
+        },
+        {
+          "file": "src/components/dashboard/RouteImpactMap.tsx",
+          "generator": "frontend",
+          "reason": "CC-003/004/005/007/009/012: Major rework — legend, popups, route selector, data source, info popover, wrapper div",
+          "status": "already-modified"
+        },
+        {
+          "file": "src/components/flights/FlightRouteMap.tsx",
+          "generator": "frontend",
+          "reason": "CC-006/013: Popup + importance colors",
+          "status": "already-modified"
+        },
+        {
+          "file": "src/components/routes/RouteTable.tsx",
+          "generator": "frontend",
+          "reason": "CC-010: Status info popover",
+          "status": "already-modified"
+        },
+        {
+          "file": "src/components/flights/FlightTable.tsx",
+          "generator": "frontend",
+          "reason": "CC-011: Status info popover",
+          "status": "already-modified"
+        },
+        {
+          "file": "src/app/api/dashboard/route-impact/route.ts",
+          "generator": "backend",
+          "reason": "CC-008: Critical+high filter",
+          "status": "already-modified"
+        },
+        {
+          "file": "src/components/dashboard/RecentCriticalNotams.tsx",
+          "generator": "frontend",
+          "reason": "CC-008: Now displays critical+high NOTAMs",
+          "status": "already-modified"
+        }
+      ],
+      "removed": [],
+      "unchanged_files": {
+        "backend": 46,
+        "frontend": 61,
+        "total": 107,
+        "note": "107 of 115 pipeline-generated files are unchanged (8 modified by direct code changes)"
+      }
+    }
+  },
+  "recommended_reentry": "requirements-analyst",
+  "reentry_reason": "New input file (항공정보분석workflow.png) may contain workflow requirements not captured in v1. Additionally, FR-005 and FR-006 acceptance criteria need updating to reflect the 13 direct code changes. The workflow diagram must be analyzed before architecture or specs can be updated. Direct code changes (CC-001 through CC-013) are already applied to the codebase and should be reconciled into the artifact chain (requirements -> architecture -> specs) to maintain traceability.",
+  "reentry_strategy": {
+    "requirements-analyst": {
+      "action": "Analyze 항공정보분석workflow.png for new/modified requirements. Update FR-005/FR-006 acceptance criteria to match direct code changes. Check if workflow diagram introduces new FRs.",
+      "scope": "incremental — update existing FRs, add new if workflow diagram requires"
+    },
+    "architect": {
+      "action": "Update architecture.json component definitions to reflect Popover additions, data source changes, and new sub-components (MapLegend, MapPopup patterns). Add cloudscape_components entries.",
+      "scope": "incremental — modify 6 existing components"
+    },
+    "spec-writer": {
+      "action": "Update frontend-spec.json for 6 modified components. Update backend-spec.json for dashboard API filter change.",
+      "scope": "incremental — update existing specs only"
+    },
+    "code-generator": {
+      "action": "Skip regeneration for the 8 already-modified files. Only regenerate if requirements-analyst or architect identifies new requirements from workflow diagram.",
+      "scope": "minimal — direct code changes already applied"
+    }
+  },
+  "scope": "medium",
+  "estimated_changes": {
+    "new_files": 0,
+    "modified_files": 8,
+    "unchanged_files": 107,
+    "already_applied_code_changes": 8,
+    "pending_artifact_updates": 4,
+    "note": "Code changes are already in place. Primary work is reconciling artifacts (requirements/architecture/specs) to match the current code state, plus analyzing the new workflow diagram."
+  }
+}

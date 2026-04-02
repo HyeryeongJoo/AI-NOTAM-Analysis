@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "processed_at": "2026-03-30T00:00:00Z",
+  "brief_checksum": "46814a8bc3858919f9fbc3f902e3a3b1",
+  "files": [
+    {
+      "name": "JejuAir-AI-Powered-NOTAM-Analysis-System-Requirements.pdf",
+      "path": ".pipeline/input/raw/JejuAir-AI-Powered-NOTAM-Analysis-System-Requirements.pdf",
+      "checksum": "9ca1aaae8e95479ba532490c065dba55",
+      "size": 78603,
+      "type": "requirements-doc"
+    }
+  ]
+}

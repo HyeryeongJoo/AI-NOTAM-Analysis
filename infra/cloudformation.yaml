@@ -1,0 +1,479 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: '7C NOTAM Prototype - CloudFront + EC2 (Existing VPC)'
+
+Parameters:
+  S3CodeBucket:
+    Type: String
+    Description: S3 bucket containing the deployment package
+  S3CodeKey:
+    Type: String
+    Default: notam-prototype.tar.gz
+    Description: S3 key for the deployment package
+  AwsRegion:
+    Type: String
+    Default: us-east-1
+    Description: AWS region for Bedrock and other services
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: Existing VPC ID to deploy into
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Existing public subnet ID with internet access
+
+Mappings:
+  AWSRegionsPrefixListID:
+    us-east-1: {PrefixList: pl-3b927c52}
+    us-west-2: {PrefixList: pl-82a045eb}
+    ap-northeast-1: {PrefixList: pl-58a04531}
+    ap-northeast-2: {PrefixList: pl-22a6434b}
+
+Resources:
+  # ============================================================
+  # Security Group - CloudFront only ingress on port 3000
+  # ============================================================
+
+  NotamSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub '${AWS::StackName} - Allow CloudFront ingress on port 3000'
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - Description: Allow HTTP from CloudFront on port 3000
+          IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          SourcePrefixListId: !FindInMap [AWSRegionsPrefixListID, !Ref 'AWS::Region', PrefixList]
+
+  # ============================================================
+  # IAM Roles
+  # ============================================================
+
+  NotamEC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-ec2-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+                - ssm.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+        - arn:aws:iam::aws:policy/AmazonBedrockFullAccess
+      Policies:
+        - PolicyName: NotamEC2Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub 'arn:aws:s3:::${S3CodeBucket}'
+                  - !Sub 'arn:aws:s3:::${S3CodeBucket}/*'
+
+  NotamEC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref NotamEC2Role
+
+  # ============================================================
+  # EC2 Instance (ARM64 Graviton, m7g.medium, 30GB)
+  # ============================================================
+
+  NotamInstance:
+    Type: AWS::EC2::Instance
+    DependsOn: [NotamSecurityGroup]
+    Properties:
+      ImageId: resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
+      InstanceType: m7g.medium
+      IamInstanceProfile: !Ref NotamEC2InstanceProfile
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref NotamSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 30
+            VolumeType: gp3
+            DeleteOnTermination: true
+            Encrypted: true
+      Monitoring: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-Instance'
+
+  # ============================================================
+  # Lambda Functions for SSM Document orchestration
+  # ============================================================
+
+  SSMDocLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SSMDocOnEC2
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:SendCommand
+                Resource:
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:document/${NotamDeploySSMDoc}'
+                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/${NotamInstance}'
+              - Effect: Allow
+                Action:
+                  - ssm:ListCommandInvocations
+                  - ssm:GetCommandInvocation
+                Resource: '*'
+
+  RunSSMDocLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Run SSM document on EC2 instance
+      Handler: index.lambda_handler
+      Runtime: python3.11
+      MemorySize: 128
+      Timeout: 600
+      Environment:
+        Variables:
+          RetrySleep: 2900
+          AbortTimeRemaining: 3200
+      Role: !GetAtt SSMDocLambdaRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import logging
+          import time
+          import os
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def lambda_handler(event, context):
+              if event['RequestType'] != 'Create':
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData={}, reason='No action to take')
+              else:
+                  sleep_ms = int(os.environ.get('RetrySleep'))
+                  abort_time_remaining_ms = int(os.environ.get('AbortTimeRemaining'))
+                  resource_properties = event['ResourceProperties']
+                  instance_id = resource_properties['InstanceId']
+                  document_name = resource_properties['DocumentName']
+                  cloudwatch_log_group_name = resource_properties['CloudWatchLogGroupName']
+
+                  logger.info(f'Running SSM Document {document_name} on EC2 instance {instance_id}')
+
+                  del resource_properties['ServiceToken']
+                  if 'ServiceTimeout' in resource_properties:
+                      del resource_properties['ServiceTimeout']
+                  del resource_properties['InstanceId']
+                  del resource_properties['DocumentName']
+                  del resource_properties['CloudWatchLogGroupName']
+
+                  parameters = {}
+                  for key, value in resource_properties.items():
+                      parameters[key] = [value]
+
+                  retry = True
+                  attempt_no = 0
+                  time_remaining_ms = context.get_remaining_time_in_millis()
+                  ssm = boto3.client('ssm')
+
+                  while (retry == True):
+                      attempt_no += 1
+                      logger.info(f'Attempt: {attempt_no}. Time Remaining: {time_remaining_ms/1000}s')
+                      try:
+                          response = ssm.send_command(
+                              InstanceIds = [instance_id],
+                              DocumentName = document_name,
+                              CloudWatchOutputConfig = {'CloudWatchLogGroupName': cloudwatch_log_group_name, 'CloudWatchOutputEnabled': True},
+                              Parameters = parameters
+                          )
+                          command_id = response['Command']['CommandId']
+                          responseData = {'CommandId': command_id}
+                          cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, reason='OK')
+                          retry = False
+
+                      except ssm.exceptions.InvalidInstanceId as e:
+                          time_remaining_ms = context.get_remaining_time_in_millis()
+                          if (time_remaining_ms > abort_time_remaining_ms):
+                              logger.info(f'Instance {instance_id} not ready. Sleeping: {sleep_ms/1000}s')
+                              time.sleep(sleep_ms/1000)
+                              retry = True
+                          else:
+                              logger.error(e, exc_info=True)
+                              cfnresponse.send(event, context, cfnresponse.FAILED, responseData={}, reason='Timed out')
+                              retry = False
+                      except Exception as e:
+                          logger.error(e, exc_info=True)
+                          cfnresponse.send(event, context, cfnresponse.FAILED, responseData={}, reason=str(e))
+                          retry = False
+
+  CheckSSMDocLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Check SSM document completion on EC2 instance
+      Handler: index.lambda_handler
+      Runtime: python3.11
+      MemorySize: 128
+      Timeout: 600
+      Environment:
+        Variables:
+          RetrySleep: 2900
+          AbortTimeRemaining: 5000
+      Role: !GetAtt SSMDocLambdaRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import logging
+          import time
+          import os
+          import re
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def sanitize(text):
+              text = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', text)
+              text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', text)
+              return text
+
+          def lambda_handler(event, context):
+              if event['RequestType'] != 'Create':
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData={}, reason='No action to take')
+              else:
+                  sleep_ms = int(os.environ.get('RetrySleep'))
+                  abort_time_remaining_ms = int(os.environ.get('AbortTimeRemaining'))
+                  resource_properties = event['ResourceProperties']
+                  instance_id = resource_properties['InstanceId']
+                  document_name = resource_properties['DocumentName']
+
+                  logger.info(f'Checking SSM Document {document_name} on EC2 instance {instance_id}')
+
+                  retry = True
+                  attempt_no = 0
+                  time_remaining_ms = context.get_remaining_time_in_millis()
+                  ssm = boto3.client('ssm')
+
+                  while (retry == True):
+                      attempt_no += 1
+                      logger.info(f'Attempt: {attempt_no}. Time Remaining: {time_remaining_ms/1000}s')
+                      try:
+                          response = ssm.list_command_invocations(
+                              InstanceId=instance_id,
+                              Details=True
+                          )
+
+                          for invocation in response['CommandInvocations']:
+                              if invocation['DocumentName'] == document_name:
+                                  invocation_status = invocation['Status']
+                                  if invocation_status == 'Success':
+                                      logger.info(f'SSM Document completed successfully')
+                                      cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData={}, reason='OK')
+                                      retry = False
+                                  elif invocation_status in ['Failed', 'Cancelled', 'TimedOut']:
+                                      reason = f'SSM Document failed with status: {invocation_status}'
+                                      for step in invocation['CommandPlugins']:
+                                          step_name = step['Name']
+                                          step_status = step['Status']
+                                          if step_status != 'Success':
+                                              step_output = step.get('Output', 'No output available')
+                                              clean_output = sanitize(step_output[-2000:])
+                                              reason += f'\nStep {step_name} {step_status}: {clean_output}'
+                                      logger.error(reason)
+                                      cfnresponse.send(event, context, cfnresponse.FAILED, responseData={}, reason=reason)
+                                      retry = False
+                                  else:
+                                      logger.info(f'SSM Document still running. Status: {invocation_status}')
+                                      retry = True
+
+                          if retry == True:
+                              if (time_remaining_ms > abort_time_remaining_ms):
+                                  time.sleep(sleep_ms/1000)
+                                  time_remaining_ms = context.get_remaining_time_in_millis()
+                              else:
+                                  cfnresponse.send(event, context, cfnresponse.FAILED, responseData={}, reason='Timeout waiting for SSM document completion')
+                                  retry = False
+                      except Exception as e:
+                          logger.error(e, exc_info=True)
+                          cfnresponse.send(event, context, cfnresponse.FAILED, responseData={}, reason=str(e))
+                          retry = False
+
+  # ============================================================
+  # SSM Document: Deploy NOTAM Prototype (Next.js)
+  # ============================================================
+
+  NotamDeploySSMDoc:
+    Type: AWS::SSM::Document
+    Properties:
+      DocumentType: Command
+      Content:
+        schemaVersion: '2.2'
+        description: Deploy 7C NOTAM Prototype (Next.js 15) application
+        parameters:
+          S3Bucket:
+            type: String
+          S3Key:
+            type: String
+          AwsRegion:
+            type: String
+        mainSteps:
+          - name: DeployNotamPrototype
+            action: aws:runShellScript
+            inputs:
+              timeoutSeconds: 900
+              runCommand:
+                - '#!/bin/bash'
+                - set -e
+                - ''
+                - echo "=== Waiting for dnf lock ==="
+                - 'for i in $(seq 1 30); do fuser /var/lib/rpm/.rpm.lock > /dev/null 2>&1 || break; echo "Waiting for rpm lock..."; sleep 5; done'
+                - 'for i in $(seq 1 30); do fuser /var/cache/dnf/metadata_lock.pid > /dev/null 2>&1 || break; echo "Waiting for dnf lock..."; sleep 5; done'
+                - ''
+                - echo "=== Installing Node.js 22 ==="
+                - curl -fsSL https://rpm.nodesource.com/setup_22.x | bash -
+                - dnf install -y nodejs
+                - node --version && npm --version
+                - ''
+                - echo "=== Downloading deployment package from S3 ==="
+                - rm -rf /opt/notam-prototype
+                - mkdir -p /opt/notam-prototype
+                - 'aws s3 cp "s3://{{ S3Bucket }}/{{ S3Key }}" /tmp/notam-prototype.tar.gz'
+                - tar -xzf /tmp/notam-prototype.tar.gz -C /opt/notam-prototype
+                - rm -f /tmp/notam-prototype.tar.gz
+                - ''
+                - echo "=== Installing dependencies ==="
+                - cd /opt/notam-prototype
+                - npm ci --production=false
+                - ''
+                - echo "=== Building Next.js ==="
+                - npm run build
+                - ''
+                - echo "=== Creating .env.local ==="
+                - |
+                  cat > /opt/notam-prototype/.env.local <<ENV
+                  AWS_REGION={{ AwsRegion }}
+                  BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-20250514-v1:0
+                  ENV
+                - ''
+                - echo "=== Creating systemd service ==="
+                - |
+                  cat > /etc/systemd/system/notam-prototype.service <<UNIT
+                  [Unit]
+                  Description=7C NOTAM Prototype (Next.js 15)
+                  After=network.target
+
+                  [Service]
+                  Type=simple
+                  User=ec2-user
+                  WorkingDirectory=/opt/notam-prototype
+                  ExecStart=/usr/bin/node node_modules/.bin/next start -p 3000
+                  Restart=always
+                  RestartSec=5
+                  Environment=NODE_ENV=production
+                  Environment=AWS_REGION={{ AwsRegion }}
+                  Environment=BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-20250514-v1:0
+                  Environment=HOSTNAME=0.0.0.0
+
+                  [Install]
+                  WantedBy=multi-user.target
+                  UNIT
+                - ''
+                - chown -R ec2-user:ec2-user /opt/notam-prototype
+                - systemctl daemon-reload
+                - systemctl enable notam-prototype
+                - systemctl start notam-prototype
+                - ''
+                - echo "=== Waiting for health check ==="
+                - set +e
+                - 'for i in $(seq 1 30); do curl -sf http://localhost:3000 > /dev/null 2>&1 && echo "Health check passed" && break; sleep 2; done'
+                - echo "NOTAM Prototype deployment complete"
+
+  # ============================================================
+  # Orchestration: Deploy -> Check -> CloudFront
+  # ============================================================
+
+  RunDeploySSMDoc:
+    Type: Custom::RunSSMDocLambda
+    Properties:
+      ServiceToken: !GetAtt RunSSMDocLambda.Arn
+      ServiceTimeout: 305
+      InstanceId: !Ref NotamInstance
+      DocumentName: !Ref NotamDeploySSMDoc
+      CloudWatchLogGroupName: !Sub '/aws/ssm/${NotamDeploySSMDoc}'
+      S3Bucket: !Ref S3CodeBucket
+      S3Key: !Ref S3CodeKey
+      AwsRegion: !Ref AwsRegion
+
+  CheckDeploySSMDoc:
+    Type: Custom::CheckSSMDocLambda
+    DependsOn: RunDeploySSMDoc
+    Properties:
+      ServiceToken: !GetAtt CheckSSMDocLambda.Arn
+      ServiceTimeout: 610
+      InstanceId: !Ref NotamInstance
+      DocumentName: !Ref NotamDeploySSMDoc
+
+  # ============================================================
+  # CloudFront Distribution
+  # ============================================================
+
+  NotamCloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn: CheckDeploySSMDoc
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        HttpVersion: http2and3
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+          OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3
+          TargetOriginId: !Sub 'NotamPrototype-${AWS::StackName}'
+          ViewerProtocolPolicy: redirect-to-https
+        Origins:
+          - DomainName: !GetAtt NotamInstance.PublicDnsName
+            Id: !Sub 'NotamPrototype-${AWS::StackName}'
+            CustomOriginConfig:
+              HTTPPort: 3000
+              OriginProtocolPolicy: http-only
+              OriginReadTimeout: 120
+              OriginKeepaliveTimeout: 120
+
+Outputs:
+  CloudFrontURL:
+    Description: NOTAM Prototype URL
+    Value: !Sub 'https://${NotamCloudFrontDistribution.DomainName}'
+
+  InstanceId:
+    Description: EC2 Instance ID
+    Value: !Ref NotamInstance
+
+  S3CodeBucketName:
+    Description: S3 bucket used for deployment package
+    Value: !Ref S3CodeBucket

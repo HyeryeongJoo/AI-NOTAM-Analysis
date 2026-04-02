@@ -1,0 +1,1494 @@
+{
+  "generator": "frontend",
+  "metadata": {
+    "created": "2026-03-30T13:00:00Z",
+    "version": 1,
+    "total_specs": 38,
+    "description": "Frontend specs for Jeju Air AI NOTAM Analysis System — hooks, contexts, layout, shared components, feature components, pages"
+  },
+  "generation_order": ["hooks", "contexts", "layout", "shared", "feature", "page"],
+  "hooks": [
+    {
+      "name": "useNotams",
+      "file_path": "src/hooks/useNotams.ts",
+      "api_endpoint": "GET /api/notams",
+      "query_params": ["importance", "status", "airport", "qCode", "sortBy", "order", "page", "pageSize", "expiryStatus"],
+      "return_type": "{ data: { items: Notam[]; total: number; stats: NotamStats } | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/notam.ts"],
+      "requirements": ["FR-001", "FR-005", "FR-019"],
+      "use_client": true
+    },
+    {
+      "name": "useNotam",
+      "file_path": "src/hooks/useNotam.ts",
+      "api_endpoint": "GET /api/notams/[id]",
+      "query_params": [],
+      "return_type": "{ data: Notam | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/notam.ts"],
+      "requirements": ["FR-002", "FR-012"],
+      "use_client": true
+    },
+    {
+      "name": "useNotamAnalysis",
+      "file_path": "src/hooks/useNotamAnalysis.ts",
+      "api_endpoint": "POST /api/notams/analyze",
+      "query_params": [],
+      "return_type": "{ trigger: (notamId: string) => Promise<{ importanceScore: number; importanceLevel: ImportanceLevel; aiSummary: string; aiAnalysis: string }>; isMutating: boolean }",
+      "swr_config": {},
+      "dependencies": ["swr/mutation", "src/types/notam.ts"],
+      "requirements": ["FR-001", "FR-003"],
+      "use_client": true
+    },
+    {
+      "name": "useFlights",
+      "file_path": "src/hooks/useFlights.ts",
+      "api_endpoint": "GET /api/flights",
+      "query_params": ["airport", "route", "date", "impactStatus", "sortBy", "order", "page", "pageSize"],
+      "return_type": "{ data: { items: Flight[]; total: number } | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/flight.ts"],
+      "requirements": ["FR-004", "FR-013"],
+      "use_client": true
+    },
+    {
+      "name": "useFlight",
+      "file_path": "src/hooks/useFlight.ts",
+      "api_endpoint": "GET /api/flights/[id]",
+      "query_params": [],
+      "return_type": "{ data: (Flight & { route: Route; affectedNotams: Notam[] }) | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/flight.ts", "src/types/route.ts", "src/types/notam.ts"],
+      "requirements": ["FR-004", "FR-013"],
+      "use_client": true
+    },
+    {
+      "name": "useRoutes",
+      "file_path": "src/hooks/useRoutes.ts",
+      "api_endpoint": "GET /api/routes",
+      "query_params": ["status", "sortBy", "order", "page", "pageSize"],
+      "return_type": "{ data: { items: Route[]; total: number } | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/route.ts"],
+      "requirements": ["FR-006", "FR-010"],
+      "use_client": true
+    },
+    {
+      "name": "useRoute",
+      "file_path": "src/hooks/useRoute.ts",
+      "api_endpoint": "GET /api/routes/[id]",
+      "query_params": [],
+      "return_type": "{ data: (Route & { impacts: NotamRouteImpact[]; activeNotams: Notam[] }) | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/route.ts", "src/types/impact.ts", "src/types/notam.ts"],
+      "requirements": ["FR-009", "FR-010"],
+      "use_client": true
+    },
+    {
+      "name": "useRefBook",
+      "file_path": "src/hooks/useRefBook.ts",
+      "api_endpoint": "GET /api/ref-book",
+      "query_params": ["status", "sortBy", "order", "page", "pageSize"],
+      "return_type": "{ data: { items: RefBookEntry[]; total: number } | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/refBook.ts"],
+      "requirements": ["FR-011"],
+      "use_client": true
+    },
+    {
+      "name": "useBriefings",
+      "file_path": "src/hooks/useBriefings.ts",
+      "api_endpoint": "GET /api/briefings",
+      "query_params": ["flightId", "type", "status", "sortBy", "order", "page", "pageSize"],
+      "return_type": "{ data: { items: Briefing[]; total: number } | undefined; error: Error | undefined; isLoading: boolean; mutate: () => void }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/briefing.ts"],
+      "requirements": ["FR-007", "FR-008", "FR-014"],
+      "use_client": true
+    },
+    {
+      "name": "useBriefing",
+      "file_path": "src/hooks/useBriefing.ts",
+      "api_endpoint": "GET /api/briefings/[id]",
+      "query_params": [],
+      "return_type": "{ data: Briefing | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/briefing.ts"],
+      "requirements": ["FR-007", "FR-008"],
+      "use_client": true
+    },
+    {
+      "name": "useDashboard",
+      "file_path": "src/hooks/useDashboard.ts",
+      "api_endpoint": "GET /api/dashboard/route-impact",
+      "query_params": ["routeId"],
+      "return_type": "{ data: { summary: DashboardSummary; routeImpacts: RouteImpactMapData[]; criticalNotams: Notam[] } | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false, "refreshInterval": 30000 },
+      "dependencies": ["swr", "src/types/dashboard.ts", "src/types/notam.ts"],
+      "requirements": ["FR-006", "FR-005", "FR-016"],
+      "use_client": true
+    },
+    {
+      "name": "useAuditLog",
+      "file_path": "src/hooks/useAuditLog.ts",
+      "api_endpoint": "GET /api/audit-log",
+      "query_params": ["userId", "action", "targetType", "startDate", "endDate", "page", "pageSize"],
+      "return_type": "{ data: { items: AuditLog[]; total: number } | undefined; error: Error | undefined; isLoading: boolean }",
+      "swr_config": { "revalidateOnFocus": false },
+      "dependencies": ["swr", "src/types/auditLog.ts"],
+      "requirements": ["FR-017"],
+      "use_client": true
+    },
+    {
+      "name": "useGenerateBriefing",
+      "file_path": "src/hooks/useGenerateBriefing.ts",
+      "api_endpoint": "POST /api/briefings/generate",
+      "query_params": [],
+      "return_type": "{ trigger: (params: { flightId: string; type: BriefingType }) => Promise<Briefing>; isMutating: boolean }",
+      "swr_config": {},
+      "dependencies": ["swr/mutation", "src/types/briefing.ts"],
+      "requirements": ["FR-007"],
+      "use_client": true
+    },
+    {
+      "name": "useRouteAlternatives",
+      "file_path": "src/hooks/useRouteAlternatives.ts",
+      "api_endpoint": "POST /api/routes/[id]/alternatives",
+      "query_params": [],
+      "return_type": "{ trigger: (notamId: string) => Promise<{ alternatives: RouteAlternative[]; reasoning: string }>; isMutating: boolean }",
+      "swr_config": {},
+      "dependencies": ["swr/mutation", "src/types/route.ts"],
+      "requirements": ["FR-009"],
+      "use_client": true
+    }
+  ],
+  "contexts": [
+    {
+      "name": "NotificationContext",
+      "file_path": "src/contexts/NotificationContext.tsx",
+      "purpose": "Flashbar 알림 메시지 관리 — AppLayout notifications 슬롯에 표시",
+      "state": {
+        "notifications": "FlashbarProps.MessageDefinition[]"
+      },
+      "actions": {
+        "addNotification": "(notification: FlashbarProps.MessageDefinition) => void",
+        "removeNotification": "(id: string) => void",
+        "clearNotifications": "() => void"
+      },
+      "cloudscape_components": ["Flashbar"],
+      "use_client": true,
+      "requirements": []
+    },
+    {
+      "name": "AlertContext",
+      "file_path": "src/contexts/AlertContext.tsx",
+      "purpose": "Critical NOTAM 알림 배너 상태 관리 — 미확인 critical 알림 추적",
+      "state": {
+        "criticalAlerts": "Notam[]",
+        "acknowledgedIds": "Set<string>"
+      },
+      "actions": {
+        "setCriticalAlerts": "(alerts: Notam[]) => void",
+        "acknowledgeAlert": "(notamId: string) => void",
+        "getUnacknowledgedAlerts": "() => Notam[]"
+      },
+      "cloudscape_components": [],
+      "use_client": true,
+      "requirements": ["FR-016"]
+    },
+    {
+      "name": "AuthContext",
+      "file_path": "src/contexts/AuthContext.tsx",
+      "purpose": "Mock 인증 상태 관리 — 현재 로그인한 dispatcher 정보",
+      "state": {
+        "user": "Dispatcher | null",
+        "isAuthenticated": "boolean"
+      },
+      "actions": {
+        "login": "(username: string, password: string) => Promise<void>",
+        "logout": "() => void"
+      },
+      "cloudscape_components": [],
+      "use_client": true,
+      "requirements": []
+    }
+  ],
+  "layout": [
+    {
+      "name": "RootLayout",
+      "file_path": "src/app/layout.tsx",
+      "type": "layout",
+      "description": "Root layout with global styles, SWR config, context providers",
+      "cloudscape_components": [],
+      "imports": [
+        "@cloudscape-design/global-styles/index.css",
+        "src/contexts/NotificationContext.tsx",
+        "src/contexts/AlertContext.tsx",
+        "src/contexts/AuthContext.tsx",
+        "src/components/layout/AppShell.tsx"
+      ],
+      "use_client": false,
+      "requirements": []
+    },
+    {
+      "name": "AppShell",
+      "file_path": "src/components/layout/AppShell.tsx",
+      "type": "layout",
+      "description": "TopNavigation (AppLayout 외부) + AppLayout with SideNavigation, Breadcrumbs, Flashbar",
+      "cloudscape_components": [
+        { "name": "TopNavigation", "import_path": "@cloudscape-design/components/top-navigation", "key_props": ["identity", "utilities"] },
+        { "name": "AppLayout", "import_path": "@cloudscape-design/components/app-layout", "key_props": ["navigation", "breadcrumbs", "notifications", "content", "contentType", "toolsHide"] },
+        { "name": "SideNavigation", "import_path": "@cloudscape-design/components/side-navigation", "key_props": ["header", "items", "activeHref"] },
+        { "name": "BreadcrumbGroup", "import_path": "@cloudscape-design/components/breadcrumb-group", "key_props": ["items"] },
+        { "name": "Flashbar", "import_path": "@cloudscape-design/components/flashbar", "key_props": ["items"] }
+      ],
+      "top_navigation": {
+        "identity": { "title": "NOTAM 분석 시스템", "href": "/" },
+        "utilities": [
+          { "type": "button", "iconName": "notification", "title": "알림", "ariaLabel": "알림" },
+          { "type": "button", "text": "교대 근무: 주간", "iconName": "user-profile" },
+          { "type": "menu-dropdown", "text": "김운항관리사", "items": [{ "id": "signout", "text": "로그아웃" }] }
+        ]
+      },
+      "side_navigation": {
+        "header": { "text": "NOTAM 분석", "href": "/" },
+        "items": [
+          {
+            "type": "section",
+            "text": "운항 현황",
+            "items": [
+              { "type": "link", "text": "대시보드", "href": "/" },
+              { "type": "link", "text": "NOTAM 목록", "href": "/notams" },
+              { "type": "link", "text": "운항편", "href": "/flights" }
+            ]
+          },
+          {
+            "type": "section",
+            "text": "항로 관리",
+            "items": [
+              { "type": "link", "text": "항로 목록", "href": "/routes" }
+            ]
+          },
+          {
+            "type": "section",
+            "text": "문서 관리",
+            "items": [
+              { "type": "link", "text": "REF BOOK", "href": "/ref-book" },
+              { "type": "link", "text": "브리핑 문서", "href": "/briefings" }
+            ]
+          },
+          {
+            "type": "section",
+            "text": "관리",
+            "items": [
+              { "type": "link", "text": "감사 로그", "href": "/audit-log" }
+            ]
+          }
+        ]
+      },
+      "use_client": true,
+      "requirements": []
+    }
+  ],
+  "shared": [
+    {
+      "component": "ImportanceBadge",
+      "file_path": "src/components/common/ImportanceBadge.tsx",
+      "type": "shared",
+      "requirements": ["FR-001"],
+      "description": "ImportanceLevel에 따라 색상 코딩된 Badge 컴포넌트",
+      "props_interface": {
+        "level": "ImportanceLevel"
+      },
+      "cloudscape_components": [
+        { "name": "Badge", "import_path": "@cloudscape-design/components/badge", "key_props": ["color"], "event_handlers": [] }
+      ],
+      "color_mapping": {
+        "critical": "red",
+        "high": "red",
+        "medium": "blue",
+        "low": "grey",
+        "routine": "grey"
+      },
+      "label_mapping": {
+        "critical": "위험",
+        "high": "높음",
+        "medium": "보통",
+        "low": "낮음",
+        "routine": "일상"
+      },
+      "use_client": false,
+      "dependencies": ["src/types/notam.ts"]
+    },
+    {
+      "component": "NotamExpiryIndicator",
+      "file_path": "src/components/common/NotamExpiryIndicator.tsx",
+      "type": "shared",
+      "requirements": ["FR-019"],
+      "description": "NOTAM 만료까지 남은 시간 표시 — StatusIndicator 색상으로 긴급도 시각화",
+      "props_interface": {
+        "effectiveTo": "string",
+        "status": "NotamStatus"
+      },
+      "cloudscape_components": [
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["variant"], "event_handlers": [] }
+      ],
+      "logic": "effectiveTo가 24시간 이내면 warning, 6시간 이내면 error, expired면 stopped, PERM이면 info",
+      "use_client": false,
+      "dependencies": ["src/types/notam.ts"]
+    },
+    {
+      "component": "ImportanceScoreBar",
+      "file_path": "src/components/common/ImportanceScoreBar.tsx",
+      "type": "shared",
+      "requirements": ["FR-001"],
+      "description": "중요도 점수(0.0~1.0)를 ProgressBar로 시각화",
+      "props_interface": {
+        "score": "number",
+        "showLabel": "boolean"
+      },
+      "cloudscape_components": [
+        { "name": "ProgressBar", "import_path": "@cloudscape-design/components/progress-bar", "key_props": ["value", "status", "additionalInfo"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["variant"], "event_handlers": [] }
+      ],
+      "logic": "score >= 0.8 error, >= 0.6 warning(in-progress), else success",
+      "use_client": false,
+      "dependencies": []
+    },
+    {
+      "component": "AirportLabel",
+      "file_path": "src/components/common/AirportLabel.tsx",
+      "type": "shared",
+      "requirements": [],
+      "description": "ICAO 코드 + 한국어 공항명 Popover 표시",
+      "props_interface": {
+        "icaoCode": "string",
+        "airportName": "string",
+        "airportNameKo": "string"
+      },
+      "cloudscape_components": [
+        { "name": "Popover", "import_path": "@cloudscape-design/components/popover", "key_props": ["content", "triggerType"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["fontWeight"], "event_handlers": [] }
+      ],
+      "use_client": false,
+      "dependencies": []
+    },
+    {
+      "component": "LeafletMapWrapper",
+      "file_path": "src/components/common/LeafletMapWrapper.tsx",
+      "type": "shared",
+      "requirements": ["FR-006"],
+      "description": "Leaflet 지도 래퍼 — dynamic import로 SSR 방지, Container 내부에 MapContainer 렌더링",
+      "props_interface": {
+        "center": "[number, number]",
+        "zoom": "number",
+        "height": "string",
+        "children": "React.ReactNode"
+      },
+      "external_libs": ["leaflet", "react-leaflet"],
+      "cloudscape_components": [],
+      "use_client": true,
+      "note": "next/dynamic으로 lazy load. leaflet CSS는 head에 link로 추가. MapContainer, TileLayer를 기본 렌더링.",
+      "dependencies": ["leaflet", "react-leaflet"]
+    },
+    {
+      "component": "LoadingState",
+      "file_path": "src/components/common/LoadingState.tsx",
+      "type": "shared",
+      "requirements": [],
+      "description": "데이터 로딩 중 표시 컴포넌트",
+      "props_interface": {
+        "text": "string"
+      },
+      "cloudscape_components": [
+        { "name": "Spinner", "import_path": "@cloudscape-design/components/spinner", "key_props": ["size"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["textAlign"], "event_handlers": [] }
+      ],
+      "use_client": false,
+      "dependencies": []
+    },
+    {
+      "component": "ErrorState",
+      "file_path": "src/components/common/ErrorState.tsx",
+      "type": "shared",
+      "requirements": [],
+      "description": "에러 발생 시 Alert와 재시도 버튼 표시",
+      "props_interface": {
+        "error": "Error | string",
+        "onRetry": "(() => void) | undefined"
+      },
+      "cloudscape_components": [
+        { "name": "Alert", "import_path": "@cloudscape-design/components/alert", "key_props": ["type", "header"], "event_handlers": [] },
+        { "name": "Button", "import_path": "@cloudscape-design/components/button", "key_props": ["onClick"], "event_handlers": ["onClick"] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["padding"], "event_handlers": [] }
+      ],
+      "use_client": true,
+      "dependencies": []
+    }
+  ],
+  "specs": [
+    {
+      "component": "CriticalAlertBanner",
+      "file_path": "src/components/dashboard/CriticalAlertBanner.tsx",
+      "type": "feature",
+      "requirements": ["FR-016"],
+      "cloudscape_components": [
+        { "name": "Flashbar", "import_path": "@cloudscape-design/components/flashbar", "key_props": ["items", "stackItems"], "event_handlers": [] }
+      ],
+      "props_interface": {},
+      "state": "context",
+      "context_used": ["AlertContext"],
+      "behavior": {
+        "mount": "AlertContext에서 미확인 critical 알림 목록을 가져와 Flashbar items로 변환",
+        "dismiss": "acknowledgeAlert(notamId) 호출하여 해당 알림 숨김",
+        "action": "각 알림에 '상세 보기' 버튼링크 → /notams/{id}"
+      },
+      "use_client": true,
+      "dependencies": ["src/contexts/AlertContext.tsx", "src/types/notam.ts"]
+    },
+    {
+      "component": "DashboardSummaryCards",
+      "file_path": "src/components/dashboard/DashboardSummaryCards.tsx",
+      "type": "feature",
+      "requirements": ["FR-006", "FR-005"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "ColumnLayout", "import_path": "@cloudscape-design/components/column-layout", "key_props": ["columns", "variant"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["variant", "fontSize", "fontWeight", "color"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size", "direction"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "summary": "DashboardSummary"
+      },
+      "state": "local",
+      "cards": [
+        { "label": "활성 NOTAM", "value": "summary.totalActiveNotams", "icon": "status-info" },
+        { "label": "위험 NOTAM", "value": "summary.criticalCount", "icon": "status-negative", "highlight": true },
+        { "label": "높은 중요도", "value": "summary.highCount", "icon": "status-warning" },
+        { "label": "영향받는 항로", "value": "summary.affectedRoutesCount", "icon": "status-pending" },
+        { "label": "영향받는 운항편", "value": "summary.affectedFlightsCount", "icon": "status-pending" },
+        { "label": "필터링 비율", "value": "summary.filteredVsTotalRatio", "format": "percentage" }
+      ],
+      "use_client": false,
+      "dependencies": ["src/types/dashboard.ts"]
+    },
+    {
+      "component": "RouteImpactMap",
+      "file_path": "src/components/dashboard/RouteImpactMap.tsx",
+      "type": "feature",
+      "requirements": ["FR-006"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "actions"], "event_handlers": [] },
+        { "name": "Select", "import_path": "@cloudscape-design/components/select", "key_props": ["selectedOption", "options", "placeholder"], "event_handlers": ["onChange"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "routeImpacts": "RouteImpactMapData[]",
+        "criticalNotams": "Notam[]"
+      },
+      "state": "local",
+      "local_state": {
+        "selectedRouteId": "string | null"
+      },
+      "map_features": {
+        "notam_circles": "Circle 마커 — center=[notam.latitude, notam.longitude], radius=notam.radius (NM→m 변환). importance에 따라 색상: critical=red, high=orange, medium=yellow",
+        "route_polylines": "Polyline — waypoints를 순서대로 연결. 활성 항로는 파란색, 선택된 항로는 굵은 파란색",
+        "airport_markers": "Marker — 출발/도착 공항 위치에 아이콘 마커",
+        "intersection_highlight": "NOTAM 영역과 항로가 교차하는 구간을 빨간색 Polyline으로 강조"
+      },
+      "event_handlers": {
+        "onRouteSelect": "({ detail }) => setSelectedRouteId(detail.selectedOption.value) — 항로 선택 시 해당 항로와 관련 NOTAM만 필터링",
+        "onMapClick": "NOTAM 원형 클릭 시 Popup에 요약 표시, 링크 → /notams/{id}"
+      },
+      "external_libs": ["leaflet", "react-leaflet"],
+      "use_client": true,
+      "dependencies": ["src/components/common/LeafletMapWrapper.tsx", "src/types/dashboard.ts", "src/types/notam.ts", "src/types/route.ts"]
+    },
+    {
+      "component": "RecentCriticalNotams",
+      "file_path": "src/components/dashboard/RecentCriticalNotams.tsx",
+      "type": "feature",
+      "requirements": ["FR-005", "FR-016"],
+      "cloudscape_components": [
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation", "variant"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "counter"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] },
+        { "name": "Badge", "import_path": "@cloudscape-design/components/badge", "key_props": ["color"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "criticalNotams": "Notam[]"
+      },
+      "column_definitions": [
+        { "id": "locationIndicator", "header": "공항", "width": 80 },
+        { "id": "qCode", "header": "Q-Code", "width": 100 },
+        { "id": "importanceLevel", "header": "중요도", "width": 80, "cell_component": "ImportanceBadge" },
+        { "id": "aiSummary", "header": "요약", "width": 300 },
+        { "id": "effectiveFrom", "header": "시작", "width": 140 }
+      ],
+      "use_client": true,
+      "dependencies": ["src/types/notam.ts", "src/components/common/ImportanceBadge.tsx"]
+    },
+    {
+      "component": "AffectedFlightsSummary",
+      "file_path": "src/components/dashboard/AffectedFlightsSummary.tsx",
+      "type": "feature",
+      "requirements": ["FR-006"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "counter"], "event_handlers": [] },
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "flights": "Flight[]"
+      },
+      "column_definitions": [
+        { "id": "flightNumber", "header": "편명", "width": 100 },
+        { "id": "departureAirport", "header": "출발", "width": 80 },
+        { "id": "arrivalAirport", "header": "도착", "width": 80 },
+        { "id": "scheduledDeparture", "header": "출발 시간", "width": 140 },
+        { "id": "notamImpactCount", "header": "영향 NOTAM", "width": 100 },
+        { "id": "notamMaxSeverity", "header": "최대 심각도", "width": 100, "cell_component": "ImportanceBadge" }
+      ],
+      "use_client": true,
+      "dependencies": ["src/types/flight.ts", "src/components/common/ImportanceBadge.tsx"]
+    },
+    {
+      "component": "NotamTable",
+      "file_path": "src/components/notams/NotamTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-001", "FR-002", "FR-005", "FR-019"],
+      "cloudscape_components": [
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "selectionType", "selectedItems", "enableKeyboardNavigation", "loading", "loadingText", "empty", "filter", "header", "pagination", "preferences", "variant", "stickyHeader"], "event_handlers": ["onSelectionChange", "onSortingChange"] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "counter", "actions"], "event_handlers": [] },
+        { "name": "Pagination", "import_path": "@cloudscape-design/components/pagination", "key_props": ["currentPageIndex", "pagesCount"], "event_handlers": ["onChange"] },
+        { "name": "PropertyFilter", "import_path": "@cloudscape-design/components/property-filter", "key_props": ["query", "filteringProperties", "filteringOptions"], "event_handlers": ["onChange"] },
+        { "name": "CollectionPreferences", "import_path": "@cloudscape-design/components/collection-preferences", "key_props": ["preferences", "pageSizePreference", "visibleContentPreference"], "event_handlers": ["onConfirm"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] },
+        { "name": "Button", "import_path": "@cloudscape-design/components/button", "key_props": ["variant", "iconName"], "event_handlers": ["onClick"] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["textAlign"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "notams": "Notam[]",
+        "totalCount": "number",
+        "stats": "NotamStats | undefined",
+        "isLoading": "boolean",
+        "onSelectionChange": "(selectedNotam: Notam | null) => void"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "column_definitions": [
+        { "id": "locationIndicator", "header": "공항", "sortingField": "locationIndicator", "width": 80 },
+        { "id": "qCode", "header": "Q-Code", "sortingField": "qCode", "width": 100 },
+        { "id": "importanceScore", "header": "점수", "sortingField": "importanceScore", "width": 80, "cell_component": "ImportanceScoreBar" },
+        { "id": "importanceLevel", "header": "중요도", "sortingField": "importanceLevel", "width": 90, "cell_component": "ImportanceBadge" },
+        { "id": "body", "header": "내용", "width": 300, "maxWidth": 400 },
+        { "id": "type", "header": "유형", "width": 90 },
+        { "id": "effectiveFrom", "header": "시작일시", "sortingField": "effectiveFrom", "width": 140 },
+        { "id": "effectiveTo", "header": "종료일시", "sortingField": "effectiveTo", "width": 140, "cell_component": "NotamExpiryIndicator" },
+        { "id": "status", "header": "상태", "width": 100 },
+        { "id": "fir", "header": "FIR", "width": 70 }
+      ],
+      "filtering_properties": [
+        { "key": "importanceLevel", "operators": ["=", "!="], "propertyLabel": "중요도", "groupValuesLabel": "중요도 값" },
+        { "key": "status", "operators": ["=", "!="], "propertyLabel": "상태", "groupValuesLabel": "상태 값" },
+        { "key": "locationIndicator", "operators": ["=", ":"], "propertyLabel": "공항", "groupValuesLabel": "공항 코드" },
+        { "key": "qCode", "operators": ["=", ":"], "propertyLabel": "Q-Code", "groupValuesLabel": "Q-Code 값" },
+        { "key": "fir", "operators": ["="], "propertyLabel": "FIR", "groupValuesLabel": "FIR 값" },
+        { "key": "type", "operators": ["="], "propertyLabel": "유형", "groupValuesLabel": "NOTAM 유형" }
+      ],
+      "use_client": true,
+      "dependencies": ["@cloudscape-design/collection-hooks", "src/types/notam.ts", "src/components/common/ImportanceBadge.tsx", "src/components/common/ImportanceScoreBar.tsx", "src/components/common/NotamExpiryIndicator.tsx"]
+    },
+    {
+      "component": "NotamSplitPanelDetail",
+      "file_path": "src/components/notams/NotamSplitPanelDetail.tsx",
+      "type": "feature",
+      "requirements": ["FR-001", "FR-002"],
+      "cloudscape_components": [
+        { "name": "SplitPanel", "import_path": "@cloudscape-design/components/split-panel", "key_props": ["header", "closeBehavior"], "event_handlers": [] },
+        { "name": "KeyValuePairs", "import_path": "@cloudscape-design/components/key-value-pairs", "key_props": ["items", "columns"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "notam": "Notam | null"
+      },
+      "key_value_pairs": [
+        { "label": "공항", "value": "notam.locationIndicator" },
+        { "label": "Q-Code", "value": "notam.qCode + 설명" },
+        { "label": "중요도 점수", "value": "notam.importanceScore" },
+        { "label": "중요도", "value": "ImportanceBadge" },
+        { "label": "유효 기간", "value": "effectiveFrom ~ effectiveTo" },
+        { "label": "AI 요약", "value": "notam.aiSummary" }
+      ],
+      "use_client": true,
+      "dependencies": ["src/types/notam.ts", "src/components/common/ImportanceBadge.tsx"]
+    },
+    {
+      "component": "NotamRawAndParsed",
+      "file_path": "src/components/notams/NotamRawAndParsed.tsx",
+      "type": "feature",
+      "requirements": ["FR-002", "FR-012"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "ColumnLayout", "import_path": "@cloudscape-design/components/column-layout", "key_props": ["columns"], "event_handlers": [] },
+        { "name": "KeyValuePairs", "import_path": "@cloudscape-design/components/key-value-pairs", "key_props": ["items", "columns"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "CopyToClipboard", "import_path": "@cloudscape-design/components/copy-to-clipboard", "key_props": ["copyButtonAriaLabel", "copyText"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "notam": "Notam"
+      },
+      "layout": "2열 ColumnLayout — 좌측에 rawText 표시(코드 블록 스타일), 우측에 파싱된 구조화 필드 KeyValuePairs",
+      "use_client": false,
+      "dependencies": ["src/types/notam.ts"]
+    },
+    {
+      "component": "NotamAiAnalysis",
+      "file_path": "src/components/notams/NotamAiAnalysis.tsx",
+      "type": "feature",
+      "requirements": ["FR-001", "FR-003", "FR-015"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "actions"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "ExpandableSection", "import_path": "@cloudscape-design/components/expandable-section", "key_props": ["headerText", "defaultExpanded"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["variant", "padding"], "event_handlers": [] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] },
+        { "name": "Button", "import_path": "@cloudscape-design/components/button", "key_props": ["variant", "loading", "iconName"], "event_handlers": ["onClick"] }
+      ],
+      "props_interface": {
+        "notam": "Notam",
+        "onReanalyze": "() => void",
+        "isAnalyzing": "boolean"
+      },
+      "sections": [
+        { "title": "중요도 점수", "content": "ImportanceScoreBar + ImportanceBadge" },
+        { "title": "AI 한국어 요약", "content": "notam.aiSummary (ExpandableSection)" },
+        { "title": "영향 분석", "content": "notam.aiAnalysis (ExpandableSection)" }
+      ],
+      "behavior": {
+        "reanalyze_button": "Header actions에 '재분석' 버튼. 클릭 시 onReanalyze 호출, isAnalyzing=true면 loading 상태",
+        "empty_analysis": "aiSummary/aiAnalysis가 null이면 '분석 대기 중' StatusIndicator pending 표시"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/notam.ts", "src/components/common/ImportanceBadge.tsx", "src/components/common/ImportanceScoreBar.tsx"]
+    },
+    {
+      "component": "NotamImpactSection",
+      "file_path": "src/components/notams/NotamImpactSection.tsx",
+      "type": "feature",
+      "requirements": ["FR-003", "FR-004"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "Tabs", "import_path": "@cloudscape-design/components/tabs", "key_props": ["tabs", "activeTabId"], "event_handlers": ["onChange"] },
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "notamId": "string",
+        "affectedRoutes": "NotamRouteImpact[]",
+        "affectedFlights": "NotamFlightImpact[]"
+      },
+      "tabs": [
+        { "id": "routes", "label": "영향받는 항로", "table_type": "NotamRouteImpact" },
+        { "id": "flights", "label": "영향받는 운항편", "table_type": "NotamFlightImpact" }
+      ],
+      "use_client": true,
+      "dependencies": ["src/types/impact.ts"]
+    },
+    {
+      "component": "NotamMiniMap",
+      "file_path": "src/components/notams/NotamMiniMap.tsx",
+      "type": "feature",
+      "requirements": ["FR-012"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "latitude": "number",
+        "longitude": "number",
+        "radius": "number",
+        "locationIndicator": "string"
+      },
+      "map_features": {
+        "center": "[latitude, longitude]",
+        "zoom": "자동 — radius 기반 zoom level 계산",
+        "circle": "NOTAM 영향 범위 Circle (radius NM → meters 변환)",
+        "marker": "중심점 Marker + Popup"
+      },
+      "external_libs": ["leaflet", "react-leaflet"],
+      "use_client": true,
+      "dependencies": ["src/components/common/LeafletMapWrapper.tsx"]
+    },
+    {
+      "component": "NotamDiffView",
+      "file_path": "src/components/notams/NotamDiffView.tsx",
+      "type": "feature",
+      "requirements": ["FR-018"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "ColumnLayout", "import_path": "@cloudscape-design/components/column-layout", "key_props": ["columns"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["variant", "color"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "original": "Notam",
+        "replacement": "Notam",
+        "changes": "DiffChange[]"
+      },
+      "layout": "2열 ColumnLayout — 좌측 원본 NOTAM, 우측 대체 NOTAM. changes 배열의 각 필드를 하이라이트 (삭제=빨강 배경, 추가=초록 배경)",
+      "use_client": false,
+      "dependencies": ["src/types/notam.ts"]
+    },
+    {
+      "component": "FlightTable",
+      "file_path": "src/components/flights/FlightTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-004", "FR-013"],
+      "cloudscape_components": [
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation", "loading", "loadingText", "empty", "filter", "header", "pagination", "preferences", "stickyHeader"], "event_handlers": ["onSortingChange"] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "counter"], "event_handlers": [] },
+        { "name": "Pagination", "import_path": "@cloudscape-design/components/pagination", "key_props": ["currentPageIndex", "pagesCount"], "event_handlers": ["onChange"] },
+        { "name": "PropertyFilter", "import_path": "@cloudscape-design/components/property-filter", "key_props": ["query", "filteringProperties"], "event_handlers": ["onChange"] },
+        { "name": "CollectionPreferences", "import_path": "@cloudscape-design/components/collection-preferences", "key_props": ["preferences"], "event_handlers": ["onConfirm"] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["textAlign"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "flights": "Flight[]",
+        "totalCount": "number",
+        "isLoading": "boolean"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "column_definitions": [
+        { "id": "flightNumber", "header": "편명", "sortingField": "flightNumber", "width": 100, "cell": "Link → /flights/{id}" },
+        { "id": "departureAirport", "header": "출발 공항", "sortingField": "departureAirport", "width": 100 },
+        { "id": "arrivalAirport", "header": "도착 공항", "sortingField": "arrivalAirport", "width": 100 },
+        { "id": "scheduledDeparture", "header": "출발 시간", "sortingField": "scheduledDeparture", "width": 140 },
+        { "id": "scheduledArrival", "header": "도착 시간", "width": 140 },
+        { "id": "aircraftType", "header": "기종", "width": 80 },
+        { "id": "status", "header": "상태", "width": 100, "cell": "StatusIndicator" },
+        { "id": "notamImpactCount", "header": "NOTAM 영향", "sortingField": "notamImpactCount", "width": 100 },
+        { "id": "notamMaxSeverity", "header": "최대 심각도", "width": 100, "cell_component": "ImportanceBadge" }
+      ],
+      "filtering_properties": [
+        { "key": "departureAirport", "operators": ["=", ":"], "propertyLabel": "출발 공항" },
+        { "key": "arrivalAirport", "operators": ["=", ":"], "propertyLabel": "도착 공항" },
+        { "key": "status", "operators": ["=", "!="], "propertyLabel": "상태" },
+        { "key": "notamMaxSeverity", "operators": ["=", "!="], "propertyLabel": "NOTAM 심각도" }
+      ],
+      "use_client": true,
+      "dependencies": ["@cloudscape-design/collection-hooks", "src/types/flight.ts", "src/components/common/ImportanceBadge.tsx"]
+    },
+    {
+      "component": "FlightInfo",
+      "file_path": "src/components/flights/FlightInfo.tsx",
+      "type": "feature",
+      "requirements": ["FR-013"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "KeyValuePairs", "import_path": "@cloudscape-design/components/key-value-pairs", "key_props": ["items", "columns"], "event_handlers": [] },
+        { "name": "ColumnLayout", "import_path": "@cloudscape-design/components/column-layout", "key_props": ["columns"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "flight": "Flight & { route: Route }"
+      },
+      "key_value_pairs": [
+        "편명", "출발 공항", "도착 공항", "출발 시간", "도착 시간", "기종", "상태", "항로", "비행 거리"
+      ],
+      "use_client": false,
+      "dependencies": ["src/types/flight.ts", "src/types/route.ts"]
+    },
+    {
+      "component": "FlightNotamImpact",
+      "file_path": "src/components/flights/FlightNotamImpact.tsx",
+      "type": "feature",
+      "requirements": ["FR-004"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "counter"], "event_handlers": [] },
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] },
+        { "name": "Badge", "import_path": "@cloudscape-design/components/badge", "key_props": ["color"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "affectedNotams": "Notam[]"
+      },
+      "column_definitions": [
+        { "id": "locationIndicator", "header": "공항", "width": 80 },
+        { "id": "qCode", "header": "Q-Code", "width": 100 },
+        { "id": "importanceLevel", "header": "중요도", "width": 90, "cell_component": "ImportanceBadge" },
+        { "id": "body", "header": "내용", "width": 300 },
+        { "id": "effectiveFrom", "header": "시작", "width": 140 },
+        { "id": "effectiveTo", "header": "종료", "width": 140 }
+      ],
+      "use_client": true,
+      "dependencies": ["src/types/notam.ts", "src/components/common/ImportanceBadge.tsx"]
+    },
+    {
+      "component": "FlightRouteMap",
+      "file_path": "src/components/flights/FlightRouteMap.tsx",
+      "type": "feature",
+      "requirements": ["FR-009"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "route": "Route",
+        "affectedNotams": "Notam[]",
+        "alternativeRoute": "Route | null"
+      },
+      "map_features": {
+        "route_line": "Polyline — 원본 항로 (파란색)",
+        "alt_route_line": "Polyline — 대체 항로 (초록색 점선, alternativeRoute가 있을 때만)",
+        "notam_circles": "Circle — 영향 NOTAM 범위 (빨간색 반투명)",
+        "airport_markers": "Marker — 출발/도착 공항",
+        "waypoint_markers": "CircleMarker — 각 웨이포인트 위치에 작은 원"
+      },
+      "external_libs": ["leaflet", "react-leaflet"],
+      "use_client": true,
+      "dependencies": ["src/components/common/LeafletMapWrapper.tsx", "src/types/route.ts", "src/types/notam.ts"]
+    },
+    {
+      "component": "FlightBriefingActions",
+      "file_path": "src/components/flights/FlightBriefingActions.tsx",
+      "type": "feature",
+      "requirements": ["FR-007", "FR-008"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "Button", "import_path": "@cloudscape-design/components/button", "key_props": ["variant", "loading", "iconName"], "event_handlers": ["onClick"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size", "direction"], "event_handlers": [] },
+        { "name": "Select", "import_path": "@cloudscape-design/components/select", "key_props": ["selectedOption", "options", "placeholder"], "event_handlers": ["onChange"] }
+      ],
+      "props_interface": {
+        "flightId": "string",
+        "onBriefingGenerated": "(briefing: Briefing) => void"
+      },
+      "behavior": {
+        "briefing_type_select": "Select에서 BriefingType 선택 (운항관리사 요약, Company NOTAM, DISP COMMENT, 승무원 브리핑)",
+        "generate_button": "선택된 유형으로 POST /api/briefings/generate 호출. 로딩 중 Button loading 상태",
+        "crew_package_button": "별도 버튼 — POST /api/briefings/generate-crew 호출하여 전체 승무원 패키지 생성",
+        "success": "생성 완료 시 onBriefingGenerated 콜백 + NotificationContext로 성공 알림"
+      },
+      "use_client": true,
+      "dependencies": ["src/hooks/useGenerateBriefing.ts", "src/contexts/NotificationContext.tsx", "src/types/briefing.ts"]
+    },
+    {
+      "component": "RouteDeviationGuidance",
+      "file_path": "src/components/flights/RouteDeviationGuidance.tsx",
+      "type": "feature",
+      "requirements": ["FR-009"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "actions"], "event_handlers": [] },
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Alert", "import_path": "@cloudscape-design/components/alert", "key_props": ["type", "header"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "routeId": "string",
+        "affectedNotams": "Notam[]"
+      },
+      "behavior": {
+        "request": "Critical/high NOTAM이 있으면 '대체 항로 분석' 버튼 표시. 클릭 시 POST /api/routes/{id}/alternatives",
+        "result": "alternatives 테이블에 대체 항로 목록 (항로명, 거리 차이, 시간 차이, 회피 NOTAM 수). reasoning은 Alert info로 표시",
+        "loading": "분석 중 Table loading 상태",
+        "empty": "대체 항로 없으면 '현재 항로를 유지하는 것이 최선입니다' Alert"
+      },
+      "use_client": true,
+      "dependencies": ["src/hooks/useRouteAlternatives.ts", "src/types/route.ts", "src/types/notam.ts"]
+    },
+    {
+      "component": "RouteTable",
+      "file_path": "src/components/routes/RouteTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-010", "FR-006"],
+      "cloudscape_components": [
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation", "loading", "loadingText", "empty", "filter", "header", "pagination", "preferences", "stickyHeader"], "event_handlers": ["onSortingChange"] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "counter"], "event_handlers": [] },
+        { "name": "Pagination", "import_path": "@cloudscape-design/components/pagination", "key_props": ["currentPageIndex", "pagesCount"], "event_handlers": ["onChange"] },
+        { "name": "PropertyFilter", "import_path": "@cloudscape-design/components/property-filter", "key_props": ["query", "filteringProperties"], "event_handlers": ["onChange"] },
+        { "name": "CollectionPreferences", "import_path": "@cloudscape-design/components/collection-preferences", "key_props": ["preferences"], "event_handlers": ["onConfirm"] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["textAlign"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "routes": "Route[]",
+        "totalCount": "number",
+        "isLoading": "boolean"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "column_definitions": [
+        { "id": "routeName", "header": "항로명", "sortingField": "routeName", "width": 120, "cell": "Link → /routes/{id}" },
+        { "id": "departureAirport", "header": "출발", "sortingField": "departureAirport", "width": 80 },
+        { "id": "arrivalAirport", "header": "도착", "sortingField": "arrivalAirport", "width": 80 },
+        { "id": "distance", "header": "거리 (NM)", "sortingField": "distance", "width": 100 },
+        { "id": "flightLevel", "header": "비행고도", "width": 100 },
+        { "id": "status", "header": "상태", "width": 100, "cell": "StatusIndicator" },
+        { "id": "waypointCount", "header": "웨이포인트", "width": 100, "cell": "waypoints.length" }
+      ],
+      "use_client": true,
+      "dependencies": ["@cloudscape-design/collection-hooks", "src/types/route.ts"]
+    },
+    {
+      "component": "RouteInfo",
+      "file_path": "src/components/routes/RouteInfo.tsx",
+      "type": "feature",
+      "requirements": ["FR-010"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "KeyValuePairs", "import_path": "@cloudscape-design/components/key-value-pairs", "key_props": ["items", "columns"], "event_handlers": [] },
+        { "name": "ColumnLayout", "import_path": "@cloudscape-design/components/column-layout", "key_props": ["columns"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "route": "Route"
+      },
+      "key_value_pairs": [
+        "항로명", "출발 공항", "도착 공항", "거리 (NM)", "비행고도", "상태", "항로 (Airways)", "웨이포인트 목록"
+      ],
+      "use_client": false,
+      "dependencies": ["src/types/route.ts"]
+    },
+    {
+      "component": "RouteMapVisualization",
+      "file_path": "src/components/routes/RouteMapVisualization.tsx",
+      "type": "feature",
+      "requirements": ["FR-006", "FR-010"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "route": "Route",
+        "impacts": "NotamRouteImpact[]",
+        "activeNotams": "Notam[]"
+      },
+      "map_features": {
+        "route_line": "Polyline — 웨이포인트 연결선 (파란색 실선)",
+        "waypoint_markers": "CircleMarker — 각 웨이포인트 (5글자 ICAO 코드 Tooltip)",
+        "notam_circles": "Circle — 활성 NOTAM 영향 범위 (importance 색상)",
+        "affected_segments": "Polyline — impacts의 affectedSegment에 해당하는 구간 빨간색 강조"
+      },
+      "external_libs": ["leaflet", "react-leaflet"],
+      "use_client": true,
+      "dependencies": ["src/components/common/LeafletMapWrapper.tsx", "src/types/route.ts", "src/types/impact.ts", "src/types/notam.ts"]
+    },
+    {
+      "component": "RouteNotamImpacts",
+      "file_path": "src/components/routes/RouteNotamImpacts.tsx",
+      "type": "feature",
+      "requirements": ["FR-010"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "counter"], "event_handlers": [] },
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] },
+        { "name": "Badge", "import_path": "@cloudscape-design/components/badge", "key_props": ["color"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "impacts": "NotamRouteImpact[]",
+        "notams": "Notam[]"
+      },
+      "column_definitions": [
+        { "id": "notamId", "header": "NOTAM", "width": 120, "cell": "Link → /notams/{id}" },
+        { "id": "overlapType", "header": "교차 유형", "width": 120 },
+        { "id": "affectedSegment", "header": "영향 구간", "width": 150 },
+        { "id": "distanceThroughArea", "header": "통과 거리 (NM)", "width": 130 },
+        { "id": "altitudeConflict", "header": "고도 충돌", "width": 100, "cell": "StatusIndicator" }
+      ],
+      "use_client": true,
+      "dependencies": ["src/types/impact.ts", "src/types/notam.ts"]
+    },
+    {
+      "component": "RouteAlternatives",
+      "file_path": "src/components/routes/RouteAlternatives.tsx",
+      "type": "feature",
+      "requirements": ["FR-009"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "actions"], "event_handlers": [] },
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "routeId": "string",
+        "alternatives": "RouteAlternative[]",
+        "reasoning": "string"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/route.ts"]
+    },
+    {
+      "component": "RefBookTable",
+      "file_path": "src/components/ref-book/RefBookTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-011"],
+      "cloudscape_components": [
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation", "loading", "loadingText", "empty", "filter", "header", "pagination", "preferences", "stickyHeader"], "event_handlers": ["onSortingChange"] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "counter", "actions"], "event_handlers": [] },
+        { "name": "Pagination", "import_path": "@cloudscape-design/components/pagination", "key_props": ["currentPageIndex", "pagesCount"], "event_handlers": ["onChange"] },
+        { "name": "PropertyFilter", "import_path": "@cloudscape-design/components/property-filter", "key_props": ["query", "filteringProperties"], "event_handlers": ["onChange"] },
+        { "name": "CollectionPreferences", "import_path": "@cloudscape-design/components/collection-preferences", "key_props": ["preferences"], "event_handlers": ["onConfirm"] },
+        { "name": "Button", "import_path": "@cloudscape-design/components/button", "key_props": ["variant"], "event_handlers": ["onClick"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["textAlign"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "entries": "RefBookEntry[]",
+        "totalCount": "number",
+        "isLoading": "boolean",
+        "onRegisterNew": "() => void",
+        "onDelete": "(id: string) => void"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "column_definitions": [
+        { "id": "notamId", "header": "NOTAM", "width": 120, "cell": "Link → /notams/{id}" },
+        { "id": "summary", "header": "요약", "width": 300 },
+        { "id": "impactLevel", "header": "영향도", "width": 90, "cell_component": "ImportanceBadge" },
+        { "id": "affectedAirports", "header": "영향 공항", "width": 120 },
+        { "id": "registeredBy", "header": "등록자", "width": 100 },
+        { "id": "registeredAt", "header": "등록일시", "width": 140 },
+        { "id": "status", "header": "상태", "width": 100, "cell": "StatusIndicator" },
+        { "id": "expiresAt", "header": "만료일", "width": 140 }
+      ],
+      "use_client": true,
+      "dependencies": ["@cloudscape-design/collection-hooks", "src/types/refBook.ts", "src/components/common/ImportanceBadge.tsx"]
+    },
+    {
+      "component": "RefBookRegistrationModal",
+      "file_path": "src/components/ref-book/RefBookRegistrationModal.tsx",
+      "type": "feature",
+      "requirements": ["FR-011"],
+      "cloudscape_components": [
+        { "name": "Modal", "import_path": "@cloudscape-design/components/modal", "key_props": ["visible", "header", "footer", "size"], "event_handlers": ["onDismiss"] },
+        { "name": "Form", "import_path": "@cloudscape-design/components/form", "key_props": ["actions"], "event_handlers": [] },
+        { "name": "FormField", "import_path": "@cloudscape-design/components/form-field", "key_props": ["label", "description", "errorText"], "event_handlers": [] },
+        { "name": "Input", "import_path": "@cloudscape-design/components/input", "key_props": ["value", "placeholder"], "event_handlers": ["onChange"] },
+        { "name": "Textarea", "import_path": "@cloudscape-design/components/textarea", "key_props": ["value", "rows"], "event_handlers": ["onChange"] },
+        { "name": "Select", "import_path": "@cloudscape-design/components/select", "key_props": ["selectedOption", "options"], "event_handlers": ["onChange"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] },
+        { "name": "Button", "import_path": "@cloudscape-design/components/button", "key_props": ["variant", "loading"], "event_handlers": ["onClick"] }
+      ],
+      "props_interface": {
+        "visible": "boolean",
+        "onDismiss": "() => void",
+        "onSubmit": "(data: CreateRefBookEntryRequest) => Promise<void>",
+        "prefilledNotamId": "string | null",
+        "isSubmitting": "boolean"
+      },
+      "form_fields": [
+        { "name": "notamId", "label": "NOTAM ID", "type": "Input", "required": true },
+        { "name": "summary", "label": "요약", "type": "Textarea", "required": true },
+        { "name": "impactLevel", "label": "영향도", "type": "Select", "options": "ImportanceLevel values", "required": true },
+        { "name": "affectedAirports", "label": "영향 공항 (쉼표 구분)", "type": "Input", "required": true },
+        { "name": "affectedRoutes", "label": "영향 항로 (쉼표 구분)", "type": "Input", "required": false },
+        { "name": "remarks", "label": "비고", "type": "Textarea", "required": false },
+        { "name": "expiresAt", "label": "만료일시", "type": "Input", "placeholder": "YYYY-MM-DDTHH:mm:ssZ", "required": true }
+      ],
+      "use_client": true,
+      "dependencies": ["src/types/refBook.ts", "src/types/notam.ts"]
+    },
+    {
+      "component": "BriefingTable",
+      "file_path": "src/components/briefings/BriefingTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-007", "FR-008", "FR-014"],
+      "cloudscape_components": [
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation", "loading", "loadingText", "empty", "filter", "header", "pagination", "preferences", "stickyHeader"], "event_handlers": ["onSortingChange"] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "counter", "actions"], "event_handlers": [] },
+        { "name": "Pagination", "import_path": "@cloudscape-design/components/pagination", "key_props": ["currentPageIndex", "pagesCount"], "event_handlers": ["onChange"] },
+        { "name": "PropertyFilter", "import_path": "@cloudscape-design/components/property-filter", "key_props": ["query", "filteringProperties"], "event_handlers": ["onChange"] },
+        { "name": "CollectionPreferences", "import_path": "@cloudscape-design/components/collection-preferences", "key_props": ["preferences"], "event_handlers": ["onConfirm"] },
+        { "name": "Button", "import_path": "@cloudscape-design/components/button", "key_props": ["variant"], "event_handlers": ["onClick"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["textAlign"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Badge", "import_path": "@cloudscape-design/components/badge", "key_props": ["color"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "briefings": "Briefing[]",
+        "totalCount": "number",
+        "isLoading": "boolean"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "column_definitions": [
+        { "id": "id", "header": "브리핑 ID", "width": 120, "cell": "Link → /briefings/{id}" },
+        { "id": "type", "header": "유형", "width": 130 },
+        { "id": "flightId", "header": "운항편", "width": 100 },
+        { "id": "generatedAt", "header": "생성일시", "sortingField": "generatedAt", "width": 140 },
+        { "id": "status", "header": "상태", "width": 100, "cell": "StatusIndicator" },
+        { "id": "notamIds", "header": "관련 NOTAM", "width": 100, "cell": "count" },
+        { "id": "approvedBy", "header": "승인자", "width": 100 }
+      ],
+      "use_client": true,
+      "dependencies": ["@cloudscape-design/collection-hooks", "src/types/briefing.ts"]
+    },
+    {
+      "component": "BriefingInfo",
+      "file_path": "src/components/briefings/BriefingInfo.tsx",
+      "type": "feature",
+      "requirements": ["FR-007"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "KeyValuePairs", "import_path": "@cloudscape-design/components/key-value-pairs", "key_props": ["items", "columns"], "event_handlers": [] },
+        { "name": "ColumnLayout", "import_path": "@cloudscape-design/components/column-layout", "key_props": ["columns"], "event_handlers": [] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Badge", "import_path": "@cloudscape-design/components/badge", "key_props": ["color"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "briefing": "Briefing"
+      },
+      "use_client": false,
+      "dependencies": ["src/types/briefing.ts"]
+    },
+    {
+      "component": "BriefingContentPreview",
+      "file_path": "src/components/briefings/BriefingContentPreview.tsx",
+      "type": "feature",
+      "requirements": ["FR-007", "FR-008"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "Tabs", "import_path": "@cloudscape-design/components/tabs", "key_props": ["tabs", "activeTabId"], "event_handlers": ["onChange"] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["variant", "padding"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "briefing": "Briefing",
+        "crewPackage": "{ dispComment: string; companyNotam: string; crewBriefing: string } | null"
+      },
+      "tabs": [
+        { "id": "content", "label": "브리핑 내용" },
+        { "id": "disp-comment", "label": "DISP COMMENT" },
+        { "id": "company-notam", "label": "Company NOTAM" },
+        { "id": "crew-briefing", "label": "승무원 브리핑" }
+      ],
+      "use_client": true,
+      "dependencies": ["src/types/briefing.ts"]
+    },
+    {
+      "component": "BriefingApprovalActions",
+      "file_path": "src/components/briefings/BriefingApprovalActions.tsx",
+      "type": "feature",
+      "requirements": ["FR-007"],
+      "cloudscape_components": [
+        { "name": "Container", "import_path": "@cloudscape-design/components/container", "key_props": ["header"], "event_handlers": [] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"], "event_handlers": [] },
+        { "name": "Button", "import_path": "@cloudscape-design/components/button", "key_props": ["variant", "loading"], "event_handlers": ["onClick"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"], "event_handlers": [] },
+        { "name": "Alert", "import_path": "@cloudscape-design/components/alert", "key_props": ["type"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "briefing": "Briefing",
+        "onApprove": "() => Promise<void>",
+        "onReject": "() => Promise<void>",
+        "isProcessing": "boolean"
+      },
+      "behavior": {
+        "approve": "status가 draft/pending-review일 때 '승인' 버튼 활성. PUT /api/briefings/{id} 호출 (status: approved, approvedBy: currentUser)",
+        "reject": "'반려' 버튼 → status를 draft로 되돌림",
+        "already_approved": "approved 상태면 Alert success로 승인 정보 표시"
+      },
+      "use_client": true,
+      "dependencies": ["src/types/briefing.ts", "src/contexts/AuthContext.tsx"]
+    },
+    {
+      "component": "AuditLogTable",
+      "file_path": "src/components/audit-log/AuditLogTable.tsx",
+      "type": "feature",
+      "requirements": ["FR-017"],
+      "cloudscape_components": [
+        { "name": "Table", "import_path": "@cloudscape-design/components/table", "key_props": ["items", "columnDefinitions", "enableKeyboardNavigation", "loading", "loadingText", "empty", "filter", "header", "pagination", "preferences", "stickyHeader"], "event_handlers": ["onSortingChange"] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant", "counter"], "event_handlers": [] },
+        { "name": "Pagination", "import_path": "@cloudscape-design/components/pagination", "key_props": ["currentPageIndex", "pagesCount"], "event_handlers": ["onChange"] },
+        { "name": "PropertyFilter", "import_path": "@cloudscape-design/components/property-filter", "key_props": ["query", "filteringProperties"], "event_handlers": ["onChange"] },
+        { "name": "CollectionPreferences", "import_path": "@cloudscape-design/components/collection-preferences", "key_props": ["preferences"], "event_handlers": ["onConfirm"] },
+        { "name": "StatusIndicator", "import_path": "@cloudscape-design/components/status-indicator", "key_props": ["type"], "event_handlers": [] },
+        { "name": "Link", "import_path": "@cloudscape-design/components/link", "key_props": ["href"], "event_handlers": [] },
+        { "name": "Box", "import_path": "@cloudscape-design/components/box", "key_props": ["textAlign"], "event_handlers": [] }
+      ],
+      "props_interface": {
+        "logs": "AuditLog[]",
+        "totalCount": "number",
+        "isLoading": "boolean"
+      },
+      "use_collection": {
+        "filtering": true,
+        "sorting": true,
+        "pagination": { "pageSize": 20 }
+      },
+      "column_definitions": [
+        { "id": "timestamp", "header": "시간", "sortingField": "timestamp", "width": 160 },
+        { "id": "userId", "header": "사용자", "width": 120 },
+        { "id": "action", "header": "작업", "width": 140 },
+        { "id": "targetType", "header": "대상 유형", "width": 100 },
+        { "id": "targetId", "header": "대상 ID", "width": 120, "cell": "Link" },
+        { "id": "details", "header": "상세", "width": 300 }
+      ],
+      "filtering_properties": [
+        { "key": "action", "operators": ["=", "!="], "propertyLabel": "작업" },
+        { "key": "userId", "operators": ["=", ":"], "propertyLabel": "사용자" },
+        { "key": "targetType", "operators": ["="], "propertyLabel": "대상 유형" }
+      ],
+      "use_client": true,
+      "dependencies": ["@cloudscape-design/collection-hooks", "src/types/auditLog.ts"]
+    }
+  ],
+  "pages": [
+    {
+      "component": "DashboardPage",
+      "file_path": "src/app/page.tsx",
+      "type": "page",
+      "route": "/",
+      "requirements": ["FR-006", "FR-005", "FR-016"],
+      "cloudscape_components": [
+        { "name": "ContentLayout", "import_path": "@cloudscape-design/components/content-layout", "key_props": ["header"] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"] },
+        { "name": "Grid", "import_path": "@cloudscape-design/components/grid", "key_props": ["gridDefinition"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"] }
+      ],
+      "hook_used": "useDashboard",
+      "children": ["CriticalAlertBanner", "DashboardSummaryCards", "RouteImpactMap", "RecentCriticalNotams", "AffectedFlightsSummary"],
+      "grid_layout": [
+        { "colspan": 12, "component": "CriticalAlertBanner" },
+        { "colspan": 12, "component": "DashboardSummaryCards" },
+        { "colspan": 8, "component": "RouteImpactMap" },
+        { "colspan": 4, "component": "RecentCriticalNotams" },
+        { "colspan": 12, "component": "AffectedFlightsSummary" }
+      ],
+      "content_type": "dashboard",
+      "use_client": true,
+      "dependencies": ["src/hooks/useDashboard.ts", "src/contexts/AlertContext.tsx"]
+    },
+    {
+      "component": "NotamListPage",
+      "file_path": "src/app/notams/page.tsx",
+      "type": "page",
+      "route": "/notams",
+      "requirements": ["FR-001", "FR-002", "FR-005", "FR-019"],
+      "cloudscape_components": [
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"] }
+      ],
+      "hook_used": "useNotams",
+      "children": ["NotamTable", "NotamSplitPanelDetail"],
+      "behavior": {
+        "split_panel": "NotamTable에서 행 선택 시 NotamSplitPanelDetail에 해당 NOTAM 표시. AppLayout splitPanel prop 사용."
+      },
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useNotams.ts"]
+    },
+    {
+      "component": "NotamDetailPage",
+      "file_path": "src/app/notams/[id]/page.tsx",
+      "type": "page",
+      "route": "/notams/[id]",
+      "requirements": ["FR-002", "FR-003", "FR-012", "FR-015", "FR-018"],
+      "cloudscape_components": [
+        { "name": "ContentLayout", "import_path": "@cloudscape-design/components/content-layout", "key_props": ["header"] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"] }
+      ],
+      "hook_used": "useNotam",
+      "children": ["NotamRawAndParsed", "NotamAiAnalysis", "NotamImpactSection", "NotamMiniMap", "NotamDiffView"],
+      "behavior": {
+        "load": "useNotam(id)로 NOTAM 데이터 로드",
+        "diff": "notam.type === 'NOTAMR' && notam.replacesNotamId가 있으면 GET /api/notams/{id}/diff 호출하여 NotamDiffView 렌더링",
+        "impact": "GET /api/notams/{id}/affected-routes, GET /api/notams/{id}/affected-flights로 영향 데이터 로드",
+        "reanalyze": "useNotamAnalysis trigger로 재분석 요청"
+      },
+      "content_type": "default",
+      "use_client": true,
+      "dependencies": ["src/hooks/useNotam.ts", "src/hooks/useNotamAnalysis.ts"]
+    },
+    {
+      "component": "FlightListPage",
+      "file_path": "src/app/flights/page.tsx",
+      "type": "page",
+      "route": "/flights",
+      "requirements": ["FR-004", "FR-013"],
+      "cloudscape_components": [
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"] }
+      ],
+      "hook_used": "useFlights",
+      "children": ["FlightTable"],
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useFlights.ts"]
+    },
+    {
+      "component": "FlightDetailPage",
+      "file_path": "src/app/flights/[id]/page.tsx",
+      "type": "page",
+      "route": "/flights/[id]",
+      "requirements": ["FR-004", "FR-009", "FR-013"],
+      "cloudscape_components": [
+        { "name": "ContentLayout", "import_path": "@cloudscape-design/components/content-layout", "key_props": ["header"] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"] }
+      ],
+      "hook_used": "useFlight",
+      "children": ["FlightInfo", "FlightNotamImpact", "FlightRouteMap", "FlightBriefingActions", "RouteDeviationGuidance"],
+      "content_type": "default",
+      "use_client": true,
+      "dependencies": ["src/hooks/useFlight.ts", "src/hooks/useGenerateBriefing.ts", "src/hooks/useRouteAlternatives.ts"]
+    },
+    {
+      "component": "RouteListPage",
+      "file_path": "src/app/routes/page.tsx",
+      "type": "page",
+      "route": "/routes",
+      "requirements": ["FR-010", "FR-006"],
+      "cloudscape_components": [
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"] }
+      ],
+      "hook_used": "useRoutes",
+      "children": ["RouteTable"],
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useRoutes.ts"]
+    },
+    {
+      "component": "RouteDetailPage",
+      "file_path": "src/app/routes/[id]/page.tsx",
+      "type": "page",
+      "route": "/routes/[id]",
+      "requirements": ["FR-009", "FR-010"],
+      "cloudscape_components": [
+        { "name": "ContentLayout", "import_path": "@cloudscape-design/components/content-layout", "key_props": ["header"] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"] }
+      ],
+      "hook_used": "useRoute",
+      "children": ["RouteInfo", "RouteMapVisualization", "RouteNotamImpacts", "RouteAlternatives"],
+      "content_type": "default",
+      "use_client": true,
+      "dependencies": ["src/hooks/useRoute.ts", "src/hooks/useRouteAlternatives.ts"]
+    },
+    {
+      "component": "RefBookPage",
+      "file_path": "src/app/ref-book/page.tsx",
+      "type": "page",
+      "route": "/ref-book",
+      "requirements": ["FR-011"],
+      "cloudscape_components": [
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"] }
+      ],
+      "hook_used": "useRefBook",
+      "children": ["RefBookTable", "RefBookRegistrationModal"],
+      "behavior": {
+        "register": "RefBookTable의 '등록' 버튼 클릭 시 RefBookRegistrationModal visible=true",
+        "submit": "POST /api/ref-book 호출 후 mutate()로 목록 갱신",
+        "delete": "DELETE /api/ref-book/{id} 호출 후 mutate()"
+      },
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useRefBook.ts"]
+    },
+    {
+      "component": "BriefingListPage",
+      "file_path": "src/app/briefings/page.tsx",
+      "type": "page",
+      "route": "/briefings",
+      "requirements": ["FR-007", "FR-008", "FR-014"],
+      "cloudscape_components": [
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"] }
+      ],
+      "hook_used": "useBriefings",
+      "children": ["BriefingTable"],
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useBriefings.ts"]
+    },
+    {
+      "component": "BriefingDetailPage",
+      "file_path": "src/app/briefings/[id]/page.tsx",
+      "type": "page",
+      "route": "/briefings/[id]",
+      "requirements": ["FR-007", "FR-008"],
+      "cloudscape_components": [
+        { "name": "ContentLayout", "import_path": "@cloudscape-design/components/content-layout", "key_props": ["header"] },
+        { "name": "Header", "import_path": "@cloudscape-design/components/header", "key_props": ["variant"] },
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"] }
+      ],
+      "hook_used": "useBriefing",
+      "children": ["BriefingInfo", "BriefingContentPreview", "BriefingApprovalActions"],
+      "behavior": {
+        "load": "useBriefing(id) + crew-briefing일 경우 GET /api/briefings/{id}/crew-package",
+        "approve": "PUT /api/briefings/{id} (status: approved)"
+      },
+      "content_type": "default",
+      "use_client": true,
+      "dependencies": ["src/hooks/useBriefing.ts"]
+    },
+    {
+      "component": "AuditLogPage",
+      "file_path": "src/app/audit-log/page.tsx",
+      "type": "page",
+      "route": "/audit-log",
+      "requirements": ["FR-017"],
+      "cloudscape_components": [
+        { "name": "SpaceBetween", "import_path": "@cloudscape-design/components/space-between", "key_props": ["size"] }
+      ],
+      "hook_used": "useAuditLog",
+      "children": ["AuditLogTable"],
+      "content_type": "table",
+      "use_client": true,
+      "dependencies": ["src/hooks/useAuditLog.ts"]
+    }
+  ]
+}

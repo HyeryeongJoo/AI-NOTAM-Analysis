@@ -1,0 +1,547 @@
+{
+  "metadata": {
+    "industry": "Aviation / Low-Cost Carrier",
+    "subdomain": "NOTAM Analysis & Flight Dispatch Operations",
+    "researched_at": "2026-03-30T09:00:00Z",
+    "sources": [
+      {
+        "name": "Wikipedia - NOTAM",
+        "url": "https://en.wikipedia.org/wiki/NOTAM"
+      },
+      {
+        "name": "Wikipedia - Flight Dispatcher",
+        "url": "https://en.wikipedia.org/wiki/Flight_dispatcher"
+      },
+      {
+        "name": "Wikipedia - AFTN",
+        "url": "https://en.wikipedia.org/wiki/Aeronautical_Fixed_Telecommunication_Network"
+      },
+      {
+        "name": "Wikipedia - Flight Information Region",
+        "url": "https://en.wikipedia.org/wiki/Flight_information_region"
+      },
+      {
+        "name": "Wikipedia - Low-cost Carrier",
+        "url": "https://en.wikipedia.org/wiki/Low-cost_carrier"
+      },
+      {
+        "name": "Wikipedia - Jeju Air",
+        "url": "https://en.wikipedia.org/wiki/Jeju_Air"
+      },
+      {
+        "name": "ICAO API Data Service",
+        "url": "https://www.icao.int/safety/iStars/Pages/API-Data-Service.aspx"
+      },
+      {
+        "name": "ICAO Annex 15 - Aeronautical Information Services (standard reference)",
+        "url": null
+      },
+      {
+        "name": "ICAO Doc 8126 - Aeronautical Information Services Manual",
+        "url": null
+      },
+      {
+        "name": "JejuAir AI-Powered NOTAM Analysis System Requirements (customer PDF)",
+        "url": null
+      }
+    ]
+  },
+  "core_entities": [
+    {
+      "name": "NOTAM",
+      "description": "Notice to Air Missions - standardized alert about potential hazards or changes affecting flight operations",
+      "common_attributes": [
+        "id",
+        "series",
+        "number",
+        "year",
+        "type",
+        "qCode",
+        "fir",
+        "trafficType",
+        "purpose",
+        "scope",
+        "lowerLimit",
+        "upperLimit",
+        "latitude",
+        "longitude",
+        "radius",
+        "locationIndicator",
+        "effectiveFrom",
+        "effectiveTo",
+        "schedule",
+        "body",
+        "lowerAltitude",
+        "upperAltitude",
+        "rawText",
+        "importanceScore",
+        "aiAnalysis",
+        "affectedRoutes",
+        "createdAt"
+      ],
+      "common_statuses": [
+        "new",
+        "active",
+        "analyzed",
+        "ref-book-registered",
+        "expired",
+        "cancelled",
+        "replaced"
+      ]
+    },
+    {
+      "name": "RefBookEntry",
+      "description": "Important NOTAM record registered in the REF BOOK by dispatchers for reference",
+      "common_attributes": [
+        "id",
+        "notamId",
+        "registeredBy",
+        "registeredAt",
+        "summary",
+        "impactLevel",
+        "affectedAirports",
+        "affectedRoutes",
+        "remarks",
+        "expiresAt"
+      ],
+      "common_statuses": [
+        "active",
+        "expired",
+        "superseded"
+      ]
+    },
+    {
+      "name": "Flight",
+      "description": "Scheduled flight operation with route and timing information",
+      "common_attributes": [
+        "id",
+        "flightNumber",
+        "departureAirport",
+        "arrivalAirport",
+        "scheduledDeparture",
+        "scheduledArrival",
+        "routeId",
+        "aircraftType",
+        "status"
+      ],
+      "common_statuses": [
+        "scheduled",
+        "dispatched",
+        "in-flight",
+        "arrived",
+        "cancelled",
+        "diverted"
+      ]
+    },
+    {
+      "name": "Route",
+      "description": "Flight route with waypoints, airways, and spatial coordinates from NAVBLUE data",
+      "common_attributes": [
+        "id",
+        "routeName",
+        "departureAirport",
+        "arrivalAirport",
+        "waypoints",
+        "airways",
+        "distance",
+        "flightLevel",
+        "alternateRouteIds"
+      ],
+      "common_statuses": [
+        "active",
+        "suspended",
+        "alternate"
+      ]
+    },
+    {
+      "name": "Airport",
+      "description": "Airport with ICAO code, facilities, and runway information",
+      "common_attributes": [
+        "icaoCode",
+        "iataCode",
+        "name",
+        "latitude",
+        "longitude",
+        "runwayCount",
+        "fir",
+        "country",
+        "timezone",
+        "facilities"
+      ],
+      "common_statuses": [
+        "operational",
+        "restricted",
+        "closed"
+      ]
+    },
+    {
+      "name": "Briefing",
+      "description": "Auto-generated briefing document for dispatchers or crew",
+      "common_attributes": [
+        "id",
+        "type",
+        "flightId",
+        "generatedAt",
+        "generatedBy",
+        "content",
+        "notamIds",
+        "approvedBy",
+        "approvedAt"
+      ],
+      "common_statuses": [
+        "draft",
+        "pending-review",
+        "approved",
+        "distributed"
+      ]
+    },
+    {
+      "name": "Dispatcher",
+      "description": "Flight dispatcher user who monitors NOTAMs and manages flight operations",
+      "common_attributes": [
+        "id",
+        "name",
+        "employeeId",
+        "shiftPattern",
+        "currentShift",
+        "assignedFlights"
+      ],
+      "common_statuses": [
+        "on-duty",
+        "off-duty"
+      ]
+    }
+  ],
+  "domain_workflows": [
+    {
+      "name": "NOTAM Intake & Triage",
+      "steps": [
+        "receive_via_aftn",
+        "parse_icao_format",
+        "extract_q_code",
+        "extract_spatial_data",
+        "extract_temporal_data",
+        "ai_importance_scoring",
+        "classify_importance",
+        "route_to_dispatcher"
+      ],
+      "description": "NOTAM received through AFTN is parsed, AI-scored for importance, and classified for dispatcher attention"
+    },
+    {
+      "name": "NOTAM Impact Analysis",
+      "steps": [
+        "match_affected_airports",
+        "match_affected_firs",
+        "cross_reference_routes",
+        "cross_reference_schedule",
+        "calculate_spatial_overlap",
+        "identify_affected_flights",
+        "assess_operational_impact",
+        "generate_impact_report"
+      ],
+      "description": "Analyzed NOTAM is cross-referenced against airline routes and schedule to identify affected flights"
+    },
+    {
+      "name": "REF BOOK Registration",
+      "steps": [
+        "dispatcher_reviews_notam",
+        "ai_suggests_ref_book_entry",
+        "dispatcher_confirms_or_edits",
+        "register_to_ref_book",
+        "notify_relevant_parties"
+      ],
+      "description": "Important NOTAMs are registered in the REF BOOK by dispatcher with AI assistance"
+    },
+    {
+      "name": "Briefing Generation",
+      "steps": [
+        "collect_relevant_notams_for_flight",
+        "generate_dispatcher_summary",
+        "generate_company_notam",
+        "generate_disp_comment",
+        "generate_crew_briefing_package",
+        "dispatcher_review_and_approve",
+        "distribute_briefing"
+      ],
+      "description": "AI generates briefing documents (Company NOTAM, DISP COMMENT) for dispatcher review and crew distribution"
+    },
+    {
+      "name": "Route Deviation Decision",
+      "steps": [
+        "identify_high_impact_notam",
+        "evaluate_affected_route_segments",
+        "ai_suggests_alternate_routes",
+        "dispatcher_evaluates_alternatives",
+        "approve_route_change",
+        "update_flight_plan",
+        "notify_crew"
+      ],
+      "description": "When a NOTAM significantly impacts a route, AI suggests alternatives and dispatcher makes the final decision"
+    }
+  ],
+  "kpis": [
+    {
+      "name": "NOTAM Processing Time",
+      "formula": "Time from NOTAM receipt to classification completion",
+      "typical_target": "< 5 minutes for routine, < 1 minute for urgent",
+      "relevance": "Primary efficiency metric — shows AI automation value vs manual processing (currently 15-30 min per NOTAM)"
+    },
+    {
+      "name": "Critical NOTAM Detection Rate",
+      "formula": "AI-detected critical NOTAMs / Total actual critical NOTAMs x 100",
+      "typical_target": "99.5%+",
+      "relevance": "Safety-critical metric — AI must not miss operationally significant NOTAMs"
+    },
+    {
+      "name": "False Positive Rate",
+      "formula": "Non-critical NOTAMs flagged as critical / Total flagged as critical x 100",
+      "typical_target": "< 10%",
+      "relevance": "Efficiency metric — too many false positives cause alert fatigue"
+    },
+    {
+      "name": "Daily NOTAM Volume",
+      "formula": "Total NOTAMs received per 24-hour period",
+      "typical_target": "Tracking metric (thousands per day)",
+      "relevance": "Dashboard widget showing system load and filtering effectiveness"
+    },
+    {
+      "name": "Filtered vs Total Ratio",
+      "formula": "NOTAMs requiring dispatcher attention / Total received x 100",
+      "typical_target": "5-15% should require attention",
+      "relevance": "Shows automation effectiveness — lower ratio means better filtering"
+    },
+    {
+      "name": "REF BOOK Registration Accuracy",
+      "formula": "AI-suggested REF BOOK entries accepted by dispatcher / Total AI suggestions x 100",
+      "typical_target": "> 85%",
+      "relevance": "Measures AI suggestion quality for REF BOOK registration"
+    },
+    {
+      "name": "Briefing Generation Time",
+      "formula": "Time from request to complete briefing package",
+      "typical_target": "< 2 minutes (vs 20-30 min manual)",
+      "relevance": "Key time-saving metric for crew briefing preparation"
+    },
+    {
+      "name": "Route Impact Coverage",
+      "formula": "Routes with NOTAM impact analysis / Total active routes x 100",
+      "typical_target": "100%",
+      "relevance": "Ensures no route is missed in impact analysis"
+    }
+  ],
+  "competitor_features": [
+    {
+      "feature": "NOTAM text parsing and structured extraction",
+      "prevalence": "Standard in all NOTAM management tools (Jeppesen, NAVBLUE, SITA)",
+      "in_brief": true,
+      "suggestion": "Parse ICAO format into structured fields for search and filtering"
+    },
+    {
+      "feature": "Map-based NOTAM visualization",
+      "prevalence": "Common in modern NOTAM tools — plot NOTAM areas on map with route overlay",
+      "in_brief": true,
+      "suggestion": "Interactive map showing NOTAM circles/polygons overlaid on airline routes"
+    },
+    {
+      "feature": "NOTAM change tracking and diff view",
+      "prevalence": "Available in Jeppesen and NAVBLUE — track NOTAM replacements and cancellations",
+      "in_brief": false,
+      "suggestion": "Show NOTAM history with highlighted changes when NOTAMR replaces existing NOTAM"
+    },
+    {
+      "feature": "Automatic NOTAM expiry management",
+      "prevalence": "Standard feature — auto-archive expired NOTAMs and alert on soon-to-expire",
+      "in_brief": false,
+      "suggestion": "Auto-manage NOTAM lifecycle with expiry countdown and archive"
+    },
+    {
+      "feature": "Custom NOTAM filter profiles",
+      "prevalence": "Common — dispatchers save filter presets by route, airport, or NOTAM type",
+      "in_brief": false,
+      "suggestion": "Allow dispatchers to save and share filter profiles for their regular routes"
+    },
+    {
+      "feature": "NOTAM plain-language translation",
+      "prevalence": "Emerging AI feature — convert cryptic NOTAM text to readable summaries",
+      "in_brief": true,
+      "suggestion": "LLM generates human-readable summary alongside raw NOTAM text"
+    },
+    {
+      "feature": "Shift handover report",
+      "prevalence": "Common in 24/7 operations — auto-generate summary of active NOTAMs for incoming shift",
+      "in_brief": false,
+      "suggestion": "Generate shift handover briefing with new/changed NOTAMs since last shift start"
+    },
+    {
+      "feature": "NOTAM statistics and trend dashboard",
+      "prevalence": "Available in enterprise tools — historical analysis of NOTAM patterns",
+      "in_brief": false,
+      "suggestion": "Show NOTAM volume trends, most-affected airports/routes over time"
+    },
+    {
+      "feature": "Email/push notifications for critical NOTAMs",
+      "prevalence": "Standard in all modern tools",
+      "in_brief": false,
+      "suggestion": "Real-time alerts for NOTAMs exceeding importance threshold"
+    }
+  ],
+  "terminology": {
+    "NOTAM": "Notice to Air Missions — official notice of aviation hazards, restrictions, or changes affecting flight operations",
+    "Q-Code": "Qualifier code in NOTAM Q-line — 5-letter code (e.g., QMRLC) encoding subject and condition. 2nd/3rd letters = subject, 4th/5th letters = condition",
+    "AFTN": "Aeronautical Fixed Telecommunication Network — global network for exchanging aviation messages including NOTAMs",
+    "FIR": "Flight Information Region — defined airspace area where flight information and alerting services are provided",
+    "ICAO": "International Civil Aviation Organization — UN agency setting international aviation standards",
+    "IATA": "International Air Transport Association — airline industry trade association",
+    "REF BOOK": "Reference Book — Jeju Air internal record of operationally important NOTAMs maintained by dispatchers",
+    "Company NOTAM": "Airline-specific NOTAM briefing document prepared for crew, containing operationally relevant information",
+    "DISP COMMENT": "Dispatcher Comment — dispatcher's operational notes and recommendations added to crew briefing",
+    "J-FOS": "Jeju Air Flight Operations System — Jeju Air's internal flight operations management system",
+    "NAVBLUE": "Airbus subsidiary providing route planning and navigation data solutions to airlines",
+    "NOTAMN": "New NOTAM — creates a new notice",
+    "NOTAMR": "Replacement NOTAM — replaces an existing NOTAM",
+    "NOTAMC": "Cancellation NOTAM — cancels an existing NOTAM",
+    "Q-line": "Qualifier line in NOTAM format containing FIR, Q-code, traffic type, purpose, scope, coordinates, and radius",
+    "Series": "NOTAM series identifier (A-Z) grouping NOTAMs by geographic or functional category",
+    "SFC": "Surface — lowest altitude reference in NOTAM (Field F)",
+    "UNL": "Unlimited — highest altitude reference in NOTAM (Field G)",
+    "UTC": "Coordinated Universal Time — standard time reference for all aviation operations (also called Zulu time)",
+    "Waypoint": "Named geographic point used to define flight routes (identified by 5-letter ICAO code)",
+    "Flight Level": "Altitude reference based on standard pressure (e.g., FL350 = 35,000 feet)",
+    "AIP": "Aeronautical Information Publication — official publication containing permanent aeronautical information",
+    "PIB": "Pre-flight Information Bulletin — briefing package of active NOTAMs relevant to a planned flight",
+    "SNOWTAM": "Special NOTAM series reporting runway snow/ice conditions",
+    "ASHTAM": "Special NOTAM series reporting volcanic ash activity",
+    "BIRDTAM": "NOTAM reporting bird activity hazards",
+    "TCO": "Total Cost of Operations — used in LCC context for route profitability analysis"
+  },
+  "regulations": [
+    {
+      "name": "ICAO Annex 15 - Aeronautical Information Services",
+      "description": "Defines NOTAM format, distribution requirements, and aeronautical information management standards",
+      "relevance": "NOTAM format compliance is mandatory; the system must parse and display NOTAMs conforming to this standard"
+    },
+    {
+      "name": "ICAO Doc 8126 - Aeronautical Information Services Manual",
+      "description": "Detailed guidance on NOTAM origination, processing, and distribution procedures",
+      "relevance": "Reference for understanding NOTAM lifecycle and processing requirements"
+    },
+    {
+      "name": "ICAO Doc 8400 - ICAO Abbreviations and Codes",
+      "description": "Standard aviation abbreviations and Q-codes used in NOTAMs",
+      "relevance": "Required reference for Q-code decoding and NOTAM abbreviation interpretation"
+    },
+    {
+      "name": "Korean Aviation Safety Act (항공안전법)",
+      "description": "Korean national regulation governing aviation safety including NOTAM management requirements",
+      "relevance": "Korean regulatory context for Jeju Air operations"
+    },
+    {
+      "name": "MOLIT Aviation Information Management Standards (국토교통부 항공정보관리 기준)",
+      "description": "Korean Ministry of Land, Infrastructure and Transport standards for aeronautical information",
+      "relevance": "Governs NOTAM handling requirements for Korean airlines"
+    }
+  ],
+  "suggested_requirements": [
+    {
+      "title": "NOTAM change tracking (NOTAMR/NOTAMC diff view)",
+      "reason": "Industry standard feature — when a NOTAM is replaced or cancelled, showing the diff helps dispatchers quickly understand what changed",
+      "priority": "nice-to-have"
+    },
+    {
+      "title": "Shift handover report generation",
+      "reason": "With 3 dispatchers on 24h rotation, auto-generated shift handover reports listing new/changed/critical NOTAMs since last shift are essential for continuity",
+      "priority": "should-have"
+    },
+    {
+      "title": "NOTAM expiry countdown and auto-archive",
+      "reason": "Standard lifecycle management — expired NOTAMs should auto-archive and NOTAMs expiring within a configurable window should be flagged",
+      "priority": "nice-to-have"
+    },
+    {
+      "title": "Custom filter profiles per dispatcher",
+      "reason": "Dispatchers typically monitor specific route groups — saved filter profiles reduce setup time at shift start",
+      "priority": "nice-to-have"
+    },
+    {
+      "title": "NOTAM plain-language summary",
+      "reason": "LLM capability already present — generating a human-readable Korean translation of cryptic NOTAM text is a high-value low-effort addition",
+      "priority": "should-have"
+    },
+    {
+      "title": "Critical NOTAM push notifications",
+      "reason": "Real-time alerts for NOTAMs exceeding importance threshold ensure immediate dispatcher attention even during multitasking",
+      "priority": "should-have"
+    },
+    {
+      "title": "NOTAM volume and trend analytics dashboard",
+      "reason": "Historical NOTAM pattern analysis helps resource planning and identifies recurring issues at specific airports/routes",
+      "priority": "nice-to-have"
+    },
+    {
+      "title": "Audit trail for dispatcher actions",
+      "reason": "Aviation regulatory compliance requires traceability of operational decisions — log who reviewed, approved, and acted on each NOTAM",
+      "priority": "should-have"
+    }
+  ],
+  "data_model_hints": {
+    "common_relationships": [
+      "NOTAM belongsTo FIR",
+      "NOTAM affectsMany Airports",
+      "NOTAM affectsMany Routes",
+      "NOTAM affectsMany Flights",
+      "NOTAM hasOne RefBookEntry (optional)",
+      "NOTAM replacedBy NOTAM (self-reference for NOTAMR)",
+      "Route hasMany Waypoints",
+      "Route hasMany Flights",
+      "Flight departureAirport Airport",
+      "Flight arrivalAirport Airport",
+      "Flight hasOne Route",
+      "Briefing containsMany NOTAMs",
+      "Briefing belongsTo Flight",
+      "Dispatcher reviewsMany NOTAMs",
+      "Airport belongsTo FIR"
+    ],
+    "common_enums": [
+      "NotamType: NOTAMN | NOTAMR | NOTAMC",
+      "NotamStatus: new | active | analyzed | ref-book-registered | expired | cancelled | replaced",
+      "ImportanceLevel: critical | high | medium | low | routine",
+      "QCodeSubject: MA(aerodrome) | MR(runway) | MX(taxiway) | NA(enroute-navaid) | FA(airspace) | ...",
+      "QCodeCondition: LC(closed) | LT(limited) | AS(unserviceable) | AH(operating-hours-changed) | ...",
+      "TrafficType: I(IFR) | V(VFR) | IV(IFR+VFR) | K(checklist)",
+      "NotamPurpose: N(immediate) | B(PIB) | O(flight-ops) | M(misc) | K(checklist)",
+      "NotamScope: A(aerodrome) | E(enroute) | W(nav-warning) | AE(aero+enroute)",
+      "BriefingType: dispatcher-summary | company-notam | disp-comment | crew-briefing",
+      "FlightStatus: scheduled | dispatched | in-flight | arrived | cancelled | diverted",
+      "ShiftType: morning | afternoon | night"
+    ],
+    "notam_format_structure": {
+      "q_line": "Q) FIR/QCODE/TRAFFIC/PURPOSE/SCOPE/LOWER/UPPER/COORDINATES-RADIUS",
+      "field_a": "A) ICAO location indicator",
+      "field_b": "B) YYMMDDHHmm — effective from (UTC)",
+      "field_c": "C) YYMMDDHHmm — effective to (UTC) or PERM",
+      "field_d": "D) Optional schedule (e.g., daily 0600-1800)",
+      "field_e": "E) Plain text description with ICAO abbreviations",
+      "field_f": "F) Lower altitude limit (e.g., SFC, FL050)",
+      "field_g": "G) Upper altitude limit (e.g., FL350, UNL)",
+      "coordinates": "Latitude/Longitude in NOTAM format: DDMMssN/DDDMMssE (degrees, minutes, seconds)",
+      "radius": "Radius in nautical miles from coordinates"
+    },
+    "sample_q_codes": {
+      "QMRLC": "Runway closed",
+      "QMRXX": "Runway (general condition change)",
+      "QMXLC": "Taxiway closed",
+      "QMALC": "Aerodrome closed",
+      "QMAXX": "Aerodrome (general change)",
+      "QNBAS": "NDB unserviceable",
+      "QNVAS": "VOR unserviceable",
+      "QFALT": "Airspace limited",
+      "QFALC": "Airspace closed",
+      "QFAXX": "Airspace (general)",
+      "QWMLW": "Missile/gun/rocket firing",
+      "QWPLW": "Parachute jumping",
+      "QLLAS": "Runway lighting unserviceable",
+      "QICAS": "ILS unserviceable",
+      "QPICH": "SID/STAR procedure change"
+    }
+  }
+}

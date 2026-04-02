@@ -53,7 +53,7 @@ const eslintConfig = defineConfig([
       "jsdoc/require-param": "warn",
       "jsdoc/require-returns": "warn",
       "jsdoc/check-param-names": "error",
-      "jsdoc/check-tag-names": "error",
+      "jsdoc/check-tag-names": ["error", { definedTags: ["requirements", "route"] }],
 
       // ── Import 순서 ──
       "import/order": ["error", {

@@ -1,0 +1,64 @@
+/**
+ * 운항편 시드 데이터
+ *
+ * 제주항공 7C 편명 30개 운항편. B737-800 기종.
+ * 오늘/내일 기준 운항 스케줄. 상태 분포: scheduled 12, dispatched 8, in-flight 6, arrived 4.
+ */
+
+import type { Flight } from '@/types/flight';
+
+/**
+ * 오늘 날짜 기준 ISO-8601 시각을 생성한다.
+ *
+ * @param hoursOffset - 현재 시각 기준 오프셋 (시간)
+ * @returns ISO-8601 문자열
+ */
+function todayAt(hoursOffset: number): string {
+  const d = new Date();
+  d.setHours(d.getHours() + hoursOffset, 0, 0, 0);
+  return d.toISOString();
+}
+
+/** 시드 운항편 데이터 (30개) */
+export const SEED_FLIGHTS: Flight[] = [
+  // ICN-NRT (route-001)
+  { id: 'flight-001', flightNumber: '7C101', departureAirport: 'RKSI', arrivalAirport: 'RJAA', scheduledDeparture: todayAt(2), scheduledArrival: todayAt(4.5), routeId: 'route-001', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 3, notamMaxSeverity: 'high' },
+  { id: 'flight-002', flightNumber: '7C103', departureAirport: 'RKSI', arrivalAirport: 'RJAA', scheduledDeparture: todayAt(6), scheduledArrival: todayAt(8.5), routeId: 'route-001', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 2, notamMaxSeverity: 'medium' },
+  { id: 'flight-003', flightNumber: '7C102', departureAirport: 'RJAA', arrivalAirport: 'RKSI', scheduledDeparture: todayAt(-3), scheduledArrival: todayAt(-0.5), routeId: 'route-001', aircraftType: 'B737-800', status: 'arrived', notamImpactCount: 1, notamMaxSeverity: 'low' },
+  // ICN-KIX (route-003)
+  { id: 'flight-004', flightNumber: '7C201', departureAirport: 'RKSI', arrivalAirport: 'RJBB', scheduledDeparture: todayAt(1), scheduledArrival: todayAt(3), routeId: 'route-003', aircraftType: 'B737-800', status: 'dispatched', notamImpactCount: 2, notamMaxSeverity: 'high' },
+  { id: 'flight-005', flightNumber: '7C203', departureAirport: 'RKSI', arrivalAirport: 'RJBB', scheduledDeparture: todayAt(8), scheduledArrival: todayAt(10), routeId: 'route-003', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 0, notamMaxSeverity: 'routine' },
+  { id: 'flight-006', flightNumber: '7C202', departureAirport: 'RJBB', arrivalAirport: 'RKSI', scheduledDeparture: todayAt(-1), scheduledArrival: todayAt(1), routeId: 'route-003', aircraftType: 'B737-800', status: 'in-flight', notamImpactCount: 1, notamMaxSeverity: 'medium' },
+  // ICN-BKK (route-005)
+  { id: 'flight-007', flightNumber: '7C301', departureAirport: 'RKSI', arrivalAirport: 'VTBS', scheduledDeparture: todayAt(3), scheduledArrival: todayAt(8.5), routeId: 'route-005', aircraftType: 'B737-800', status: 'dispatched', notamImpactCount: 4, notamMaxSeverity: 'critical' },
+  { id: 'flight-008', flightNumber: '7C302', departureAirport: 'VTBS', arrivalAirport: 'RKSI', scheduledDeparture: todayAt(-6), scheduledArrival: todayAt(-0.5), routeId: 'route-005', aircraftType: 'B737-800', status: 'arrived', notamImpactCount: 2, notamMaxSeverity: 'high' },
+  // ICN-HAN (route-007)
+  { id: 'flight-009', flightNumber: '7C401', departureAirport: 'RKSI', arrivalAirport: 'VVNB', scheduledDeparture: todayAt(4), scheduledArrival: todayAt(8), routeId: 'route-007', aircraftType: 'B737-800', status: 'dispatched', notamImpactCount: 1, notamMaxSeverity: 'medium' },
+  { id: 'flight-010', flightNumber: '7C402', departureAirport: 'VVNB', arrivalAirport: 'RKSI', scheduledDeparture: todayAt(-2), scheduledArrival: todayAt(2), routeId: 'route-007', aircraftType: 'B737-800', status: 'in-flight', notamImpactCount: 0, notamMaxSeverity: 'routine' },
+  // ICN-CJU (route-008)
+  { id: 'flight-011', flightNumber: '7C501', departureAirport: 'RKSI', arrivalAirport: 'RKPC', scheduledDeparture: todayAt(0.5), scheduledArrival: todayAt(1.5), routeId: 'route-008', aircraftType: 'B737-800', status: 'in-flight', notamImpactCount: 2, notamMaxSeverity: 'high' },
+  { id: 'flight-012', flightNumber: '7C503', departureAirport: 'RKSI', arrivalAirport: 'RKPC', scheduledDeparture: todayAt(3), scheduledArrival: todayAt(4), routeId: 'route-008', aircraftType: 'B737-800', status: 'dispatched', notamImpactCount: 1, notamMaxSeverity: 'medium' },
+  { id: 'flight-013', flightNumber: '7C505', departureAirport: 'RKSI', arrivalAirport: 'RKPC', scheduledDeparture: todayAt(5), scheduledArrival: todayAt(6), routeId: 'route-008', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 0, notamMaxSeverity: 'routine' },
+  { id: 'flight-014', flightNumber: '7C502', departureAirport: 'RKPC', arrivalAirport: 'RKSI', scheduledDeparture: todayAt(-1), scheduledArrival: todayAt(0), routeId: 'route-008', aircraftType: 'B737-800', status: 'arrived', notamImpactCount: 1, notamMaxSeverity: 'low' },
+  // ICN-PUS (route-009)
+  { id: 'flight-015', flightNumber: '7C601', departureAirport: 'RKSI', arrivalAirport: 'RKPK', scheduledDeparture: todayAt(1), scheduledArrival: todayAt(2), routeId: 'route-009', aircraftType: 'B737-800', status: 'dispatched', notamImpactCount: 1, notamMaxSeverity: 'medium' },
+  { id: 'flight-016', flightNumber: '7C603', departureAirport: 'RKSI', arrivalAirport: 'RKPK', scheduledDeparture: todayAt(7), scheduledArrival: todayAt(8), routeId: 'route-009', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 0, notamMaxSeverity: 'routine' },
+  // GMP-CJU (route-010)
+  { id: 'flight-017', flightNumber: '7C701', departureAirport: 'RKSS', arrivalAirport: 'RKPC', scheduledDeparture: todayAt(0), scheduledArrival: todayAt(1), routeId: 'route-010', aircraftType: 'B737-800', status: 'in-flight', notamImpactCount: 2, notamMaxSeverity: 'high' },
+  { id: 'flight-018', flightNumber: '7C703', departureAirport: 'RKSS', arrivalAirport: 'RKPC', scheduledDeparture: todayAt(4), scheduledArrival: todayAt(5), routeId: 'route-010', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 1, notamMaxSeverity: 'low' },
+  // ICN-MNL (route-011)
+  { id: 'flight-019', flightNumber: '7C801', departureAirport: 'RKSI', arrivalAirport: 'RPLL', scheduledDeparture: todayAt(5), scheduledArrival: todayAt(9), routeId: 'route-011', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 1, notamMaxSeverity: 'medium' },
+  { id: 'flight-020', flightNumber: '7C802', departureAirport: 'RPLL', arrivalAirport: 'RKSI', scheduledDeparture: todayAt(-5), scheduledArrival: todayAt(-1), routeId: 'route-011', aircraftType: 'B737-800', status: 'arrived', notamImpactCount: 0, notamMaxSeverity: 'routine' },
+  // ICN-SHA (route-012)
+  { id: 'flight-021', flightNumber: '7C901', departureAirport: 'RKSI', arrivalAirport: 'ZSSS', scheduledDeparture: todayAt(2), scheduledArrival: todayAt(4), routeId: 'route-012', aircraftType: 'B737-800', status: 'dispatched', notamImpactCount: 1, notamMaxSeverity: 'low' },
+  { id: 'flight-022', flightNumber: '7C902', departureAirport: 'ZSSS', arrivalAirport: 'RKSI', scheduledDeparture: todayAt(-3), scheduledArrival: todayAt(-1), routeId: 'route-012', aircraftType: 'B737-800', status: 'in-flight', notamImpactCount: 0, notamMaxSeverity: 'routine' },
+  // Additional flights
+  { id: 'flight-023', flightNumber: '7C105', departureAirport: 'RKSI', arrivalAirport: 'RJAA', scheduledDeparture: todayAt(10), scheduledArrival: todayAt(12.5), routeId: 'route-001', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 2, notamMaxSeverity: 'high' },
+  { id: 'flight-024', flightNumber: '7C507', departureAirport: 'RKSI', arrivalAirport: 'RKPC', scheduledDeparture: todayAt(9), scheduledArrival: todayAt(10), routeId: 'route-008', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 1, notamMaxSeverity: 'medium' },
+  { id: 'flight-025', flightNumber: '7C303', departureAirport: 'RKSI', arrivalAirport: 'VTBS', scheduledDeparture: todayAt(12), scheduledArrival: todayAt(17.5), routeId: 'route-005', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 3, notamMaxSeverity: 'high' },
+  { id: 'flight-026', flightNumber: '7C205', departureAirport: 'RKSI', arrivalAirport: 'RJBB', scheduledDeparture: todayAt(14), scheduledArrival: todayAt(16), routeId: 'route-003', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 0, notamMaxSeverity: 'routine' },
+  { id: 'flight-027', flightNumber: '7C605', departureAirport: 'RKSI', arrivalAirport: 'RKPK', scheduledDeparture: todayAt(11), scheduledArrival: todayAt(12), routeId: 'route-009', aircraftType: 'B737-800', status: 'scheduled', notamImpactCount: 0, notamMaxSeverity: 'routine' },
+  { id: 'flight-028', flightNumber: '7C705', departureAirport: 'RKSS', arrivalAirport: 'RKPC', scheduledDeparture: todayAt(8), scheduledArrival: todayAt(9), routeId: 'route-010', aircraftType: 'B737-800', status: 'dispatched', notamImpactCount: 1, notamMaxSeverity: 'medium' },
+  { id: 'flight-029', flightNumber: '7C509', departureAirport: 'RKSI', arrivalAirport: 'RKPC', scheduledDeparture: todayAt(13), scheduledArrival: todayAt(14), routeId: 'route-008', aircraftType: 'B737-800', status: 'dispatched', notamImpactCount: 0, notamMaxSeverity: 'routine' },
+  { id: 'flight-030', flightNumber: '7C960', departureAirport: 'RKSI', arrivalAirport: 'VVNB', scheduledDeparture: todayAt(15), scheduledArrival: todayAt(19), routeId: 'route-007', aircraftType: 'B737-800', status: 'in-flight', notamImpactCount: 2, notamMaxSeverity: 'high' },
+];
