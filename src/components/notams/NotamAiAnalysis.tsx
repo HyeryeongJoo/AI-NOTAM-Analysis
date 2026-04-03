@@ -101,16 +101,28 @@ export default function NotamAiAnalysis({ notam, onReanalyze, isAnalyzing }: Not
         <ExpandableSection headerText="AI 한국어 요약" defaultExpanded={true}>
           {notam.aiSummary ? (
             notam.aiSummary
+          ) : notam.status === 'cancelled' ? (
+            <StatusIndicator type="stopped">취소된 NOTAM — 분석 불필요</StatusIndicator>
+          ) : notam.status === 'expired' ? (
+            <StatusIndicator type="stopped">만료된 NOTAM</StatusIndicator>
           ) : (
-            <StatusIndicator type="pending">분석 대기 중</StatusIndicator>
+            <StatusIndicator type="pending">
+              분석 대기 중 — 「재분석」 버튼을 클릭하세요
+            </StatusIndicator>
           )}
         </ExpandableSection>
 
         <ExpandableSection headerText="영향 분석" defaultExpanded={false}>
           {notam.aiAnalysis ? (
             notam.aiAnalysis
+          ) : notam.status === 'cancelled' ? (
+            <StatusIndicator type="stopped">취소된 NOTAM — 영향 분석 불필요</StatusIndicator>
+          ) : notam.status === 'expired' ? (
+            <StatusIndicator type="stopped">만료된 NOTAM — 영향 분석 불필요</StatusIndicator>
           ) : (
-            <StatusIndicator type="pending">분석 대기 중</StatusIndicator>
+            <StatusIndicator type="pending">
+              분석 대기 중 — 「재분석」 버튼을 클릭하세요
+            </StatusIndicator>
           )}
         </ExpandableSection>
       </SpaceBetween>
