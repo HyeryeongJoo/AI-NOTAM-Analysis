@@ -35,7 +35,7 @@ const IMPACT_LEVEL_OPTIONS: SelectProps.Option[] = [
   { label: '높음', value: 'high' },
   { label: '보통', value: 'medium' },
   { label: '낮음', value: 'low' },
-  { label: '일상', value: 'routine' },
+  { label: '참고', value: 'routine' },
 ];
 
 /**

@@ -11,11 +11,11 @@
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import Box from '@cloudscape-design/components/box';
 import Header from '@cloudscape-design/components/header';
+import Link from '@cloudscape-design/components/link';
 import Pagination from '@cloudscape-design/components/pagination';
 import PropertyFilter from '@cloudscape-design/components/property-filter';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Table from '@cloudscape-design/components/table';
-import Link from '@cloudscape-design/components/link';
 import AirportLabel from '@/components/common/AirportLabel';
 import ImportanceBadge from '@/components/common/ImportanceBadge';
 import ImportanceScoreBar from '@/components/common/ImportanceScoreBar';
@@ -62,12 +62,7 @@ function formatDate(iso: string): string {
  * @param props.isLoading - 로딩 상태
  * @returns Table 컴포넌트
  */
-export default function NotamTable({
-  notams,
-  totalCount,
-  stats,
-  isLoading,
-}: NotamTableProps) {
+export default function NotamTable({ notams, totalCount, stats, isLoading }: NotamTableProps) {
   const { items, collectionProps, propertyFilterProps, paginationProps } = useCollection(notams, {
     propertyFiltering: {
       filteringProperties: [
@@ -116,7 +111,7 @@ export default function NotamTable({
   });
 
   const statsDescription = stats
-    ? `위험 ${stats.bySeverity.critical} | 높음 ${stats.bySeverity.high} | 만료임박 ${stats.expiringSoon}`
+    ? `위험 ${stats.bySeverity.critical} | 높음 ${stats.bySeverity.high} | 보통 ${stats.bySeverity.medium} | 낮음 ${stats.bySeverity.low} | 참고 ${stats.bySeverity.routine} | 만료임박 ${stats.expiringSoon}`
     : undefined;
 
   return (
@@ -162,11 +157,7 @@ export default function NotamTable({
         {
           id: 'notamId',
           header: 'NOTAM',
-          cell: (item) => (
-            <Link href={`/notams/${item.id}`}>
-              {formatNotamCode(item)}
-            </Link>
-          ),
+          cell: (item) => <Link href={`/notams/${item.id}`}>{formatNotamCode(item)}</Link>,
           sortingField: 'number',
           width: 160,
           isRowHeader: true,
