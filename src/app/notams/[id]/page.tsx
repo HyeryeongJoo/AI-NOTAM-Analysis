@@ -71,7 +71,7 @@ export default function NotamDetailPage() {
   if (error) return <ErrorState error={error} />;
   if (!notam) return <LoadingState />;
 
-  const headerTitle = `NOTAM 상세 — ${notam.locationIndicator} ${notam.series}${notam.number}/${notam.year}`;
+  const headerTitle = `NOTAM 상세 — ${notam.locationIndicator} ${notam.series}${notam.number}/${String(notam.year).slice(-2)}`;
 
   /**
    * 재분석을 실행한다

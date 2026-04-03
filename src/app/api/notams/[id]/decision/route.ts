@@ -108,7 +108,7 @@ export async function POST(
     action: 'record-decision',
     targetType: 'decision',
     targetId: decision.id,
-    details: `NOTAM ${notam.series}${notam.number}/${notam.year}에 대한 TIFRS 의사결정 기록: ${decision.overallDecision}`,
+    details: `NOTAM ${notam.series}${notam.number}/${String(notam.year).slice(-2)}에 대한 TIFRS 의사결정 기록: ${decision.overallDecision}`,
   });
 
   return NextResponse.json(decision, { status: 201 });

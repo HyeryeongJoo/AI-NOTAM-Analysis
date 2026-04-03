@@ -15,6 +15,7 @@ import Pagination from '@cloudscape-design/components/pagination';
 import PropertyFilter from '@cloudscape-design/components/property-filter';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Table from '@cloudscape-design/components/table';
+import Link from '@cloudscape-design/components/link';
 import AirportLabel from '@/components/common/AirportLabel';
 import ImportanceBadge from '@/components/common/ImportanceBadge';
 import ImportanceScoreBar from '@/components/common/ImportanceScoreBar';
@@ -26,7 +27,16 @@ interface NotamTableProps {
   totalCount: number;
   stats?: NotamStats;
   isLoading: boolean;
-  onSelectionChange: (selectedNotam: Notam | null) => void;
+}
+
+/**
+ * NOTAM 식별자를 ICAO 형식으로 포맷한다 (예: RKRR A1234/2026)
+ *
+ * @param notam - NOTAM 객체
+ * @returns ICAO 형식 NOTAM 식별자
+ */
+function formatNotamCode(notam: Notam): string {
+  return `${notam.fir} ${notam.series}${notam.number}/${String(notam.year).slice(-2)}`;
 }
 
 /**
@@ -50,7 +60,6 @@ function formatDate(iso: string): string {
  * @param props.totalCount - 전체 NOTAM 수
  * @param props.stats - NOTAM 통계 (선택적)
  * @param props.isLoading - 로딩 상태
- * @param props.onSelectionChange - 선택 변경 핸들러
  * @returns Table 컴포넌트
  */
 export default function NotamTable({
@@ -58,7 +67,6 @@ export default function NotamTable({
   totalCount,
   stats,
   isLoading,
-  onSelectionChange,
 }: NotamTableProps) {
   const { items, collectionProps, propertyFilterProps, paginationProps } = useCollection(notams, {
     propertyFiltering: {
@@ -105,7 +113,6 @@ export default function NotamTable({
     },
     sorting: {},
     pagination: { pageSize: 20 },
-    selection: { trackBy: 'id' },
   });
 
   const statsDescription = stats
@@ -118,12 +125,10 @@ export default function NotamTable({
       items={items}
       loading={isLoading}
       loadingText="NOTAM을 불러오는 중..."
-      selectionType="single"
       trackBy="id"
       enableKeyboardNavigation={true}
       stickyHeader={true}
       variant="full-page"
-      onSelectionChange={({ detail }) => onSelectionChange(detail.selectedItems[0] ?? null)}
       header={
         <Header
           variant="awsui-h1-sticky"
@@ -155,12 +160,23 @@ export default function NotamTable({
       pagination={<Pagination {...paginationProps} />}
       columnDefinitions={[
         {
+          id: 'notamId',
+          header: 'NOTAM',
+          cell: (item) => (
+            <Link href={`/notams/${item.id}`}>
+              {formatNotamCode(item)}
+            </Link>
+          ),
+          sortingField: 'number',
+          width: 160,
+          isRowHeader: true,
+        },
+        {
           id: 'locationIndicator',
           header: '공항',
           cell: (item) => <AirportLabel icaoCode={item.locationIndicator} />,
           sortingField: 'locationIndicator',
           width: 80,
-          isRowHeader: true,
         },
         {
           id: 'qCode',

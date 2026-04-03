@@ -40,7 +40,7 @@ export default function RouteDetailPage() {
       <SpaceBetween size="l">
         <RouteInfo route={route} />
         <RouteMapVisualization route={route} impacts={route.impacts} activeNotams={route.activeNotams} />
-        <RouteNotamImpacts impacts={route.impacts} />
+        <RouteNotamImpacts impacts={route.impacts} activeNotams={route.activeNotams} />
         <RouteAlternatives routeId={routeId} activeNotams={route.activeNotams} />
       </SpaceBetween>
     </ContentLayout>

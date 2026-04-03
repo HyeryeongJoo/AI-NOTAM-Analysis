@@ -8,7 +8,7 @@ import { z } from 'zod';
 
 /** 대체 항로 요청 검증 */
 export const routeAlternativesSchema = z.object({
-  notamId: z.string().uuid(),
+  notamId: z.string().min(1),
 });
 
 /** 항로 목록 쿼리 검증 */

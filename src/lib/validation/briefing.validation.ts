@@ -8,13 +8,13 @@ import { z } from 'zod';
 
 /** 브리핑 생성 요청 검증 */
 export const generateBriefingSchema = z.object({
-  flightId: z.string().uuid(),
+  flightId: z.string().min(1),
   type: z.enum(['dispatcher-summary', 'company-notam', 'disp-comment', 'crew-briefing']),
 });
 
 /** 승무원 브리핑 생성 요청 검증 */
 export const generateCrewBriefingSchema = z.object({
-  flightId: z.string().uuid(),
+  flightId: z.string().min(1),
 });
 
 /** 브리핑 수정 요청 검증 */

@@ -6,7 +6,7 @@
 
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { Dispatcher } from '@/types/auth';
 
 interface AuthContextValue {
@@ -41,21 +41,22 @@ const AuthContext = createContext<AuthContextValue>({
  * @returns 인증 컨텍스트 프로바이더
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<Dispatcher | null>(() => {
-    // localStorage에서 복원하거나 기본 사용자로 자동 로그인 (lazy initializer)
-    if (typeof window === 'undefined') return null;
+  const [user, setUser] = useState<Dispatcher | null>(null);
+
+  /* hydration 안전: localStorage는 useEffect에서만 접근 */
+  useEffect(() => {
     try {
       const stored = localStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored) as Dispatcher;
+        setUser(JSON.parse(stored) as Dispatcher);
+      } else {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(DEFAULT_USER));
+        setUser(DEFAULT_USER);
       }
-      // 프로토타입: 기본 사용자로 자동 로그인
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(DEFAULT_USER));
-      return DEFAULT_USER;
     } catch {
-      return DEFAULT_USER;
+      setUser(DEFAULT_USER);
     }
-  });
+  }, []);
 
   const login = useCallback(async (username: string, password: string) => {
     const res = await fetch('/api/auth/login', {

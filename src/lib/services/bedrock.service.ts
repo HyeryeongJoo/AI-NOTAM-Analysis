@@ -116,8 +116,10 @@ export async function analyzeNotamImportance(
   notam: Notam,
   qCode: QCode | undefined,
   airport: Airport | undefined,
+  affectedFlights?: Flight[],
+  affectedRoutes?: NotamRouteImpact[],
 ): Promise<NotamImportanceResult> {
-  const userMessage = buildImportanceAnalysisMessage(notam, qCode, airport);
+  const userMessage = buildImportanceAnalysisMessage(notam, qCode, airport, affectedFlights, affectedRoutes);
   const text = await invokeModel(NOTAM_IMPORTANCE_SYSTEM_PROMPT, userMessage, { temperature: 0.1 });
 
   const fallback = qCode
@@ -162,8 +164,9 @@ export async function generateImpactAnalysis(
   affectedRoutes: NotamRouteImpact[],
   affectedFlights: NotamFlightImpact[],
   airport: Airport | undefined,
+  flights?: Flight[],
 ): Promise<string> {
-  const userMessage = buildImpactAnalysisMessage(notam, affectedRoutes, affectedFlights, airport);
+  const userMessage = buildImpactAnalysisMessage(notam, affectedRoutes, affectedFlights, airport, flights);
   return invokeModel(IMPACT_ANALYSIS_SYSTEM_PROMPT, userMessage, { temperature: 0.3 });
 }
 

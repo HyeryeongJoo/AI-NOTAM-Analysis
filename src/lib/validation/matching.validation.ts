@@ -8,5 +8,5 @@ import { z } from 'zod';
 
 /** 매칭 계산 요청 검증 */
 export const matchingCalculateSchema = z.object({
-  notamId: z.string().uuid().optional(),
+  notamId: z.string().min(1).optional(),
 });

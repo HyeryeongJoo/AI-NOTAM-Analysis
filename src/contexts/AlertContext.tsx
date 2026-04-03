@@ -8,7 +8,7 @@
 
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { Notam } from '@/types/notam';
 
 interface AlertContextValue {
@@ -38,19 +38,19 @@ const AlertContext = createContext<AlertContextValue>({
  */
 export function AlertProvider({ children }: { children: React.ReactNode }) {
   const [criticalAlerts, setCriticalAlerts] = useState<Notam[]>([]);
-  const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(() => {
-    // sessionStorage에서 확인된 알림 복원 (lazy initializer)
-    if (typeof window === 'undefined') return new Set<string>();
+  const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(new Set());
+
+  /* hydration 안전: sessionStorage는 useEffect에서만 접근 */
+  useEffect(() => {
     try {
       const stored = sessionStorage.getItem(STORAGE_KEY);
       if (stored) {
-        return new Set(JSON.parse(stored) as string[]);
+        setAcknowledgedIds(new Set(JSON.parse(stored) as string[]));
       }
     } catch {
       // sessionStorage 접근 실패 시 무시
     }
-    return new Set<string>();
-  });
+  }, []);
 
   const acknowledgeAlert = useCallback((notamId: string) => {
     setAcknowledgedIds((prev) => {

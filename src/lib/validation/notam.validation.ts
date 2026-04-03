@@ -10,7 +10,7 @@ import { z } from 'zod';
 
 /** NOTAM 분석 요청 검증 */
 export const analyzeNotamSchema = z.object({
-  notamId: z.string().uuid(),
+  notamId: z.string().min(1),
 });
 
 /** NOTAM 목록 쿼리 검증 */

@@ -8,6 +8,7 @@
 
 import { NextResponse } from 'next/server';
 import * as airportRepo from '@/lib/db/airport.repository';
+import * as flightRepo from '@/lib/db/flight.repository';
 import * as impactRepo from '@/lib/db/impact.repository';
 import * as notamRepo from '@/lib/db/notam.repository';
 import * as bedrockService from '@/lib/services/bedrock.service';
@@ -42,12 +43,19 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
 
   const airport = airportRepo.findByIcao(notam.locationIndicator);
 
+  /* 영향받는 운항편의 실제 Flight 객체 조회 (편명, 스케줄, 기종 등 상세 정보) */
+  const affectedFlightIds = [...new Set(affectedFlights.map((fi) => fi.flightId))];
+  const flights = affectedFlightIds
+    .map((fid) => flightRepo.findById(fid))
+    .filter((f) => f !== undefined);
+
   try {
     const contextualSeverity = await bedrockService.generateImpactAnalysis(
       notam,
       affectedRoutes,
       affectedFlights,
       airport,
+      flights,
     );
 
     return NextResponse.json({ affectedRoutes, affectedFlights, contextualSeverity });

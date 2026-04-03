@@ -26,7 +26,31 @@ export function buildImportanceAnalysisMessage(
   notam: Notam,
   qCode: QCode | undefined,
   airport: Airport | undefined,
+  affectedFlights?: Flight[],
+  affectedRoutes?: NotamRouteImpact[],
 ): string {
+  const flightContext = affectedFlights && affectedFlights.length > 0
+    ? `<flight_context>
+영향받는 운항편 (${affectedFlights.length}편):
+${affectedFlights.map((f) => {
+  const depTime = new Date(f.scheduledDeparture);
+  const arrTime = new Date(f.scheduledArrival);
+  const notamStart = new Date(notam.effectiveFrom);
+  const notamEnd = notam.effectiveTo === 'PERM' ? new Date('2099-12-31') : new Date(notam.effectiveTo);
+  const temporalOverlap = depTime <= notamEnd && arrTime >= notamStart;
+  const spatialOverlap = f.departureAirport === notam.locationIndicator || f.arrivalAirport === notam.locationIndicator;
+  return `- ${f.flightNumber} (${f.departureAirport}→${f.arrivalAirport}): 출발=${f.scheduledDeparture}, 도착=${f.scheduledArrival}, 상태=${f.status}, 시간중첩=${temporalOverlap ? '예' : '아니오'}, 공간중첩=${spatialOverlap ? '예' : '아니오'}`;
+}).join('\n')}
+</flight_context>`
+    : '<flight_context>영향받는 운항편 정보 없음</flight_context>';
+
+  const routeContext = affectedRoutes && affectedRoutes.length > 0
+    ? `<route_context>
+영향받는 항로 (${affectedRoutes.length}개):
+${affectedRoutes.map((r) => `- 항로 ${r.routeId}: 중첩유형=${r.overlapType}, 영향구간=${r.affectedSegment}, 관통거리=${r.distanceThroughArea}NM, 고도충돌=${r.altitudeConflict ? '예' : '아니오'}`).join('\n')}
+</route_context>`
+    : '<route_context>영향받는 항로 정보 없음</route_context>';
+
   return `<notam_data>
 <raw_text>
 ${notam.rawText}
@@ -61,6 +85,10 @@ FIR: ${airport.fir}, 국가: ${airport.country}`
     : '공항 참조 정보 없음'
 }
 </reference_data>
+
+${flightContext}
+
+${routeContext}
 </notam_data>`;
 }
 
@@ -92,6 +120,7 @@ export function buildImpactAnalysisMessage(
   affectedRoutes: NotamRouteImpact[],
   affectedFlights: NotamFlightImpact[],
   airport: Airport | undefined,
+  flights?: Flight[],
 ): string {
   const routeDetails = affectedRoutes
     .map(
@@ -100,11 +129,21 @@ export function buildImpactAnalysisMessage(
     )
     .join('\n');
 
+  /** 운항편 영향 레코드에 실제 Flight 정보를 결합하여 상세 정보 제공 */
+  const flightMap = new Map((flights ?? []).map((f) => [f.id, f]));
   const flightDetails = affectedFlights
-    .map(
-      (f) =>
-        `- 운항편 ${f.flightId}: 시간중첩=${f.temporalOverlap ? '예' : '아니오'}, 공간중첩=${f.spatialOverlap ? '예' : '아니오'}`,
-    )
+    .map((fi) => {
+      const f = flightMap.get(fi.flightId);
+      if (f) {
+        const depTime = new Date(f.scheduledDeparture);
+        const arrTime = new Date(f.scheduledArrival);
+        const notamStart = new Date(notam.effectiveFrom);
+        const notamEnd = notam.effectiveTo === 'PERM' ? new Date('2099-12-31') : new Date(notam.effectiveTo);
+        const fullOverlap = depTime <= notamEnd && arrTime >= notamStart;
+        return `- ${f.flightNumber} (${f.departureAirport}→${f.arrivalAirport}): 출발=${f.scheduledDeparture}, 도착=${f.scheduledArrival}, 기종=${f.aircraftType}, 상태=${f.status}, 시간중첩=${fi.temporalOverlap ? '예' : '아니오'}, 공간중첩=${fi.spatialOverlap ? '예' : '아니오'}, 전구간중첩=${fullOverlap ? '예' : '아니오'}, 영향요약=${fi.impactSummary}`;
+      }
+      return `- 운항편 ${fi.flightId}: 시간중첩=${fi.temporalOverlap ? '예' : '아니오'}, 공간중첩=${fi.spatialOverlap ? '예' : '아니오'}`;
+    })
     .join('\n');
 
   return `<notam>
@@ -123,7 +162,8 @@ ${routeDetails || '없음'}
 ${flightDetails || '없음'}
 </impact_data>
 
-위 데이터를 기반으로 종합 영향 분석을 수행하세요.`;
+위 데이터를 기반으로 종합 영향 분석을 수행하세요.
+운항편별 구체적 영향(시간 중첩 여부, 출도착 공항 일치 여부, 운항 상태)을 포함하여 분석하세요.`;
 }
 
 /**

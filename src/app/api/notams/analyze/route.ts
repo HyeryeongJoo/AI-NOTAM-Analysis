@@ -8,6 +8,8 @@
 
 import { NextResponse } from 'next/server';
 import * as airportRepo from '@/lib/db/airport.repository';
+import * as flightRepo from '@/lib/db/flight.repository';
+import * as impactRepo from '@/lib/db/impact.repository';
 import * as notamRepo from '@/lib/db/notam.repository';
 import { findByCode } from '@/lib/db/qCode.repository';
 import * as bedrockService from '@/lib/services/bedrock.service';
@@ -37,8 +39,16 @@ export async function POST(request: NextRequest) {
   const qCode = findByCode(notam.qCode);
   const airport = airportRepo.findByIcao(notam.locationIndicator);
 
+  /* 운항편 문맥: 이 NOTAM에 영향받는 항로/운항편 조회 */
+  const routeImpacts = impactRepo.findRouteImpactsByNotam(notam.id);
+  const flightImpacts = impactRepo.findFlightImpactsByNotam(notam.id);
+  const affectedFlightIds = [...new Set(flightImpacts.map((fi) => fi.flightId))];
+  const affectedFlights = affectedFlightIds
+    .map((fid) => flightRepo.findById(fid))
+    .filter((f) => f !== undefined);
+
   try {
-    const result = await bedrockService.analyzeNotamImportance(notam, qCode, airport);
+    const result = await bedrockService.analyzeNotamImportance(notam, qCode, airport, affectedFlights, routeImpacts);
 
     // NOTAM 레코드 업데이트
     notamRepo.update(notam.id, {

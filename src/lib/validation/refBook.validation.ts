@@ -8,7 +8,7 @@ import { z } from 'zod';
 
 /** REF BOOK 생성 요청 검증 */
 export const createRefBookEntrySchema = z.object({
-  notamId: z.string().uuid(),
+  notamId: z.string().min(1),
   summary: z.string().min(1).max(2000),
   impactLevel: z.enum(['critical', 'high', 'medium', 'low', 'routine']),
   affectedAirports: z.array(z.string().length(4)).min(1),

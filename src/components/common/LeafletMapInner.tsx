@@ -17,10 +17,16 @@ import 'leaflet/dist/leaflet.css';
 
 /* Leaflet 기본 마커 아이콘 경로 수정 (webpack/turbopack 환경 호환) */
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)['_getIconUrl'];
+
+/** 이미지 import가 객체({src}) 또는 문자열인 경우 모두 처리 */
+function resolveAssetUrl(imported: { src: string } | string): string {
+  return typeof imported === 'string' ? imported : imported.src;
+}
+
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x.src,
-  iconUrl: markerIcon.src,
-  shadowUrl: markerShadow.src,
+  iconRetinaUrl: resolveAssetUrl(markerIcon2x),
+  iconUrl: resolveAssetUrl(markerIcon),
+  shadowUrl: resolveAssetUrl(markerShadow),
 });
 
 interface LeafletMapInnerProps {

@@ -16,9 +16,11 @@ import Link from '@cloudscape-design/components/link';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Table from '@cloudscape-design/components/table';
 import type { NotamRouteImpact } from '@/types/impact';
+import type { Notam } from '@/types/notam';
 
 interface RouteNotamImpactsProps {
   impacts: NotamRouteImpact[];
+  activeNotams?: Notam[];
 }
 
 /**
@@ -28,7 +30,10 @@ interface RouteNotamImpactsProps {
  * @param props.impacts - NotamRouteImpact 배열
  * @returns Table 컨테이너
  */
-export default function RouteNotamImpacts({ impacts }: RouteNotamImpactsProps) {
+export default function RouteNotamImpacts({ impacts, activeNotams = [] }: RouteNotamImpactsProps) {
+  /** notamId → NOTAM 객체 매핑 (ICAO 형식 표시용) */
+  const notamMap = new Map(activeNotams.map((n) => [n.id, n]));
+
   const { items, collectionProps } = useCollection(impacts, {
     sorting: {},
   });
@@ -45,7 +50,14 @@ export default function RouteNotamImpacts({ impacts }: RouteNotamImpactsProps) {
           {
             id: 'notamId',
             header: 'NOTAM',
-            cell: (item) => <Link href={`/notams/${item.notamId}`}>{item.notamId.substring(0, 8)}...</Link>,
+            cell: (item) => {
+              const notam = notamMap.get(item.notamId);
+              const label = notam
+                ? `${notam.fir} ${notam.series}${notam.number}/${String(notam.year).slice(-2)}`
+                : item.notamId.substring(0, 12);
+              return <Link href={`/notams/${item.notamId}`}>{label}</Link>;
+            },
+            width: 160,
             isRowHeader: true,
           },
           { id: 'overlapType', header: '중첩 유형', cell: (item) => item.overlapType },

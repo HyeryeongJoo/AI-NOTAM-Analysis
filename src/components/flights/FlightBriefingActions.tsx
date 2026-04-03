@@ -2,18 +2,22 @@
  * 운항편 브리핑 생성 액션 컴포넌트
  *
  * BriefingType을 선택하고 브리핑 생성을 트리거한다.
+ * 생성 완료 후 미리보기와 다운로드 기능을 제공한다.
  *
  * @requirements FR-007, FR-008
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import Container from '@cloudscape-design/components/container';
+import ExpandableSection from '@cloudscape-design/components/expandable-section';
 import Header from '@cloudscape-design/components/header';
 import Select from '@cloudscape-design/components/select';
 import SpaceBetween from '@cloudscape-design/components/space-between';
+import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import { useNotification } from '@/contexts/NotificationContext';
 import { useApiMutation } from '@/hooks/useApiMutation';
 import { useGenerateBriefing } from '@/hooks/useGenerateBriefing';
@@ -32,6 +36,35 @@ const BRIEFING_TYPE_OPTIONS: SelectProps.Option[] = [
   { label: '승무원 브리핑', value: 'crew-briefing' },
 ];
 
+/** 브리핑 유형별 파일명 */
+const BRIEFING_FILENAME: Record<BriefingType, string> = {
+  'dispatcher-summary': '운항관리사_요약',
+  'company-notam': 'Company_NOTAM',
+  'disp-comment': 'DISP_COMMENT',
+  'crew-briefing': '승무원_브리핑',
+};
+
+/**
+ * 마크다운 텍스트를 간단한 HTML로 변환한다
+ *
+ * @param md - 마크다운 문자열
+ * @returns HTML 문자열
+ */
+function simpleMarkdownToHtml(md: string): string {
+  return md
+    .replace(/^### (.+)$/gm, '<h4 style="margin:12px 0 4px">$1</h4>')
+    .replace(/^## (.+)$/gm, '<h3 style="margin:16px 0 8px">$1</h3>')
+    .replace(/^# (.+)$/gm, '<h2 style="margin:20px 0 8px">$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g, '<ul style="margin:4px 0;padding-left:20px">$&</ul>')
+    .replace(/^---$/gm, '<hr style="margin:12px 0;border:none;border-top:1px solid #e9ebed"/>')
+    .replace(/\n\n/g, '<br/>')
+    .replace(/⚠️/g, '&#9888;&#65039;')
+    .replace(/🚨/g, '&#128680;')
+    .replace(/📋/g, '&#128203;');
+}
+
 /**
  * 브리핑 생성 액션을 렌더링한다
  *
@@ -42,6 +75,7 @@ const BRIEFING_TYPE_OPTIONS: SelectProps.Option[] = [
  */
 export default function FlightBriefingActions({ flightId, onBriefingGenerated }: FlightBriefingActionsProps) {
   const [selectedType, setSelectedType] = useState<SelectProps.Option | null>(null);
+  const [generatedBriefing, setGeneratedBriefing] = useState<Briefing | null>(null);
   const { trigger, isMutating } = useGenerateBriefing();
   const { addNotification } = useNotification();
   const { execute: generateCrewPackage, loading: crewLoading } = useApiMutation<{ flightId: string }, Briefing>(
@@ -50,9 +84,23 @@ export default function FlightBriefingActions({ flightId, onBriefingGenerated }:
   );
 
   /**
+   * 브리핑 파일을 다운로드한다
+   */
+  const handleDownload = useCallback(() => {
+    if (!generatedBriefing) return;
+    const typeName = BRIEFING_FILENAME[generatedBriefing.type] ?? generatedBriefing.type;
+    const filename = `${typeName}_${flightId}_${new Date().toISOString().slice(0, 10)}.md`;
+    const blob = new Blob([generatedBriefing.content], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [generatedBriefing, flightId]);
+
+  /**
    * 브리핑 생성을 처리한다
-   *
-   * @returns void
    */
   async function handleGenerate() {
     if (!selectedType?.value) return;
@@ -61,6 +109,7 @@ export default function FlightBriefingActions({ flightId, onBriefingGenerated }:
         flightId,
         type: selectedType.value as BriefingType,
       });
+      setGeneratedBriefing(briefing);
       onBriefingGenerated(briefing);
       addNotification({
         type: 'success',
@@ -76,12 +125,11 @@ export default function FlightBriefingActions({ flightId, onBriefingGenerated }:
 
   /**
    * 전체 승무원 패키지 생성을 처리한다
-   *
-   * @returns void
    */
   async function handleCrewPackage() {
     try {
       const briefing = await generateCrewPackage({ flightId });
+      setGeneratedBriefing(briefing);
       onBriefingGenerated(briefing);
       addNotification({
         type: 'success',
@@ -118,6 +166,38 @@ export default function FlightBriefingActions({ flightId, onBriefingGenerated }:
         <Button variant="normal" loading={crewLoading} onClick={handleCrewPackage}>
           전체 승무원 패키지 생성
         </Button>
+
+        {generatedBriefing && (
+          <SpaceBetween size="m">
+            <SpaceBetween size="xs" direction="horizontal" alignItems="center">
+              <StatusIndicator type="success">생성 완료</StatusIndicator>
+              <Box variant="small" color="text-body-secondary">
+                {new Date(generatedBriefing.generatedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}
+              </Box>
+              <Button iconName="download" variant="primary" onClick={handleDownload}>
+                다운로드
+              </Button>
+            </SpaceBetween>
+
+            <ExpandableSection
+              headerText="브리핑 미리보기"
+              defaultExpanded={true}
+              variant="footer"
+            >
+              <Box padding="s">
+                <div
+                  style={{
+                    maxHeight: '500px',
+                    overflow: 'auto',
+                    fontSize: '14px',
+                    lineHeight: '1.6',
+                  }}
+                  dangerouslySetInnerHTML={{ __html: simpleMarkdownToHtml(generatedBriefing.content) }}
+                />
+              </Box>
+            </ExpandableSection>
+          </SpaceBetween>
+        )}
       </SpaceBetween>
     </Container>
   );
