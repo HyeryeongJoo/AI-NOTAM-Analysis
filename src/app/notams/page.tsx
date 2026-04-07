@@ -1,36 +1,21 @@
 /**
  * NOTAM 목록 페이지
  *
- * PropertyFilter와 SplitPanel을 포함한 NOTAM 목록.
+ * 서버에서 데이터를 미리 조회하여 즉시 렌더링한다.
  *
  * @route /notams
  * @requirements FR-001, FR-002, FR-005, FR-019
  */
 
-'use client';
-
-import ErrorState from '@/components/common/ErrorState';
-import LoadingState from '@/components/common/LoadingState';
-import NotamTable from '@/components/notams/NotamTable';
-import { useNotams } from '@/hooks/useNotams';
+import NotamListContent from '@/components/notams/NotamListContent';
+import * as notamRepo from '@/lib/db/notam.repository';
 
 /**
- * NOTAM 목록 페이지 컴포넌트
+ * NOTAM 목록 페이지 컴포넌트 (Server Component)
  *
  * @returns NOTAM 목록 레이아웃
  */
 export default function NotamListPage() {
-  const { data, error, isLoading, mutate } = useNotams();
-
-  if (isLoading && !data) return <LoadingState />;
-  if (error) return <ErrorState error={error} onRetry={() => mutate()} />;
-
-  return (
-    <NotamTable
-      notams={data?.items ?? []}
-      totalCount={data?.total ?? 0}
-      stats={data?.stats}
-      isLoading={isLoading}
-    />
-  );
+  const initialData = notamRepo.findAll({ page: 1, pageSize: 20 });
+  return <NotamListContent initialData={initialData} />;
 }

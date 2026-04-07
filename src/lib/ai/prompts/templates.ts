@@ -93,6 +93,24 @@ ${routeContext}
 }
 
 /**
+ * NOTAM 본문 필드 추출 사용자 메시지를 생성한다.
+ *
+ * @param notam - 추출 대상 NOTAM
+ * @returns 구조화된 사용자 메시지
+ */
+export function buildFieldExtractionMessage(notam: Notam): string {
+  return `<raw_text>
+${notam.rawText}
+</raw_text>
+
+<body>
+${notam.body}
+</body>
+
+위 NOTAM 원문에서 좌표, 반경, 고도, 유효시간을 추출하세요.`;
+}
+
+/**
  * NOTAM 한국어 요약 사용자 메시지를 생성한다.
  *
  * @param notam - 요약 대상 NOTAM

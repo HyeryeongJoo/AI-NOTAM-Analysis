@@ -8,8 +8,10 @@
 
 'use client';
 
+import { useState } from 'react';
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import Box from '@cloudscape-design/components/box';
+import Button from '@cloudscape-design/components/button';
 import Header from '@cloudscape-design/components/header';
 import Link from '@cloudscape-design/components/link';
 import Pagination from '@cloudscape-design/components/pagination';
@@ -63,6 +65,21 @@ function formatDate(iso: string): string {
  * @returns Table 컴포넌트
  */
 export default function NotamTable({ notams, totalCount, stats, isLoading }: NotamTableProps) {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  /** 전체 NOTAM 일괄 재처리 */
+  async function handleProcessAll() {
+    setIsProcessing(true);
+    try {
+      await fetch('/api/notams/process-all', { method: 'POST' });
+      window.location.reload();
+    } catch {
+      /* 실패 시 조용히 무시 — 데모용 */
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
   const { items, collectionProps, propertyFilterProps, paginationProps } = useCollection(notams, {
     propertyFiltering: {
       filteringProperties: [
@@ -129,6 +146,11 @@ export default function NotamTable({ notams, totalCount, stats, isLoading }: Not
           variant="awsui-h1-sticky"
           counter={`(${totalCount})`}
           description={statsDescription}
+          actions={
+            <Button onClick={handleProcessAll} loading={isProcessing} variant="primary">
+              {isProcessing ? '전체 처리 중…' : '전체 AI 재처리'}
+            </Button>
+          }
         >
           NOTAM 목록
         </Header>

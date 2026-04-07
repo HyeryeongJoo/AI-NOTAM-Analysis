@@ -84,7 +84,7 @@ export default function NotamAiAnalysis({ notam, onReanalyze, isAnalyzing }: Not
           }
           actions={
             <Button onClick={onReanalyze} loading={isAnalyzing} variant="normal">
-              재분석
+              {isAnalyzing ? '처리 중 (추출→분석→매칭)' : 'AI 재처리'}
             </Button>
           }
         >

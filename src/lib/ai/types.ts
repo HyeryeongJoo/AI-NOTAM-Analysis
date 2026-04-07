@@ -38,6 +38,17 @@ export interface RouteAlternativeAiResult {
   reasoning: string;
 }
 
+/** NOTAM 본문 필드 추출 결과 -- LLM이 원문에서 파싱한 구조화 필드 */
+export interface NotamFieldExtractionResult {
+  latitude: number;
+  longitude: number;
+  radius: number;
+  lowerLimit: string;
+  upperLimit: string;
+  effectiveFrom: string;
+  effectiveTo: string;
+}
+
 /** LLM 호출 설정 옵션 */
 export interface LlmInvokeOptions {
   temperature?: number;

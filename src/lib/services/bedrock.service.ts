@@ -11,6 +11,7 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import {
   parseCrewPackageResult,
+  parseFieldExtractionResult,
   parseImportanceResult,
   parseRouteAlternativesResult,
   parseTifrsDecisionResult,
@@ -18,6 +19,7 @@ import {
 import {
   IMPACT_ANALYSIS_SYSTEM_PROMPT,
   KOREAN_SUMMARY_SYSTEM_PROMPT,
+  NOTAM_FIELD_EXTRACTION_SYSTEM_PROMPT,
   NOTAM_IMPORTANCE_SYSTEM_PROMPT,
   ROUTE_ALTERNATIVES_SYSTEM_PROMPT,
   SHIFT_HANDOVER_SYSTEM_PROMPT,
@@ -27,6 +29,7 @@ import {
 import {
   buildBriefingMessage,
   buildCrewPackageMessage,
+  buildFieldExtractionMessage,
   buildImpactAnalysisMessage,
   buildImportanceAnalysisMessage,
   buildKoreanSummaryMessage,
@@ -37,6 +40,7 @@ import {
 import type {
   CrewPackageResult,
   LlmInvokeOptions,
+  NotamFieldExtractionResult,
   NotamImportanceResult,
   TifrsDecisionResult,
 } from '@/lib/ai/types';
@@ -98,6 +102,24 @@ async function invokeModel(
     content: Array<{ text: string }>;
   };
   return responseBody.content[0].text;
+}
+
+/**
+ * NOTAM 원문에서 구조화 필드를 LLM으로 추출한다.
+ *
+ * 좌표, 반경, 고도, 유효시간을 ICAO NOTAM 형식에서 파싱.
+ * 추출 실패 시 null 반환 (기존 값 유지).
+ *
+ * @param notam - 추출 대상 NOTAM
+ * @returns 추출된 필드 또는 null
+ */
+export async function extractNotamFields(notam: Notam): Promise<NotamFieldExtractionResult | null> {
+  const userMessage = buildFieldExtractionMessage(notam);
+  const text = await invokeModel(NOTAM_FIELD_EXTRACTION_SYSTEM_PROMPT, userMessage, {
+    temperature: 0.0,
+    maxTokens: 1024,
+  });
+  return parseFieldExtractionResult(text);
 }
 
 /**

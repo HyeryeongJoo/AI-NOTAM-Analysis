@@ -9,6 +9,7 @@
 
 import type {
   CrewPackageResult,
+  NotamFieldExtractionResult,
   NotamImportanceResult,
   QCodeFallbackInfo,
   RouteAlternativeAiResult,
@@ -154,6 +155,41 @@ export function parseRouteAlternativesResult(text: string): RouteAlternativeAiRe
   }
 
   return null;
+}
+
+/**
+ * NOTAM 본문 필드 추출 응답을 파싱한다.
+ *
+ * @param text - LLM 응답 텍스트
+ * @returns 파싱된 필드 추출 결과 또는 null (추출 실패)
+ */
+export function parseFieldExtractionResult(text: string): NotamFieldExtractionResult | null {
+  const parsed = extractJson<Record<string, unknown>>(text);
+  if (!parsed) return null;
+
+  const lat = parsed.latitude !== null && parsed.latitude !== undefined ? Number(parsed.latitude) : null;
+  const lng = parsed.longitude !== null && parsed.longitude !== undefined ? Number(parsed.longitude) : null;
+  const radius = parsed.radius !== null && parsed.radius !== undefined ? Math.round(Number(parsed.radius)) : null;
+
+  /* 좌표 유효성: 위도 -90~90, 경도 -180~180 */
+  if (lat !== null && (lat < -90 || lat > 90)) return null;
+  if (lng !== null && (lng < -180 || lng > 180)) return null;
+  if (radius !== null && (radius < 0 || radius > 999)) return null;
+
+  /* 하나도 추출 못했으면 실패 */
+  if (lat === null && lng === null && radius === null && !parsed.effectiveFrom && !parsed.effectiveTo) {
+    return null;
+  }
+
+  return {
+    latitude: lat ?? 0,
+    longitude: lng ?? 0,
+    radius: radius ?? 0,
+    lowerLimit: parsed.lowerLimit ? String(parsed.lowerLimit) : 'SFC',
+    upperLimit: parsed.upperLimit ? String(parsed.upperLimit) : 'UNL',
+    effectiveFrom: parsed.effectiveFrom ? String(parsed.effectiveFrom) : '',
+    effectiveTo: parsed.effectiveTo ? String(parsed.effectiveTo) : '',
+  };
 }
 
 /**

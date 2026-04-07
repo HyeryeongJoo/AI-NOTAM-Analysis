@@ -11,39 +11,48 @@
 import useSWRMutation from 'swr/mutation';
 import type { ImportanceLevel } from '@/types/notam';
 
-interface AnalysisResult {
-  importanceScore: number;
-  importanceLevel: ImportanceLevel;
-  aiSummary: string;
-  aiAnalysis: string;
+/** 파이프라인 처리 결과 */
+interface PipelineResult {
+  notamId: string;
+  extraction: { success: boolean; updatedFields?: string[] };
+  analysis: {
+    success: boolean;
+    importanceScore?: number;
+    importanceLevel?: ImportanceLevel;
+  };
+  matching: {
+    success: boolean;
+    routeImpacts?: number;
+    flightImpacts?: number;
+  };
+  errors: string[];
 }
 
 /**
- * POST 요청을 보내는 fetcher
+ * POST 요청을 보내는 fetcher — 파이프라인 API 호출
  *
- * @param url - API URL
+ * @param url - API URL (사용하지 않음, notamId로 동적 URL 구성)
  * @param options - SWR mutation 옵션
  * @param options.arg
  * @param options.arg.notamId
- * @returns 분석 결과
+ * @returns 파이프라인 처리 결과
  */
-async function postFetcher(url: string, { arg }: { arg: { notamId: string } }): Promise<AnalysisResult> {
-  const res = await fetch(url, {
+async function postFetcher(_url: string, { arg }: { arg: { notamId: string } }): Promise<PipelineResult> {
+  const res = await fetch(`/api/notams/${arg.notamId}/process`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(arg),
   });
-  if (!res.ok) throw new Error(`분석 요청 실패: ${res.status}`);
-  return res.json() as Promise<AnalysisResult>;
+  if (!res.ok) throw new Error(`처리 요청 실패: ${res.status}`);
+  return res.json() as Promise<PipelineResult>;
 }
 
 /**
- * NOTAM AI 분석을 트리거한다
+ * NOTAM 자동 처리 파이프라인을 트리거한다 (추출 → 분석 → 매칭)
  *
  * @returns trigger 함수와 mutating 상태
  */
 export function useNotamAnalysis() {
-  const { trigger, isMutating } = useSWRMutation('/api/notams/analyze', postFetcher);
+  const { trigger, isMutating } = useSWRMutation('/api/notams/process', postFetcher);
 
   return { trigger, isMutating };
 }
