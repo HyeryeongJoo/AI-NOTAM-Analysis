@@ -111,7 +111,9 @@ export default function BriefingTable({ briefings, totalCount, isLoading }: Brie
         {
           id: 'flightId',
           header: '운항편',
-          cell: (item) => <Link href={`/flights/${item.flightId}`}>{item.flightId.substring(0, 8)}...</Link>,
+          cell: (item) => (
+            <Link href={`/flights/${item.flightId}`}>{item.flightNumber ?? item.flightId}</Link>
+          ),
         },
         {
           id: 'status',

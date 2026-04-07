@@ -16,7 +16,18 @@ const LeafletMapInner = dynamic(() => import('./LeafletMapInner'), {
   ssr: false,
   loading: () => (
     <Box textAlign="center" padding="xxl">
-      <Spinner size="large" />
+      <div
+        style={{
+          height: 500,
+          background: 'linear-gradient(135deg, #f2f3f3 25%, #e9ebed 50%, #f2f3f3 75%)',
+          borderRadius: 8,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Spinner size="large" />
+      </div>
     </Box>
   ),
 });

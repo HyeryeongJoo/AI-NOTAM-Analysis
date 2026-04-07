@@ -36,13 +36,19 @@ export default function NotamImpactSection({
   affectedRoutes,
   affectedFlights,
 }: NotamImpactSectionProps) {
-  const { items: routeItems, collectionProps: routeCollectionProps } = useCollection(affectedRoutes, {
-    sorting: {},
-  });
+  const { items: routeItems, collectionProps: routeCollectionProps } = useCollection(
+    affectedRoutes,
+    {
+      sorting: {},
+    },
+  );
 
-  const { items: flightItems, collectionProps: flightCollectionProps } = useCollection(affectedFlights, {
-    sorting: {},
-  });
+  const { items: flightItems, collectionProps: flightCollectionProps } = useCollection(
+    affectedFlights,
+    {
+      sorting: {},
+    },
+  );
 
   return (
     <Tabs
@@ -63,7 +69,11 @@ export default function NotamImpactSection({
                   isRowHeader: true,
                 },
                 { id: 'overlapType', header: '중첩 유형', cell: (item) => item.overlapType },
-                { id: 'affectedSegment', header: '영향 구간', cell: (item) => item.affectedSegment },
+                {
+                  id: 'affectedSegment',
+                  header: '영향 구간',
+                  cell: (item) => item.affectedSegment,
+                },
                 {
                   id: 'distanceThroughArea',
                   header: '영향 거리 (NM)',
@@ -99,7 +109,11 @@ export default function NotamImpactSection({
                 {
                   id: 'flightId',
                   header: '운항편',
-                  cell: (item) => <Link href={`/flights/${item.flightId}`}>{item.flightId}</Link>,
+                  cell: (item) => (
+                    <Link href={`/flights/${item.flightId}`}>
+                      {item.flightNumber ?? item.flightId}
+                    </Link>
+                  ),
                   isRowHeader: true,
                 },
                 {

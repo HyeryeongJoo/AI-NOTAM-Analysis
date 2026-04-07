@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import ContentLayout from '@cloudscape-design/components/content-layout';
 import Grid from '@cloudscape-design/components/grid';
 import Header from '@cloudscape-design/components/header';
@@ -37,6 +37,15 @@ interface DashboardContentProps {
 export default function DashboardContent({ initialData }: DashboardContentProps) {
   const { data, error, mutate } = useDashboard(undefined, initialData);
   const { setCriticalAlerts } = useAlert();
+  const prefetched = useRef(false);
+
+  /* Leaflet 모듈을 페이지 마운트 시 즉시 프리페치 */
+  useEffect(() => {
+    if (!prefetched.current) {
+      prefetched.current = true;
+      import('@/components/common/LeafletMapInner').catch(() => {});
+    }
+  }, []);
 
   const dashboardData = data ?? initialData;
 
@@ -55,12 +64,12 @@ export default function DashboardContent({ initialData }: DashboardContentProps)
         <CriticalAlertBanner />
         <DashboardSummaryCards summary={dashboardData.summary} />
         <Grid
-          gridDefinition={[
-            { colspan: { default: 12, l: 8 } },
-            { colspan: { default: 12, l: 4 } },
-          ]}
+          gridDefinition={[{ colspan: { default: 12, l: 8 } }, { colspan: { default: 12, l: 4 } }]}
         >
-          <RouteImpactMap routeImpacts={dashboardData.routeImpacts} criticalNotams={dashboardData.criticalNotams} />
+          <RouteImpactMap
+            routeImpacts={dashboardData.routeImpacts}
+            criticalNotams={dashboardData.criticalNotams}
+          />
           <RecentCriticalNotams criticalNotams={dashboardData.criticalNotams} />
         </Grid>
         <AffectedFlightsSummary flights={dashboardData.affectedFlights} />

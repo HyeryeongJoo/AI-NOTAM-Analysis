@@ -25,8 +25,21 @@ export async function GET(request: NextRequest) {
   const page = parseInt(sp.get('page') ?? '1', 10);
   const pageSize = parseInt(sp.get('pageSize') ?? '20', 10);
 
-  const result = refBookRepo.findAll({ status: status || undefined, sortBy, order, page, pageSize });
-  return NextResponse.json(result);
+  const result = refBookRepo.findAll({
+    status: status || undefined,
+    sortBy,
+    order,
+    page,
+    pageSize,
+  });
+  const enrichedItems = result.items.map((entry) => {
+    const notam = notamRepo.findById(entry.notamId);
+    const notamCode = notam
+      ? `${notam.fir} ${notam.series}${notam.number}/${String(notam.year).slice(-2)}`
+      : entry.notamId;
+    return { ...entry, notamCode };
+  });
+  return NextResponse.json({ ...result, items: enrichedItems });
 }
 
 /**
@@ -40,7 +53,10 @@ export async function POST(request: NextRequest) {
   const parsed = createRefBookEntrySchema.safeParse(body);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Validation Error', message: parsed.error.message, statusCode: 400 }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Validation Error', message: parsed.error.message, statusCode: 400 },
+      { status: 400 },
+    );
   }
 
   // 프로토타입: 기본 운항관리사 사용

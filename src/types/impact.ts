@@ -25,6 +25,8 @@ export interface NotamFlightImpact {
   id: string;
   notamId: string;
   flightId: string;
+  /** API 응답 시 조인된 편명 (예: '7C103') */
+  flightNumber?: string;
   routeId: string;
   temporalOverlap: boolean;
   spatialOverlap: boolean;

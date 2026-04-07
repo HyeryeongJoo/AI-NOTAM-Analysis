@@ -117,7 +117,7 @@ export default function DecisionTable({
           id: 'notamId',
           header: 'NOTAM',
           cell: (item) => (
-            <Link href={`/notams/${item.notamId}`}>{item.notamId.substring(0, 12)}</Link>
+            <Link href={`/notams/${item.notamId}`}>{item.notamCode ?? item.notamId}</Link>
           ),
           sortingField: 'notamId',
           isRowHeader: true,

@@ -15,6 +15,8 @@ export type RefBookStatus = 'active' | 'expired' | 'superseded';
 export interface RefBookEntry {
   id: string;
   notamId: string;
+  /** API 응답 시 조인된 ICAO 형식 NOTAM 코드 (예: 'RKPC A1239/26') */
+  notamCode?: string;
   registeredBy: string;
   /** ISO-8601 등록 시각 */
   registeredAt: string;

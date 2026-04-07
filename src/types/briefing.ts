@@ -21,6 +21,8 @@ export interface Briefing {
   id: string;
   type: BriefingType;
   flightId: string;
+  /** API 응답 시 조인된 편명 (예: '7C103') */
+  flightNumber?: string;
   /** ISO-8601 생성 시각 */
   generatedAt: string;
   /** 마크다운 또는 JSON (crew-package인 경우) */

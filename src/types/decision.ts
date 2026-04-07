@@ -21,6 +21,8 @@ export interface DecisionRecord {
   id: string;
   /** 대상 NOTAM ID */
   notamId: string;
+  /** API 응답 시 조인된 ICAO 형식 NOTAM 코드 (예: 'RKPC A1239/26') */
+  notamCode?: string;
   /** 의사결정 운항관리사 ID */
   decidedBy: string;
   /** 의사결정 시각 (ISO-8601) */

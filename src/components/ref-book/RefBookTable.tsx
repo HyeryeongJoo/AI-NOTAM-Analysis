@@ -104,8 +104,8 @@ export default function RefBookTable({
       columnDefinitions={[
         {
           id: 'notamId',
-          header: 'NOTAM ID',
-          cell: (item) => item.notamId.substring(0, 8) + '...',
+          header: 'NOTAM',
+          cell: (item) => item.notamCode ?? item.notamId,
           isRowHeader: true,
         },
         { id: 'summary', header: '요약', cell: (item) => item.summary },
@@ -128,7 +128,9 @@ export default function RefBookTable({
               expired: 'stopped',
               superseded: 'warning',
             };
-            return <StatusIndicator type={map[item.status] ?? 'info'}>{item.status}</StatusIndicator>;
+            return (
+              <StatusIndicator type={map[item.status] ?? 'info'}>{item.status}</StatusIndicator>
+            );
           },
         },
         {
@@ -146,7 +148,12 @@ export default function RefBookTable({
           header: '관리',
           cell: (item) => (
             <SpaceBetween size="xs" direction="horizontal">
-              <Button variant="icon" iconName="remove" onClick={() => onDelete(item.id)} ariaLabel="삭제" />
+              <Button
+                variant="icon"
+                iconName="remove"
+                onClick={() => onDelete(item.id)}
+                ariaLabel="삭제"
+              />
             </SpaceBetween>
           ),
         },

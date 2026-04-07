@@ -8,6 +8,7 @@
 
 import { NextResponse } from 'next/server';
 import * as decisionRepository from '@/lib/db/decision.repository';
+import * as notamRepo from '@/lib/db/notam.repository';
 import { decisionQuerySchema } from '@/lib/validation/decision.validation';
 import type { NextRequest } from 'next/server';
 
@@ -34,5 +35,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   const result = decisionRepository.findAll(parsed.data);
-  return NextResponse.json(result);
+  const enrichedItems = result.items.map((decision) => {
+    const notam = notamRepo.findById(decision.notamId);
+    const notamCode = notam
+      ? `${notam.fir} ${notam.series}${notam.number}/${String(notam.year).slice(-2)}`
+      : decision.notamId;
+    return { ...decision, notamCode };
+  });
+  return NextResponse.json({ ...result, items: enrichedItems });
 }

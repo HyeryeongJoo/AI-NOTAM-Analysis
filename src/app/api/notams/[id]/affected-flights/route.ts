@@ -5,6 +5,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import * as flightRepo from '@/lib/db/flight.repository';
 import * as impactRepo from '@/lib/db/impact.repository';
 import * as notamRepo from '@/lib/db/notam.repository';
 
@@ -21,9 +22,16 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const notam = notamRepo.findById(id);
 
   if (!notam) {
-    return NextResponse.json({ error: 'Not Found', message: 'NOTAM not found', statusCode: 404 }, { status: 404 });
+    return NextResponse.json(
+      { error: 'Not Found', message: 'NOTAM not found', statusCode: 404 },
+      { status: 404 },
+    );
   }
 
   const impacts = impactRepo.findFlightImpactsByNotam(id);
-  return NextResponse.json(impacts);
+  const enriched = impacts.map((impact) => {
+    const flight = flightRepo.findById(impact.flightId);
+    return { ...impact, flightNumber: flight?.flightNumber ?? impact.flightId };
+  });
+  return NextResponse.json(enriched);
 }

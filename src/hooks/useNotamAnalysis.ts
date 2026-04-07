@@ -31,13 +31,16 @@ interface PipelineResult {
 /**
  * POST 요청을 보내는 fetcher — 파이프라인 API 호출
  *
- * @param url - API URL (사용하지 않음, notamId로 동적 URL 구성)
+ * @param _url - API URL (사용하지 않음, notamId로 동적 URL 구성)
  * @param options - SWR mutation 옵션
- * @param options.arg
- * @param options.arg.notamId
+ * @param options.arg - 인자 객체
+ * @param options.arg.notamId - 처리할 NOTAM ID
  * @returns 파이프라인 처리 결과
  */
-async function postFetcher(_url: string, { arg }: { arg: { notamId: string } }): Promise<PipelineResult> {
+async function postFetcher(
+  _url: string,
+  { arg }: { arg: { notamId: string } },
+): Promise<PipelineResult> {
   const res = await fetch(`/api/notams/${arg.notamId}/process`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

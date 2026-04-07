@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import * as briefingRepo from '@/lib/db/briefing.repository';
+import * as flightRepo from '@/lib/db/flight.repository';
 import type { NextRequest } from 'next/server';
 
 /**
@@ -18,13 +19,23 @@ export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
   const result = briefingRepo.findAll({
     flightId: sp.get('flightId') ?? undefined,
-    type: (sp.get('type') as 'dispatcher-summary' | 'company-notam' | 'disp-comment' | 'crew-briefing') || undefined,
-    status: (sp.get('status') as 'draft' | 'pending-review' | 'approved' | 'distributed') || undefined,
+    type:
+      (sp.get('type') as
+        | 'dispatcher-summary'
+        | 'company-notam'
+        | 'disp-comment'
+        | 'crew-briefing') || undefined,
+    status:
+      (sp.get('status') as 'draft' | 'pending-review' | 'approved' | 'distributed') || undefined,
     sortBy: sp.get('sortBy') ?? undefined,
     order: sp.get('order') ?? undefined,
     page: parseInt(sp.get('page') ?? '1', 10),
     pageSize: parseInt(sp.get('pageSize') ?? '20', 10),
   });
 
-  return NextResponse.json(result);
+  const enrichedItems = result.items.map((briefing) => {
+    const flight = flightRepo.findById(briefing.flightId);
+    return { ...briefing, flightNumber: flight?.flightNumber ?? briefing.flightId };
+  });
+  return NextResponse.json({ ...result, items: enrichedItems });
 }
