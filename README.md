@@ -2,6 +2,8 @@
 
 > 운항관리사의 NOTAM 분석 업무를 AI로 자동화하는 웹 애플리케이션 프로토타입
 
+**샘플 프로토타입**: https://d37mgks0nq05m5.cloudfront.net/
+
 ## 빠른 시작
 
 ```bash
