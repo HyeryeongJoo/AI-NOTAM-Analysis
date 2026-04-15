@@ -8,7 +8,7 @@
 
 | 항목 | 값 |
 |------|-----|
-| 모델 | Claude Sonnet 4 (`us.anthropic.claude-sonnet-4-20250514-v1:0`) |
+| 모델 | Claude Sonnet 4.6 (`us.anthropic.claude-sonnet-4-6-v1:0`) |
 | SDK | `@aws-sdk/client-bedrock-runtime` |
 | 호출 방식 | `InvokeModelCommand` (동기 호출) |
 | 프롬프트 형식 | XML 태그 기반 구조화 |
@@ -19,7 +19,7 @@
 
 ```bash
 AWS_REGION=us-east-1
-BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-20250514-v1:0
+BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-6-v1:0
 ```
 
 > **중요**: AI 기능은 실제 Bedrock 호출이 필수입니다. Mocking은 금지되어 있습니다.

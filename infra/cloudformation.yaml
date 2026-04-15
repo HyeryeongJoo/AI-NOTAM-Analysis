@@ -371,7 +371,7 @@ Resources:
                 - |
                   cat > /opt/notam-prototype/.env.local <<ENV
                   AWS_REGION={{ AwsRegion }}
-                  BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-20250514-v1:0
+                  BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-6-v1:0
                   ENV
                 - ''
                 - echo "=== Creating systemd service ==="
@@ -390,7 +390,7 @@ Resources:
                   RestartSec=5
                   Environment=NODE_ENV=production
                   Environment=AWS_REGION={{ AwsRegion }}
-                  Environment=BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-20250514-v1:0
+                  Environment=BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-6-v1:0
                   Environment=HOSTNAME=0.0.0.0
 
                   [Install]

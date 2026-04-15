@@ -28,10 +28,35 @@ npm run dev
 | React | 19 | UI 라이브러리 |
 | TypeScript | 5+ (strict mode) | 타입 안전성 |
 | Cloudscape Design System | v3+ | AWS 스타일 UI 컴포넌트 |
-| Amazon Bedrock | Claude Sonnet | AI NOTAM 분석 (실제 호출) |
+| Amazon Bedrock | Claude Sonnet 4.6 | AI NOTAM 분석 (실제 호출) |
 | Leaflet + react-leaflet | 1.9 / 5.0 | 항로/NOTAM 지도 시각화 |
 | SWR | 2.4 | 클라이언트 데이터 패칭 |
 | zod | 4.3 | API 입력 검증 |
+
+## AI 기능 (Amazon Bedrock — Claude Sonnet 4.6)
+
+모든 AI 기능은 Amazon Bedrock의 Claude Sonnet 4.6 (`us.anthropic.claude-sonnet-4-6-v1:0`)을 통해 실제 LLM 호출로 동작합니다. Mocking 금지 원칙에 따라 실제 Bedrock API 호출이 필수이며, API 실패 시 Q-Code 규칙 기반 폴백으로 전환됩니다.
+
+| # | 기능 | 설명 | API 엔드포인트 |
+|---|------|------|----------------|
+| 1 | **NOTAM 중요도 분석** | Q-Code, 공항 인프라, 유효 기간, 영향 항로/운항편을 종합하여 0.0~1.0 중요도 점수와 등급을 산정 | `POST /api/notams/analyze` |
+| 2 | **NOTAM 필드 추출** | ICAO NOTAM 원문에서 좌표, 반경, 고도, 유효시간 등 구조화 필드를 자동 파싱 | `POST /api/notams/[id]/process` |
+| 3 | **한국어 요약 생성** | ICAO 약어를 풀어 설명하는 전문 한국어 번역/요약 | `POST /api/notams/[id]/summarize` |
+| 4 | **영향도 분석** | 항로/운항편 영향 데이터와 공항 인프라를 결합한 맥락적 종합 영향 분석 보고서 생성 | `POST /api/notams/[id]/impact-analysis` |
+| 5 | **대체 항로 제안** | NOTAM 영향 회피를 위한 대체 항로 분석, 거리/시간 차이 비교 및 종합 권고 | `POST /api/routes/[id]/alternatives` |
+| 6 | **브리핑 문서 생성** | 운항관리사/승무원용 출발·도착 브리핑 문서 자동 생성 (브리핑 유형별 최적화) | `POST /api/briefings/generate` |
+| 7 | **승무원 패키지 생성** | DISP Comment, Company NOTAM, Crew Briefing 3가지 문서를 JSON 구조화 출력으로 일괄 생성 | `POST /api/briefings/generate-crew` |
+| 8 | **TIFRS 의사결정 분석** | Time·Impact·Facilities·Route·Schedule 5가지 기준으로 NOTAM 영향을 평가하고 의사결정 유형 제안 | `GET/POST /api/notams/[id]/decision` |
+| 9 | **교대 인수인계 보고서** | 교대 시간대의 NOTAM 현황을 종합하여 다음 근무자를 위한 인수인계 보고서 생성 | `POST /api/reports/shift-handover` |
+
+### AI 아키텍처
+
+- **프롬프트**: XML 태그 기반 구조화 프롬프트 (`src/lib/ai/prompts/system.ts`, `templates.ts`)
+- **서비스**: Bedrock Runtime API 래퍼 (`src/lib/services/bedrock.service.ts`)
+- **파서**: JSON 구조화 출력 파서 (`src/lib/ai/parsers/`)
+- **Temperature**: 0.0~0.4 (기능별 최적화, 기본 0.2)
+- **Max Tokens**: 1,024~6,144 (기능별 조정)
+- **폴백**: Bedrock API 실패 시 Q-Code 규칙 기반 분류로 전환
 
 ## 프로젝트 구조
 
@@ -149,7 +174,7 @@ src/
 |------|------|--------|------|
 | `AWS_REGION` | O | `us-west-2` | Bedrock 모델 배포 리전 |
 | `AWS_PROFILE` | - | `default` | 로컬 개발 시 AWS 프로파일 |
-| `BEDROCK_MODEL_ID` | O | `us.anthropic.claude-sonnet-4-20250514-v1:0` | Bedrock 모델 ID |
+| `BEDROCK_MODEL_ID` | O | `us.anthropic.claude-sonnet-4-6-v1:0` | Bedrock 모델 ID |
 
 AI 기능은 실제 Amazon Bedrock 호출을 사용합니다. AWS 자격 증명이 필요합니다:
 - 로컬 개발: `aws configure` 또는 `AWS_PROFILE` 환경 변수

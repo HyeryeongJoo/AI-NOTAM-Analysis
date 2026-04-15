@@ -31,7 +31,7 @@ cp .env.local.example .env.local
 AWS_REGION=us-east-1
 
 # Bedrock 모델 ID
-BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-20250514-v1:0
+BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-6-v1:0
 
 # 로컬 개발 시 AWS 프로파일 사용 (권장)
 AWS_PROFILE=default
@@ -91,7 +91,7 @@ npm run test:e2e       # Playwright E2E 테스트
 주요 설정:
 - `KillMode=mixed` — 프로세스 종료 시 안전한 정리
 - `ExecStopPost=/usr/sbin/fuser -k 3000/tcp` — 포트 3000 해제 보장
-- 환경 변수: `NODE_ENV=production`, `AWS_REGION=us-east-1`, `BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-20250514-v1:0`
+- 환경 변수: `NODE_ENV=production`, `AWS_REGION=us-east-1`, `BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-6-v1:0`
 
 ### 배포 절차
 

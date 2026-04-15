@@ -58,7 +58,7 @@ const client = new BedrockRuntimeClient({
 });
 
 /** 모델 ID -- Bedrock cross-region inference 지원 */
-const MODEL_ID = process.env.BEDROCK_MODEL_ID ?? 'us.anthropic.claude-sonnet-4-20250514-v1:0';
+const MODEL_ID = process.env.BEDROCK_MODEL_ID ?? 'us.anthropic.claude-sonnet-4-6-v1:0';
 
 /** 기본 최대 토큰 */
 const DEFAULT_MAX_TOKENS = 4096;
@@ -132,6 +132,8 @@ export async function extractNotamFields(notam: Notam): Promise<NotamFieldExtrac
  * @param notam - 분석 대상 NOTAM
  * @param qCode - Q-Code 참조 정보
  * @param airport - 해당 공항 정보
+ * @param affectedFlights
+ * @param affectedRoutes
  * @returns 중요도 점수, 등급, 한국어 요약, 영향 분석
  */
 export async function analyzeNotamImportance(
@@ -141,7 +143,13 @@ export async function analyzeNotamImportance(
   affectedFlights?: Flight[],
   affectedRoutes?: NotamRouteImpact[],
 ): Promise<NotamImportanceResult> {
-  const userMessage = buildImportanceAnalysisMessage(notam, qCode, airport, affectedFlights, affectedRoutes);
+  const userMessage = buildImportanceAnalysisMessage(
+    notam,
+    qCode,
+    airport,
+    affectedFlights,
+    affectedRoutes,
+  );
   const text = await invokeModel(NOTAM_IMPORTANCE_SYSTEM_PROMPT, userMessage, { temperature: 0.1 });
 
   const fallback = qCode
@@ -179,6 +187,7 @@ export async function generateKoreanSummary(notam: Notam): Promise<string> {
  * @param affectedRoutes - 영향받는 항로 목록
  * @param affectedFlights - 영향받는 운항편 목록
  * @param airport - 해당 공항 정보
+ * @param flights
  * @returns 영향 분석 텍스트
  */
 export async function generateImpactAnalysis(
@@ -188,7 +197,13 @@ export async function generateImpactAnalysis(
   airport: Airport | undefined,
   flights?: Flight[],
 ): Promise<string> {
-  const userMessage = buildImpactAnalysisMessage(notam, affectedRoutes, affectedFlights, airport, flights);
+  const userMessage = buildImpactAnalysisMessage(
+    notam,
+    affectedRoutes,
+    affectedFlights,
+    airport,
+    flights,
+  );
   return invokeModel(IMPACT_ANALYSIS_SYSTEM_PROMPT, userMessage, { temperature: 0.3 });
 }
 
