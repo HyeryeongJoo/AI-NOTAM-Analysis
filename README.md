@@ -66,6 +66,8 @@ npm run dev
 
 > 아키텍처 다이어그램: [`docs/notam-llm-architecture.drawio`](docs/notam-llm-architecture.drawio)
 
+![Option A: LLM 기반 아키텍처](img/optionA.png)
+
 - Amazon Bedrock **Claude Sonnet 4.6** + XML 구조화 프롬프트
 - **3-Stage Pipeline**: 필드 추출 (LLM) → 중요도 분석 (LLM) → 영향 매칭 (Haversine 수학 연산)
 - Bedrock 실패 시 Q-Code 규칙 기반 폴백으로 무중단 분석 보장
@@ -73,6 +75,8 @@ npm run dev
 #### Option B: Hybrid NLP + XGBoost (고도화 방안)
 
 > 아키텍처 다이어그램: [`docs/notam-ml-architecture.drawio`](docs/notam-ml-architecture.drawio)
+
+![Option B: Hybrid NLP + XGBoost 아키텍처](img/optionB.png)
 
 - **Aviation-BERT** 사전학습/파인튜닝 (SageMaker) + **XGBoost** 지연 확률 예측
 - **2-Phase 구성**: Training Pipeline (데이터 수집 → 학습) + Inference Pipeline (실시간 추론)
