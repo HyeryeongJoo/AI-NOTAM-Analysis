@@ -78,7 +78,7 @@ npm run dev
 
 ![Option B: Hybrid NLP + XGBoost 아키텍처](img/optionB.png)
 
-- **Aviation-BERT** 사전학습/파인튜닝 (SageMaker) + **XGBoost** 지연 확률 예측
+- **BERT or BART 계열의 모델** 사전학습/파인튜닝 (SageMaker) + **XGBoost** 지연 확률 예측
 - **2-Phase 구성**: Training Pipeline (데이터 수집 → 학습) + Inference Pipeline (실시간 추론)
 - NLP 특징 추출과 외부 데이터(기상, 혼잡도) 조회를 병렬 실행 후 통합 예측
 
