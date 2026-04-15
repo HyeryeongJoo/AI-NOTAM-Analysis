@@ -58,6 +58,39 @@ npm run dev
 - **Max Tokens**: 1,024~6,144 (기능별 조정)
 - **폴백**: Bedrock API 실패 시 Q-Code 규칙 기반 분류로 전환
 
+### 아키텍처 로드맵 — Option A → Option B
+
+현재 프로토타입은 **Option A (LLM 기반)** 으로 구현되어 있으며, 향후 정밀도 고도화를 위해 **Option B (Hybrid ML 파이프라인)** 으로 발전할 수 있습니다. 각 옵션의 상세 아키텍처는 `docs/` 폴더의 draw.io 다이어그램을 참조하세요.
+
+#### Option A: LLM 기반 NOTAM 분석 (현재 프로토타입)
+
+> 아키텍처 다이어그램: [`docs/notam-llm-architecture.drawio`](docs/notam-llm-architecture.drawio)
+
+- Amazon Bedrock **Claude Sonnet 4.6** + XML 구조화 프롬프트
+- **3-Stage Pipeline**: 필드 추출 (LLM) → 중요도 분석 (LLM) → 영향 매칭 (Haversine 수학 연산)
+- Bedrock 실패 시 Q-Code 규칙 기반 폴백으로 무중단 분석 보장
+
+#### Option B: Hybrid NLP + XGBoost (고도화 방안)
+
+> 아키텍처 다이어그램: [`docs/notam-ml-architecture.drawio`](docs/notam-ml-architecture.drawio)
+
+- **Aviation-BERT** 사전학습/파인튜닝 (SageMaker) + **XGBoost** 지연 확률 예측
+- **2-Phase 구성**: Training Pipeline (데이터 수집 → 학습) + Inference Pipeline (실시간 추론)
+- NLP 특징 추출과 외부 데이터(기상, 혼잡도) 조회를 병렬 실행 후 통합 예측
+
+#### 옵션 비교
+
+| 항목 | Option A (LLM) | Option B (Hybrid ML) |
+|------|----------------|----------------------|
+| **구현 상태** | 현재 프로토타입 | 고도화 제안 |
+| **핵심 기술** | Bedrock Claude Sonnet 4.6 | Aviation-BERT + XGBoost |
+| **구축 기간** | 즉시 (프롬프트 엔지니어링) | 3~6개월 (데이터 수집 + 학습) |
+| **학습 데이터** | 불필요 | 수만 건 이상 필요 |
+| **지연 예측 정밀도** | 정성적 (등급) | 정량적 (확률 %) |
+| **한국어 요약/브리핑** | 네이티브 지원 (9가지 기능) | 별도 LLM 연동 필요 |
+| **추론 비용** | 토큰 단위 과금 | Serverless Endpoint (저비용) |
+| **설명 가능성** | AI 분석 텍스트 | Feature Importance 수치 |
+
 ## 프로젝트 구조
 
 ```
