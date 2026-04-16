@@ -1,7 +1,7 @@
 /**
  * 운항편 타입 정의
  *
- * 제주항공 운항 스케줄 데이터 구조.
+ * 국내 항공사 운항 스케줄 데이터 구조.
  *
  * @requirements FR-004, FR-013
  */
@@ -20,7 +20,7 @@ export type FlightStatus =
 /** 운항편 엔티티 */
 export interface Flight {
   id: string;
-  /** 7C 접두사 편명 (예: 7C101) */
+  /** IATA 항공사 코드 접두사 편명 (예: 7C101, KE901, OZ301) */
   flightNumber: string;
   /** ICAO 출발 공항 코드 */
   departureAirport: string;
