@@ -58,7 +58,7 @@ const client = new BedrockRuntimeClient({
 });
 
 /** 모델 ID -- Bedrock cross-region inference 지원 */
-const MODEL_ID = process.env.BEDROCK_MODEL_ID ?? 'us.anthropic.claude-sonnet-4-6-v1:0';
+const MODEL_ID = process.env.BEDROCK_MODEL_ID ?? 'us.anthropic.claude-sonnet-4-6';
 
 /** 기본 최대 토큰 */
 const DEFAULT_MAX_TOKENS = 4096;

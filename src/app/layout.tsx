@@ -14,8 +14,8 @@ import type { Metadata } from 'next';
 
 /** 사이트 메타데이터 */
 export const metadata: Metadata = {
-  title: 'Jeju Air AI NOTAM Analysis System',
-  description: '제주항공 AI 기반 NOTAM 분석 시스템 프로토타입',
+  title: 'AI NOTAM Analysis Dashboard',
+  description: 'AI 기반 NOTAM 분석 대시보드',
 };
 
 /**
